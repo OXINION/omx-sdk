@@ -19,8 +19,11 @@
     "release": "pnpm build && changeset publish"
   },
   "keywords": [
-    "sdk",
     "oxinion",
+    "marketing",
+    "exchange",
+    "omx",
+    "sdk",
     "geotrigger",
     "email",
     "webhook",
