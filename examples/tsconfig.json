@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "omx-sdk": ["../packages/omx-sdk/src"]
+    }
+  },
+  "include": ["*.ts", "*.js"],
+  "exclude": ["node_modules", "dist"]
+}

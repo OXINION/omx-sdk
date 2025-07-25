@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GeoTrigger API Test</title>
+    <!-- Load Supabase from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .result {
+        margin: 10px 0;
+        padding: 10px;
+        background: #f5f5f5;
+        border-radius: 3px;
+      }
+      .error {
+        background: #ffebee;
+        color: #c62828;
+      }
+      .success {
+        background: #e8f5e8;
+        color: #2e7d32;
+      }
+      button {
+        margin: 5px;
+        padding: 10px 15px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .loading {
+        opacity: 0.6;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🌍 GeoTrigger API Test</h1>
+    <p>Test the new GeoTrigger create, list, and delete functionality</p>
+
+    <div class="test-section">
+      <h3>🔑 Authentication</h3>
+      <button onclick="initSDK()">Initialize SDK</button>
+      <div id="auth-result" class="result">Not initialized</div>
+    </div>
+
+    <div class="test-section">
+      <h3>➕ Create GeoTrigger</h3>
+      <button onclick="createGeoTrigger()">Create Test GeoTrigger</button>
+      <div id="create-result" class="result">No result yet</div>
+    </div>
+
+    <div class="test-section">
+      <h3>📋 List GeoTriggers</h3>
+      <button onclick="listGeoTriggers()">List All GeoTriggers</button>
+      <div id="list-result" class="result">No result yet</div>
+    </div>
+
+    <div class="test-section">
+      <h3>🗑️ Delete GeoTrigger</h3>
+      <input type="text" id="deleteId" placeholder="Enter GeoTrigger ID" />
+      <button onclick="deleteGeoTrigger()">Delete GeoTrigger</button>
+      <div id="delete-result" class="result">No result yet</div>
+    </div>
+
+    <script type="module">
+      // Browser-only implementation using CDN Supabase
+      const { createClient } = supabase;
+
+      // Global variables
+      window.omxClient = null;
+      window.supabaseClient = null;
+      window.jwtToken = null;
+
+      // Load environment variables
+      const env = {
+        clientId: 'f7b294c9-12d1-477b-b454-552dedd28de3',
+        secretKey: '87654321-4321-4321-4321-987654321cba',
+        baseUrl: 'https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1',
+        supabaseUrl: 'https://blhilidnsybhfdmwqsrx.supabase.co',
+        supabaseAnonKey:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c',
+      };
+
+      // Initialize SDK function
+      window.initSDK = async function () {
+        const resultDiv = document.getElementById('auth-result');
+        resultDiv.textContent = 'Initializing...';
+        resultDiv.className = 'result loading';
+
+        try {
+          // 1. Fetch JWT token
+          console.log('🔑 Fetching JWT token...');
+          const response = await fetch(`${env.baseUrl}/create-jwt-token`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${env.supabaseAnonKey}`,
+              apikey: env.supabaseAnonKey,
+            },
+            body: JSON.stringify({
+              clientId: env.clientId,
+              secretKey: env.secretKey,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(
+              `Failed to fetch JWT token: ${response.statusText}`
+            );
+          }
+
+          const data = await response.json();
+          window.jwtToken = data.token;
+          console.log('✅ JWT token fetched successfully');
+          console.log('🔍 JWT Token:', window.jwtToken);
+
+          // JWT 토큰 구조 분석
+          const tokenParts = window.jwtToken.split('.');
+          console.log('🔍 JWT Parts:', tokenParts.length);
+
+          // JWT 토큰이 올바르지 않으면 anon key를 사용
+          if (tokenParts.length !== 3 || tokenParts[2] === 'signature') {
+            console.warn(
+              '⚠️ Invalid JWT token detected, using anon key instead'
+            );
+            window.jwtToken = env.supabaseAnonKey;
+            console.log('🔄 Using anon key as JWT token');
+          } else {
+            // 유효한 JWT 토큰인 경우 디코딩 시도
+            try {
+              const header = JSON.parse(atob(tokenParts[0]));
+              const payload = JSON.parse(atob(tokenParts[1] + '=='));
+              console.log('🔍 JWT Header:', header);
+              console.log('🔍 JWT Payload:', payload);
+              console.log('🔍 JWT Signature length:', tokenParts[2].length);
+            } catch (e) {
+              console.error(
+                '❌ Failed to decode JWT parts, using anon key instead:',
+                e
+              );
+              window.jwtToken = env.supabaseAnonKey;
+            }
+          }
+
+          // 2. Initialize Supabase client (기본 설정)
+          window.supabaseClient = createClient(
+            env.supabaseUrl,
+            env.supabaseAnonKey
+          );
+
+          console.log('✅ Supabase client initialized with JWT token');
+
+          resultDiv.textContent = '✅ SDK initialized successfully!';
+          resultDiv.className = 'result success';
+        } catch (error) {
+          console.error('❌ SDK initialization failed:', error);
+          resultDiv.textContent = `❌ Error: ${error.message}`;
+          resultDiv.className = 'result error';
+        }
+      };
+
+      // Create GeoTrigger function
+      window.createGeoTrigger = async function () {
+        if (!window.supabaseClient || !window.jwtToken) {
+          alert('Please initialize SDK first');
+          return;
+        }
+
+        const resultDiv = document.getElementById('create-result');
+        resultDiv.textContent = 'Creating geotrigger...';
+        resultDiv.className = 'result loading';
+
+        try {
+          const triggerData = {
+            name: `Test Location ${Date.now()}`,
+            coordinates: `POINT(127.0276 37.4979)`, // PostGIS format
+            radius: 100,
+            event_type: 'enter',
+            event_payload: { message: 'Welcome to Seoul!' },
+            status: 'active',
+            created_at: new Date().toISOString(),
+          };
+
+          console.log('🌍 Creating geotrigger:', triggerData);
+
+          // REST API 직접 호출로 JWT 토큰 전달
+          const response = await fetch(
+            `${env.supabaseUrl}/rest/v1/geotriggers`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${window.jwtToken}`,
+                apikey: env.supabaseAnonKey,
+                'Content-Profile': 'omx',
+                'Accept-Profile': 'omx',
+                Prefer: 'return=representation',
+              },
+              body: JSON.stringify(triggerData),
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.text();
+            console.error('❌ Failed to create geotrigger:', errorData);
+            throw new Error(
+              `Failed to create geotrigger: ${response.statusText} - ${errorData}`
+            );
+          }
+
+          const data = await response.json();
+          const geotrigger = Array.isArray(data) ? data[0] : data;
+
+          console.log('✅ GeoTrigger created:', geotrigger);
+          resultDiv.textContent = `✅ Created: ${JSON.stringify(geotrigger, null, 2)}`;
+          resultDiv.className = 'result success';
+        } catch (error) {
+          console.error('❌ Create failed:', error);
+          resultDiv.textContent = `❌ Error: ${error.message}`;
+          resultDiv.className = 'result error';
+        }
+      };
+
+      // List GeoTriggers function
+      window.listGeoTriggers = async function () {
+        if (!window.supabaseClient || !window.jwtToken) {
+          alert('Please initialize SDK first');
+          return;
+        }
+
+        const resultDiv = document.getElementById('list-result');
+        resultDiv.textContent = 'Fetching geotriggers...';
+        resultDiv.className = 'result loading';
+
+        try {
+          console.log('📋 Fetching all geotriggers...');
+
+          const response = await fetch(
+            `${env.supabaseUrl}/rest/v1/geotriggers?order=created_at.desc`,
+            {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${window.jwtToken}`,
+                apikey: env.supabaseAnonKey,
+                'Content-Profile': 'omx',
+                'Accept-Profile': 'omx',
+              },
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.text();
+            console.error('❌ Failed to fetch geotriggers:', errorData);
+            throw new Error(
+              `Failed to fetch geotriggers: ${response.statusText} - ${errorData}`
+            );
+          }
+
+          const data = await response.json();
+
+          console.log('✅ GeoTriggers listed:', data);
+          resultDiv.textContent = `✅ Found ${data?.length || 0} geotriggers:\n${JSON.stringify(data, null, 2)}`;
+          resultDiv.className = 'result success';
+        } catch (error) {
+          console.error('❌ List failed:', error);
+          resultDiv.textContent = `❌ Error: ${error.message}`;
+          resultDiv.className = 'result error';
+        }
+      };
+
+      // Delete GeoTrigger function
+      window.deleteGeoTrigger = async function () {
+        if (!window.supabaseClient || !window.jwtToken) {
+          alert('Please initialize SDK first');
+          return;
+        }
+
+        const id = document.getElementById('deleteId').value;
+        if (!id) {
+          alert('Please enter a GeoTrigger ID');
+          return;
+        }
+
+        const resultDiv = document.getElementById('delete-result');
+        resultDiv.textContent = 'Deleting geotrigger...';
+        resultDiv.className = 'result loading';
+
+        try {
+          console.log('🗑️ Deleting geotrigger:', id);
+
+          const response = await fetch(
+            `${env.supabaseUrl}/rest/v1/geotriggers?id=eq.${id}`,
+            {
+              method: 'DELETE',
+              headers: {
+                Authorization: `Bearer ${window.jwtToken}`,
+                apikey: env.supabaseAnonKey,
+                'Content-Profile': 'omx',
+                'Accept-Profile': 'omx',
+              },
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.text();
+            console.error('❌ Failed to delete geotrigger:', errorData);
+            throw new Error(
+              `Failed to delete geotrigger: ${response.statusText} - ${errorData}`
+            );
+          }
+
+          console.log('✅ GeoTrigger deleted:', id);
+          resultDiv.textContent = `✅ Deleted geotrigger with ID: ${id}`;
+          resultDiv.className = 'result success';
+        } catch (error) {
+          console.error('❌ Delete failed:', error);
+          resultDiv.textContent = `❌ Error: ${error.message}`;
+          resultDiv.className = 'result error';
+        }
+      };
+    </script>
+  </body>
+</html>

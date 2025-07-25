@@ -1,0 +1,4 @@
+# omx-sdk/pnpm-workspace.yaml
+packages:
+  - 'packages/*'
+  - 'examples'

@@ -1,0 +1,4 @@
+
+> @omx-sdk/geotrigger@2.0.0 build /Users/brandonha/Documents/GitHub/omx-sdk/packages/geotrigger
+> tsc --build
+

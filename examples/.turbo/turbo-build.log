@@ -1,0 +1,35 @@
+
+> omx-sdk-examples@1.0.0 build /Users/brandonha/Documents/GitHub/omx-sdk/examples
+> tsc && vite build
+
+[91merror[0m[90m TS6059: [0mFile '/Users/brandonha/Documents/GitHub/omx-sdk/examples/auth-test.ts' is not under 'rootDir' '/Users/brandonha/Documents/GitHub/omx-sdk/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '*.ts' in '/Users/brandonha/Documents/GitHub/omx-sdk/examples/tsconfig.json'
+
+  [96mtsconfig.json[0m:[93m10[0m:[93m15[0m
+    [7m10[0m   "include": ["*.ts", "*.js"],
+    [7m  [0m [96m              ~~~~~~[0m
+    File is matched by include pattern specified here.
+
+[91merror[0m[90m TS6059: [0mFile '/Users/brandonha/Documents/GitHub/omx-sdk/examples/example.ts' is not under 'rootDir' '/Users/brandonha/Documents/GitHub/omx-sdk/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '*.ts' in '/Users/brandonha/Documents/GitHub/omx-sdk/examples/tsconfig.json'
+
+  [96mtsconfig.json[0m:[93m10[0m:[93m15[0m
+    [7m10[0m   "include": ["*.ts", "*.js"],
+    [7m  [0m [96m              ~~~~~~[0m
+    File is matched by include pattern specified here.
+
+[91merror[0m[90m TS6059: [0mFile '/Users/brandonha/Documents/GitHub/omx-sdk/examples/test-omx-integration.ts' is not under 'rootDir' '/Users/brandonha/Documents/GitHub/omx-sdk/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '*.ts' in '/Users/brandonha/Documents/GitHub/omx-sdk/examples/tsconfig.json'
+
+  [96mtsconfig.json[0m:[93m10[0m:[93m15[0m
+    [7m10[0m   "include": ["*.ts", "*.js"],
+    [7m  [0m [96m              ~~~~~~[0m
+    File is matched by include pattern specified here.
+
+
+Found 3 errors.
+
+[41m[30m ELIFECYCLE [39m[49m [31mCommand failed with exit code 2.[39m

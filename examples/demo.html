@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OMX SDK Example</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .section {
+        margin: 20px 0;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #f9f9f9;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      .status {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 4px;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .info {
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+      pre {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>OMX SDK Demo</h1>
+    <p>This example demonstrates the unified OMX SDK functionality.</p>
+
+    <div class="section">
+      <h2>SDK Initialization</h2>
+      <button onclick="initializeSDK()">Initialize SDK</button>
+      <button onclick="checkHealth()">Check Health</button>
+      <div id="init-status"></div>
+    </div>
+
+    <div class="section">
+      <h2>Geotrigger</h2>
+      <button onclick="setupGeotrigger()">Setup Geofencing</button>
+      <button onclick="getCurrentLocation()">Get Current Location</button>
+      <button onclick="startMonitoring()">Start Monitoring</button>
+      <button onclick="stopMonitoring()">Stop Monitoring</button>
+      <div id="geo-status"></div>
+    </div>
+
+    <div class="section">
+      <h2>Email</h2>
+      <button onclick="sendTestEmail()">Send Test Email</button>
+      <button onclick="validateEmail()">Validate Email</button>
+      <div id="email-status"></div>
+    </div>
+
+    <div class="section">
+      <h2>Webhook</h2>
+      <button onclick="testWebhook()">Test Webhook</button>
+      <button onclick="createSubscription()">Create Subscription</button>
+      <div id="webhook-status"></div>
+    </div>
+
+    <div class="section">
+      <h2>Beacon</h2>
+      <button onclick="initializeBeacon()">Initialize Beacon</button>
+      <button onclick="startBeaconScanning()">Start Scanning</button>
+      <button onclick="stopBeaconScanning()">Stop Scanning</button>
+      <div id="beacon-status"></div>
+    </div>
+
+    <div class="section">
+      <h2>Push Notifications</h2>
+      <button onclick="initializePush()">Initialize Push</button>
+      <button onclick="subscribePush()">Subscribe</button>
+      <button onclick="showLocalNotification()">Show Local Notification</button>
+      <div id="push-status"></div>
+    </div>
+
+    <div class="section">
+      <h2>Analytics</h2>
+      <button onclick="getAnalytics()">Get Analytics</button>
+      <div id="analytics-status"></div>
+    </div>
+
+    <script type="module">
+      // Since we can't import from npm in this example, we'll simulate the SDK
+      // In a real application, you would import: import { createOMXSDK } from 'omx-sdk';
+
+      let sdk = null;
+
+      // Simulate SDK functionality for demonstration
+      const mockSDK = {
+        async initialize() {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          return true;
+        },
+
+        async healthCheck() {
+          return {
+            overall: 'healthy',
+            services: {
+              geotrigger: 'healthy',
+              email: 'healthy',
+              webhook: 'healthy',
+              beacon: navigator.bluetooth ? 'healthy' : 'unhealthy',
+              pushNotification:
+                'Notification' in window ? 'healthy' : 'unhealthy',
+            },
+          };
+        },
+
+        geotrigger: {
+          addRegion(region) {
+            console.log('Added region:', region);
+            return true;
+          },
+          async getCurrentLocation() {
+            return new Promise((resolve, reject) => {
+              if (!navigator.geolocation) {
+                reject(new Error('Geolocation not supported'));
+                return;
+              }
+              navigator.geolocation.getCurrentPosition(
+                (position) =>
+                  resolve({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy,
+                  }),
+                (error) => reject(error)
+              );
+            });
+          },
+          async startMonitoring(callback) {
+            console.log('Started geofence monitoring');
+            // Simulate a geofence event after 3 seconds
+            setTimeout(() => {
+              callback({
+                type: 'enter',
+                regionId: 'demo-region',
+                location: { latitude: 37.7749, longitude: -122.4194 },
+                timestamp: new Date(),
+              });
+            }, 3000);
+            return true;
+          },
+          stopMonitoring() {
+            console.log('Stopped geofence monitoring');
+            return true;
+          },
+          isMonitoring() {
+            return false;
+          },
+        },
+
+        email: {
+          async send(message) {
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            return {
+              success: true,
+              messageId: 'msg_' + Date.now(),
+              statusCode: 200,
+            };
+          },
+          validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+          },
+        },
+
+        webhook: {
+          async testWebhook(url) {
+            await new Promise((resolve) => setTimeout(resolve, 400));
+            return {
+              success: true,
+              status: 200,
+              duration: 300,
+            };
+          },
+          async createSubscription(url, events) {
+            await new Promise((resolve) => setTimeout(resolve, 200));
+            return {
+              id: 'sub_' + Date.now(),
+              url,
+              events,
+              active: true,
+              createdAt: new Date(),
+            };
+          },
+        },
+
+        beacon: {
+          async initialize() {
+            if (!navigator.bluetooth) {
+              throw new Error('Web Bluetooth not supported');
+            }
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            return true;
+          },
+          addRegion(region) {
+            console.log('Added beacon region:', region);
+          },
+          async startScanning() {
+            console.log('Started beacon scanning');
+            return true;
+          },
+          stopScanning() {
+            console.log('Stopped beacon scanning');
+            return true;
+          },
+          getAnalytics() {
+            return {
+              totalBeacons: 0,
+              regionsMonitored: 1,
+              events: { enters: 0, exits: 0, ranges: 0 },
+            };
+          },
+        },
+
+        pushNotification: {
+          async initialize() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+              throw new Error('Push notifications not supported');
+            }
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            return true;
+          },
+          async subscribe() {
+            if (Notification.permission !== 'granted') {
+              const permission = await Notification.requestPermission();
+              if (permission !== 'granted') {
+                return { success: false, error: 'Permission denied' };
+              }
+            }
+            return { success: true, subscriptionId: 'sub_' + Date.now() };
+          },
+          async showLocalNotification(payload) {
+            if (Notification.permission === 'granted') {
+              new Notification(payload.title, {
+                body: payload.body,
+                icon: payload.icon,
+              });
+            }
+          },
+          getAnalytics() {
+            return {
+              totalSubscriptions: 1,
+              totalNotificationsSent: 0,
+              clickThroughRate: 0,
+            };
+          },
+        },
+
+        getAnalytics() {
+          return {
+            geotrigger: { isMonitoring: false },
+            email: null,
+            webhook: { subscriptions: 0 },
+            beacon: this.beacon.getAnalytics(),
+            pushNotification: this.pushNotification.getAnalytics(),
+          };
+        },
+      };
+
+      // Global functions for the demo
+      window.initializeSDK = async function () {
+        const status = document.getElementById('init-status');
+        try {
+          status.innerHTML = '<div class="info">Initializing SDK...</div>';
+
+          // Create SDK instance (simulated)
+          sdk = mockSDK;
+
+          await sdk.initialize();
+          status.innerHTML =
+            '<div class="success">✅ SDK initialized successfully!</div>';
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to initialize SDK: ${error.message}</div>`;
+        }
+      };
+
+      window.checkHealth = async function () {
+        const status = document.getElementById('init-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          const health = await sdk.healthCheck();
+          status.innerHTML = `
+                    <div class="success">
+                        <strong>Health Check Results:</strong>
+                        <pre>${JSON.stringify(health, null, 2)}</pre>
+                    </div>
+                `;
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Health check failed: ${error.message}</div>`;
+        }
+      };
+
+      window.setupGeotrigger = function () {
+        const status = document.getElementById('geo-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          sdk.geotrigger.addRegion({
+            id: 'demo-region',
+            center: { latitude: 37.7749, longitude: -122.4194 },
+            radius: 100,
+            name: 'Demo Location',
+          });
+          status.innerHTML =
+            '<div class="success">✅ Geofence region added successfully!</div>';
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to add region: ${error.message}</div>`;
+        }
+      };
+
+      window.getCurrentLocation = async function () {
+        const status = document.getElementById('geo-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          status.innerHTML =
+            '<div class="info">Getting current location...</div>';
+          const location = await sdk.geotrigger.getCurrentLocation();
+          status.innerHTML = `
+                    <div class="success">
+                        <strong>Current Location:</strong>
+                        <pre>${JSON.stringify(location, null, 2)}</pre>
+                    </div>
+                `;
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to get location: ${error.message}</div>`;
+        }
+      };
+
+      window.startMonitoring = async function () {
+        const status = document.getElementById('geo-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          status.innerHTML =
+            '<div class="info">Starting geofence monitoring...</div>';
+          await sdk.geotrigger.startMonitoring((event) => {
+            status.innerHTML += `
+                        <div class="success">
+                            <strong>Geofence Event:</strong>
+                            <pre>${JSON.stringify(event, null, 2)}</pre>
+                        </div>
+                    `;
+          });
+          status.innerHTML =
+            '<div class="success">✅ Geofence monitoring started! (simulated event in 3 seconds)</div>';
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to start monitoring: ${error.message}</div>`;
+        }
+      };
+
+      window.stopMonitoring = function () {
+        const status = document.getElementById('geo-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        sdk.geotrigger.stopMonitoring();
+        status.innerHTML =
+          '<div class="success">✅ Geofence monitoring stopped</div>';
+      };
+
+      window.sendTestEmail = async function () {
+        const status = document.getElementById('email-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          status.innerHTML = '<div class="info">Sending test email...</div>';
+          const result = await sdk.email.send({
+            to: 'test@example.com',
+            subject: 'Test Email from OMX SDK',
+            body: 'This is a test email sent using the OMX SDK.',
+            html: '<h1>Test Email</h1><p>This is a test email sent using the <strong>OMX SDK</strong>.</p>',
+          });
+          status.innerHTML = `
+                    <div class="success">
+                        <strong>Email Sent:</strong>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to send email: ${error.message}</div>`;
+        }
+      };
+
+      window.validateEmail = function () {
+        const status = document.getElementById('email-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        const testEmails = [
+          'valid@example.com',
+          'invalid-email',
+          'test@test.co.uk',
+        ];
+        const results = testEmails.map((email) => ({
+          email,
+          valid: sdk.email.validateEmail(email),
+        }));
+
+        status.innerHTML = `
+                <div class="success">
+                    <strong>Email Validation Results:</strong>
+                    <pre>${JSON.stringify(results, null, 2)}</pre>
+                </div>
+            `;
+      };
+
+      window.testWebhook = async function () {
+        const status = document.getElementById('webhook-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          status.innerHTML = '<div class="info">Testing webhook...</div>';
+          const result = await sdk.webhook.testWebhook(
+            'https://httpbin.org/post'
+          );
+          status.innerHTML = `
+                    <div class="success">
+                        <strong>Webhook Test Result:</strong>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Webhook test failed: ${error.message}</div>`;
+        }
+      };
+
+      window.createSubscription = async function () {
+        const status = document.getElementById('webhook-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          status.innerHTML =
+            '<div class="info">Creating webhook subscription...</div>';
+          const result = await sdk.webhook.createSubscription(
+            'https://your-app.com/webhook',
+            ['user.created', 'order.completed']
+          );
+          status.innerHTML = `
+                    <div class="success">
+                        <strong>Subscription Created:</strong>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to create subscription: ${error.message}</div>`;
+        }
+      };
+
+      window.initializeBeacon = async function () {
+        const status = document.getElementById('beacon-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          status.innerHTML =
+            '<div class="info">Initializing beacon manager...</div>';
+          await sdk.beacon.initialize();
+
+          sdk.beacon.addRegion({
+            id: 'demo-beacon',
+            uuid: 'B0702880-A295-A8AB-F734-031A98A512DE',
+            major: 1,
+            minor: 1,
+            name: 'Demo Beacon',
+          });
+
+          status.innerHTML =
+            '<div class="success">✅ Beacon manager initialized and region added!</div>';
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Beacon initialization failed: ${error.message}</div>`;
+        }
+      };
+
+      window.startBeaconScanning = async function () {
+        const status = document.getElementById('beacon-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          status.innerHTML =
+            '<div class="info">Starting beacon scanning...</div>';
+          await sdk.beacon.startScanning();
+          status.innerHTML =
+            '<div class="success">✅ Beacon scanning started!</div>';
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to start beacon scanning: ${error.message}</div>`;
+        }
+      };
+
+      window.stopBeaconScanning = function () {
+        const status = document.getElementById('beacon-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        sdk.beacon.stopScanning();
+        status.innerHTML =
+          '<div class="success">✅ Beacon scanning stopped</div>';
+      };
+
+      window.initializePush = async function () {
+        const status = document.getElementById('push-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          status.innerHTML =
+            '<div class="info">Initializing push notifications...</div>';
+          await sdk.pushNotification.initialize();
+          status.innerHTML =
+            '<div class="success">✅ Push notification manager initialized!</div>';
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Push initialization failed: ${error.message}</div>`;
+        }
+      };
+
+      window.subscribePush = async function () {
+        const status = document.getElementById('push-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          status.innerHTML =
+            '<div class="info">Subscribing to push notifications...</div>';
+          const result = await sdk.pushNotification.subscribe();
+          status.innerHTML = `
+                    <div class="success">
+                        <strong>Push Subscription Result:</strong>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Push subscription failed: ${error.message}</div>`;
+        }
+      };
+
+      window.showLocalNotification = async function () {
+        const status = document.getElementById('push-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          await sdk.pushNotification.showLocalNotification({
+            title: 'OMX SDK Demo',
+            body: 'This is a local notification from the OMX SDK demo!',
+            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23007bff"/></svg>',
+          });
+          status.innerHTML =
+            '<div class="success">✅ Local notification sent!</div>';
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to show notification: ${error.message}</div>`;
+        }
+      };
+
+      window.getAnalytics = function () {
+        const status = document.getElementById('analytics-status');
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        const analytics = sdk.getAnalytics();
+        status.innerHTML = `
+                <div class="success">
+                    <strong>SDK Analytics:</strong>
+                    <pre>${JSON.stringify(analytics, null, 2)}</pre>
+                </div>
+            `;
+      };
+    </script>
+  </body>
+</html>

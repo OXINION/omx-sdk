@@ -1,0 +1,4 @@
+
+> @omx-sdk/core@2.0.0 build /Users/brandonha/Documents/GitHub/omx-sdk/packages/core
+> tsc --build
+

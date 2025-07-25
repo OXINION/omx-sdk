@@ -1,0 +1,51 @@
+{
+  "name": "@omx-sdk/webhook",
+  "version": "2.0.0",
+  "description": "Webhook handling functionality for omx-sdk",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "webhook",
+    "http",
+    "events",
+    "sdk"
+  ],
+  "author": "Oxinion",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oxinion/omx-sdk.git",
+    "directory": "packages/webhook"
+  },
+  "homepage": "https://github.com/oxinion/omx-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/oxinion/omx-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {}
+}
