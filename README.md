@@ -40,46 +40,46 @@ npm install @omx-sdk/email @omx-sdk/geotrigger @omx-sdk/webhook
 ### Basic Usage
 
 ```typescript
-import { OmxClient } from 'omx-sdk';
+import { OmxClient } from "omx-sdk";
 
 const omx = new OmxClient({
-  clientId: 'your-client-id',
-  secretKey: 'your-secret-key',
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
 });
 
 // Send email
 await omx.email.send({
-  to: 'user@example.com',
-  subject: 'Welcome!',
-  body: 'Hello from OMX SDK!',
+  to: "user@example.com",
+  subject: "Welcome!",
+  body: "Hello from OMX SDK!",
 });
 
 // Set up geotrigger
 omx.geotrigger.addRegion({
-  id: 'office',
+  id: "office",
   center: { latitude: 37.7749, longitude: -122.4194 },
   radius: 100,
 });
 
 await omx.geotrigger.startMonitoring((event) => {
-  console.log('Geofence event:', event);
+  console.log("Geofence event:", event);
 });
 ```
 
 ### Using Individual Packages
 
 ```typescript
-import { EmailClient } from '@omx-sdk/email';
-import { GeotriggerClient } from '@omx-sdk/geotrigger';
+import { EmailClient } from "@omx-sdk/email";
+import { GeotriggerClient } from "@omx-sdk/geotrigger";
 
 const emailClient = new EmailClient({
-  clientId: 'your-client-id',
-  secretKey: 'your-secret-key',
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
 });
 
 const geotrigger = new GeotriggerClient({
-  clientId: 'your-client-id',
-  secretKey: 'your-secret-key',
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
 });
 ```
 
@@ -124,14 +124,14 @@ pnpm test  # Run main SDK test
 
 ### 📂 Available Examples
 
-| File | Description | How to Run |
-|------|-------------|------------|
-| `example.ts` | Main authentication and feature test | `pnpm test` or `npx tsx example.ts` |
-| `test-omx-integration.ts` | Integration testing with geotrigger focus | `npx tsx test-omx-integration.ts` |
-| `auth-test.ts` | Authentication flow testing | `npx tsx auth-test.ts` |
-| `demo.html` | Browser demo with all features | `pnpm serve` → open `localhost:8000/demo.html` |
-| `auth-demo.html` | Browser authentication demo | `pnpm serve` → open `localhost:8000/auth-demo.html` |
-| `geotrigger-test.html` | Geotrigger-specific browser test | `pnpm serve` → open `localhost:8000/geotrigger-test.html` |
+| File                      | Description                               | How to Run                                                |
+| ------------------------- | ----------------------------------------- | --------------------------------------------------------- |
+| `example.ts`              | Main authentication and feature test      | `pnpm test` or `npx tsx example.ts`                       |
+| `test-omx-integration.ts` | Integration testing with geotrigger focus | `npx tsx test-omx-integration.ts`                         |
+| `auth-test.ts`            | Authentication flow testing               | `npx tsx auth-test.ts`                                    |
+| `demo.html`               | Browser demo with all features            | `pnpm serve` → open `localhost:8000/demo.html`            |
+| `auth-demo.html`          | Browser authentication demo               | `pnpm serve` → open `localhost:8000/auth-demo.html`       |
+| `geotrigger-test.html`    | Geotrigger-specific browser test          | `pnpm serve` → open `localhost:8000/geotrigger-test.html` |
 
 ### 📚 Documentation Examples
 
@@ -192,6 +192,7 @@ pnpm serve
 ```
 
 Then navigate to:
+
 - `demo.html` - Full SDK demo with browser APIs
 - `auth-demo.html` - Authentication flow demo
 - `geotrigger-test.html` - Geotrigger-specific testing
@@ -217,10 +218,12 @@ npx tsx test-current-sdk.js
 ### 📱 Environment-Specific Features
 
 **Node.js Environment:**
+
 - ✅ Email, Webhook, Core authentication
 - ⚠️ Geolocation, Beacon, Push notifications (require browser APIs)
 
 **Browser Environment:**
+
 - ✅ All features including geolocation and device APIs
 - 🔄 Auto-terminates tests after 30 seconds
 
@@ -230,8 +233,8 @@ To test with real credentials, update the config in `examples/example.ts`:
 
 ```typescript
 const config = {
-  clientId: 'your-actual-client-id',
-  secretKey: 'your-actual-secret-key',
+  clientId: "your-actual-client-id",
+  secretKey: "your-actual-secret-key",
 };
 ```
 
@@ -240,6 +243,7 @@ Get your credentials from [omx.oxinion.com/token](https://omx.oxinion.com/token)
 ### 📋 Test Coverage
 
 The examples test:
+
 - ✅ SDK initialization and authentication
 - ✅ Error handling for invalid credentials
 - ✅ Email service integration

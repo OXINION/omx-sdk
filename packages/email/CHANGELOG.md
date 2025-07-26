@@ -1,15 +1,19 @@
 # @omx-sdk/email
 
-## 2.0.0
+## 1.0.0
 
 ### Major Changes
 
-- Initial release of OMX SDK
+- Initial release of @omx-sdk/email package
 
-  This is the first release of the modular OMX SDK with the following packages:
-  - Core authentication module with Supabase integration
-  - Email sending functionality
-  - Geotrigger/geofencing capabilities
-  - Webhook handling
-  - Beacon integration
-  - Push notification support
+Email functionality for the OMX SDK:
+- Send transactional emails
+- Template support
+- Attachment handling
+- HTML and plain text content
+- Integration with authentication system
+
+### Patch Changes
+
+- Updated dependencies
+  - @omx-sdk/core@1.0.0

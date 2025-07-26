@@ -1,25 +1,27 @@
 # omx-sdk
 
-## 2.0.0
+## 1.0.0
 
 ### Major Changes
 
-- Initial release of OMX SDK
+- Initial release of the unified omx-sdk package
 
-  This is the first release of the modular OMX SDK with the following packages:
-  - Core authentication module with Supabase integration
-  - Email sending functionality
-  - Geotrigger/geofencing capabilities
-  - Webhook handling
-  - Beacon integration
-  - Push notification support
+Complete SDK package that combines all OMX functionality:
+- Unified API for all services
+- Authentication management
+- Geotrigger capabilities
+- Email notifications
+- Webhook integration
+- Beacon detection
+- Push notifications
+- TypeScript support with full type definitions
 
 ### Patch Changes
 
 - Updated dependencies
-  - @omx-sdk/core@2.0.0
-  - @omx-sdk/email@2.0.0
-  - @omx-sdk/geotrigger@2.0.0
-  - @omx-sdk/webhook@2.0.0
-  - @omx-sdk/beacon@2.0.0
-  - @omx-sdk/push-notification@2.0.0
+  - @omx-sdk/core@1.0.0
+  - @omx-sdk/geotrigger@1.0.0
+  - @omx-sdk/email@1.0.0
+  - @omx-sdk/webhook@1.0.0
+  - @omx-sdk/beacon@1.0.0
+  - @omx-sdk/push-notification@1.0.0

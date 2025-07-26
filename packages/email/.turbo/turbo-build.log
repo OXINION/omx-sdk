@@ -1,4 +1,4 @@
 
-> @omx-sdk/email@2.0.0 build /Users/brandonha/Documents/GitHub/omx-sdk/packages/email
+> @omx-sdk/email@1.0.1 build /Users/brandonha/Documents/GitHub/omx-sdk/packages/email
 > tsc --build
 

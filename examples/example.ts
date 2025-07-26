@@ -1,4 +1,4 @@
-import OMX, { OMXSDK } from 'omx-sdk';
+import OMX from 'omx-sdk';
 
 // Test configuration with clientId and secretKey
 const config = {
@@ -6,7 +6,7 @@ const config = {
   secretKey: '87654321-4321-4321-4321-987654321cba',
 };
 
-const omx = new OMXSDK(config);
+// const omx = new OMXSDK(config); // Removed unused variable
 
 async function testOMXInitialization() {
   console.log('🚀 Testing OMX SDK Initialization...');
@@ -43,34 +43,35 @@ async function testOMXInitialization() {
 
     return sdkInstance;
   } catch (error) {
-    // Error handling
+    // Error handling with type checking
+    const err = error as any; // Type assertion for error handling
     console.error('\n❌ OMX SDK initialization failed!');
     console.error('📄 Error details:', {
-      message: error.message,
-      status: error.status || 'Unknown',
-      code: error.code || 'Unknown',
+      message: err.message || 'Unknown error',
+      status: err.status || 'Unknown',
+      code: err.code || 'Unknown',
     });
 
     // Handle specific error cases
-    if (error.message.includes('invalid credentials')) {
+    if (err.message?.includes('invalid credentials')) {
       console.error('🔑 Authentication failed: Invalid clientId or secretKey');
       console.error(
         '💡 Please verify your credentials from omx.oxinion.com/token'
       );
     } else if (
-      error.message.includes('network') ||
-      error.message.includes('fetch')
+      err.message?.includes('network') ||
+      err.message?.includes('fetch')
     ) {
       console.error(
         '🌐 Network error: Could not reach authentication endpoint'
       );
       console.error('💡 Please check your internet connection and try again');
-    } else if (error.message.includes('timeout')) {
+    } else if (err.message?.includes('timeout')) {
       console.error('⏰ Request timeout: Authentication took too long');
       console.error('💡 Please try again or check server status');
-    } else if (error.status === 401) {
+    } else if (err.status === 401) {
       console.error('🚫 Unauthorized: Invalid credentials provided');
-    } else if (error.status === 500) {
+    } else if (err.status === 500) {
       console.error(
         '🔧 Server error: Authentication service is experiencing issues'
       );
@@ -118,7 +119,7 @@ async function testDifferentScenarios() {
   }
 
   // Scenario 4: Empty credentials
-  console.log('� Scenario 4: Empty credentials');
+  console.log('📝 Scenario 4: Empty credentials');
   try {
     await OMX.initialize({
       clientId: '',
@@ -128,6 +129,10 @@ async function testDifferentScenarios() {
   } catch (error) {
     console.log('✅ Scenario 4: Correctly rejected empty credentials\n');
   }
+
+  // Return null if all scenarios failed
+  console.log('❌ All authentication scenarios failed');
+  return null;
 }
 
 async function main() {
@@ -205,8 +210,9 @@ async function main() {
         console.log('❌ API call failed:', emailResult.error);
       }
     } catch (apiError) {
-      console.error('❌ API call error:', apiError.message);
-      if (apiError.status === 401) {
+      const err = apiError as any;
+      console.error('❌ API call error:', err.message || 'Unknown error');
+      if (err.status === 401) {
         console.error('🚫 Token appears to be invalid or expired');
       }
     }
@@ -281,7 +287,8 @@ async function main() {
         const location = await geotrigger.getCurrentLocation();
         console.log('📍 Current location:', location);
       } catch (error) {
-        console.log('❌ Could not get current location:', error.message);
+        const err = error as any;
+        console.log('❌ Could not get current location:', err.message || 'Unknown error');
       }
     } else {
       console.log('⚠️ Location detection skipped in Node.js environment');
@@ -420,7 +427,8 @@ async function main() {
           );
         }, 5000);
       } catch (error) {
-        console.log('❌ Beacon functionality not available:', error.message);
+        const err = error as any;
+        console.log('❌ Beacon functionality not available:', err.message || 'Unknown error');
       }
     } else {
       console.log('⚠️ Beacon functionality skipped in Node.js environment');
@@ -480,7 +488,8 @@ async function main() {
           );
         }
       } catch (error) {
-        console.log('❌ Push notifications not available:', error.message);
+        const err = error as any;
+        console.log('❌ Push notifications not available:', err.message || 'Unknown error');
       }
     } else {
       console.log('⚠️ Push notifications skipped in Node.js environment');
@@ -523,10 +532,11 @@ async function main() {
       //   }
     }, waitTime);
   } catch (error) {
+    const err = error as any;
     console.error('❌ Main test failed:', error);
     console.error('📄 Error details:', {
-      message: error.message,
-      stack: error.stack?.split('\n').slice(0, 3).join('\n'), // Show first 3 lines of stack
+      message: err.message || 'Unknown error',
+      stack: err.stack?.split('\n').slice(0, 3).join('\n'), // Show first 3 lines of stack
     });
   }
 }

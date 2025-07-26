@@ -3,35 +3,39 @@
  * Tests the unified SDK with real authentication and geotrigger functionality
  */
 
-import OMX from '../packages/omx-sdk/src/index.js';
+import OMX from 'omx-sdk';
 
 // Test configuration
 const config = {
-  clientId: 'f7b294c9-12d1-477b-b454-552dedd28de3',
-  secretKey: '87654321-4321-4321-4321-987654321cba',
-  baseUrl: 'https://blhilidnsybhfdmwqsrx.supabase.co',
+  clientId: "f7b294c9-12d1-477b-b454-552dedd28de3",
+  secretKey: "87654321-4321-4321-4321-987654321cba",
+  baseUrl: "https://blhilidnsybhfdmwqsrx.supabase.co",
 };
 
 /**
  * Test OMX SDK initialization and authentication
  */
 async function testOMXInitialization() {
-  console.log('🚀 Testing OMX SDK Initialization...');
-  console.log('📋 Config:', {
+  console.log("🚀 Testing OMX SDK Initialization...");
+  console.log("📋 Config:", {
     clientId: config.clientId,
-    secretKey: config.secretKey.substring(0, 8) + '...',
+    secretKey: config.secretKey.substring(0, 8) + "...",
   });
 
   try {
     // Initialize the SDK with authentication
     const sdk = await OMX.initialize(config);
 
-    console.log('✅ OMX SDK initialized successfully!');
-    console.log('📦 Available services:', Object.keys(sdk));
+    console.log("✅ OMX SDK initialized successfully!");
+    console.log("📦 Available services:", Object.keys(sdk));
 
     return sdk;
   } catch (error) {
-    console.error('❌ OMX SDK initialization failed:', error.message);
+    const err = error as any;
+    console.error(
+      "❌ OMX SDK initialization failed:",
+      err.message || "Unknown error"
+    );
     throw error;
   }
 }
@@ -39,32 +43,32 @@ async function testOMXInitialization() {
 /**
  * Test Geotrigger functionality
  */
-async function testGeotrigger(sdk) {
-  console.log('\n🌍 Testing Geotrigger functionality...');
+async function testGeotrigger(sdk: any) {
+  console.log("\n🌍 Testing Geotrigger functionality...");
 
   try {
     // Access geotrigger service
     const geo = sdk.geotrigger;
-    console.log('📍 Geotrigger service available:', !!geo);
+    console.log("📍 Geotrigger service available:", !!geo);
 
     // Create a geofence trigger
     const trigger = await geo.create({
-      name: 'Dosan Park Event',
+      name: "Dosan Park Event",
       coordinates: [127.0317, 37.5219], // [lng, lat] - Dosan Park, Seoul
       radius: 500, // 500 meters
       event: {
-        type: 'webhook',
-        url: 'https://httpbin.org/post', // Test webhook endpoint
+        type: "webhook",
+        url: "https://httpbin.org/post", // Test webhook endpoint
         payload: {
-          userId: '12345',
-          eventType: 'arrived_near_dosanpark',
-          location: 'Dosan Park, Gangnam, Seoul',
+          userId: "12345",
+          eventType: "arrived_near_dosanpark",
+          location: "Dosan Park, Gangnam, Seoul",
         },
       },
     });
 
-    console.log('✅ Geotrigger created successfully!');
-    console.log('🎯 Trigger details:', {
+    console.log("✅ Geotrigger created successfully!");
+    console.log("🎯 Trigger details:", {
       id: trigger.id,
       name: trigger.name,
       center: trigger.center,
@@ -73,7 +77,8 @@ async function testGeotrigger(sdk) {
 
     return trigger;
   } catch (error) {
-    console.error('❌ Geotrigger test failed:', error.message);
+    const err = error as any;
+    console.error("❌ Geotrigger test failed:", err.message || 'Unknown error');
     // Don't throw here, just log the error
     return null;
   }
@@ -82,40 +87,41 @@ async function testGeotrigger(sdk) {
 /**
  * Test Email functionality
  */
-async function testEmail(sdk) {
-  console.log('\n📧 Testing Email functionality...');
+async function testEmail(sdk: any) {
+  console.log("\n📧 Testing Email functionality...");
 
   try {
     const email = sdk.email;
-    console.log('📬 Email service available:', !!email);
+    console.log("📬 Email service available:", !!email);
 
     const result = await email.send({
-      to: ['test@example.com'],
-      subject: 'OMX SDK Test - Geotrigger Integration',
-      body: 'Hello! This is a test email from the OMX SDK integration test.',
+      to: ["test@example.com"],
+      subject: "OMX SDK Test - Geotrigger Integration",
+      body: "Hello! This is a test email from the OMX SDK integration test.",
       attachments: [
         {
-          filename: 'test-location.json',
+          filename: "test-location.json",
           content: JSON.stringify(
             {
-              location: 'Dosan Park',
+              location: "Dosan Park",
               coordinates: [127.0317, 37.5219],
               radius: 500,
             },
             null,
             2
           ),
-          contentType: 'application/json',
+          contentType: "application/json",
         },
       ],
     });
 
-    console.log('✅ Email sent successfully!');
-    console.log('📨 Email result:', result);
+    console.log("✅ Email sent successfully!");
+    console.log("📨 Email result:", result);
 
     return result;
   } catch (error) {
-    console.error('❌ Email test failed:', error.message);
+    const err = error as any;
+    console.error("❌ Email test failed:", err.message || 'Unknown error');
     return null;
   }
 }
@@ -123,29 +129,30 @@ async function testEmail(sdk) {
 /**
  * Test Webhook functionality
  */
-async function testWebhook(sdk) {
-  console.log('\n🔗 Testing Webhook functionality...');
+async function testWebhook(sdk: any) {
+  console.log("\n🔗 Testing Webhook functionality...");
 
   try {
     const webhook = sdk.webhook;
-    console.log('🪝 Webhook service available:', !!webhook);
+    console.log("🪝 Webhook service available:", !!webhook);
 
     // Subscribe to geotrigger events
     const subscription = await webhook.subscribe({
-      event: 'geotrigger.entered',
-      url: 'https://httpbin.org/post',
+      event: "geotrigger.entered",
+      url: "https://httpbin.org/post",
       metadata: {
-        description: 'Geotrigger entry webhook for Dosan Park',
-        location: 'Seoul, Korea',
+        description: "Geotrigger entry webhook for Dosan Park",
+        location: "Seoul, Korea",
       },
     });
 
-    console.log('✅ Webhook subscription created!');
-    console.log('🔔 Subscription details:', subscription);
+    console.log("✅ Webhook subscription created!");
+    console.log("🔔 Subscription details:", subscription);
 
     return subscription;
   } catch (error) {
-    console.error('❌ Webhook test failed:', error.message);
+    const err = error as any;
+    console.error("❌ Webhook test failed:", err.message || 'Unknown error');
     return null;
   }
 }
@@ -153,37 +160,39 @@ async function testWebhook(sdk) {
 /**
  * Test SDK health and status
  */
-async function testSDKHealth(sdk) {
-  console.log('\n🔍 Testing SDK Health...');
+async function testSDKHealth(sdk: any) {
+  console.log("\n🔍 Testing SDK Health...");
 
   try {
     if (sdk.healthCheck) {
       const health = await sdk.healthCheck();
-      console.log('✅ SDK Health Check:', health);
+      console.log("✅ SDK Health Check:", health);
       return health;
     } else {
-      console.log('ℹ️ Health check not available');
-      return { status: 'unknown' };
+      console.log("ℹ️ Health check not available");
+      return { status: "unknown" };
     }
   } catch (error) {
-    console.error('❌ Health check failed:', error.message);
-    return { status: 'error', error: error.message };
+    const err = error as any;
+    console.error("❌ Health check failed:", err.message || 'Unknown error');
+    return { status: "error", error: err.message || 'Unknown error' };
   }
 }
 
 /**
  * Clean up resources
  */
-async function cleanup(sdk) {
-  console.log('\n🧹 Cleaning up resources...');
+async function cleanup(sdk: any) {
+  console.log("\n🧹 Cleaning up resources...");
 
   try {
     if (sdk.dispose) {
       await sdk.dispose();
-      console.log('✅ SDK disposed successfully');
+      console.log("✅ SDK disposed successfully");
     }
   } catch (error) {
-    console.error('⚠️ Cleanup warning:', error.message);
+    const err = error as any;
+    console.error("⚠️ Cleanup warning:", err.message || 'Unknown error');
   }
 }
 
@@ -191,9 +200,9 @@ async function cleanup(sdk) {
  * Main integration test function
  */
 async function main() {
-  console.log('🎯 OMX SDK Integration Test');
-  console.log('='.repeat(50));
-  console.log('Testing unified SDK with geotrigger focus\n');
+  console.log("🎯 OMX SDK Integration Test");
+  console.log("=".repeat(50));
+  console.log("Testing unified SDK with geotrigger focus\n");
 
   let sdk: any = null;
 
@@ -211,29 +220,29 @@ async function main() {
       ]);
 
     // 3. Report results
-    console.log('\n📊 Integration Test Summary');
-    console.log('='.repeat(50));
-    console.log('✅ SDK Initialization:', 'PASSED');
+    console.log("\n📊 Integration Test Summary");
+    console.log("=".repeat(50));
+    console.log("✅ SDK Initialization:", "PASSED");
     console.log(
-      '🌍 Geotrigger:',
-      triggerResult.status === 'fulfilled' ? 'PASSED' : 'FAILED'
+      "🌍 Geotrigger:",
+      triggerResult.status === "fulfilled" ? "PASSED" : "FAILED"
     );
     console.log(
-      '📧 Email:',
-      emailResult.status === 'fulfilled' ? 'PASSED' : 'FAILED'
+      "📧 Email:",
+      emailResult.status === "fulfilled" ? "PASSED" : "FAILED"
     );
     console.log(
-      '🔗 Webhook:',
-      webhookResult.status === 'fulfilled' ? 'PASSED' : 'FAILED'
+      "🔗 Webhook:",
+      webhookResult.status === "fulfilled" ? "PASSED" : "FAILED"
     );
     console.log(
-      '🔍 Health Check:',
-      healthResult.status === 'fulfilled' ? 'PASSED' : 'FAILED'
+      "🔍 Health Check:",
+      healthResult.status === "fulfilled" ? "PASSED" : "FAILED"
     );
 
     // 4. Show example usage
-    console.log('\n💡 Example Usage Pattern:');
-    console.log('='.repeat(30));
+    console.log("\n💡 Example Usage Pattern:");
+    console.log("=".repeat(30));
     console.log(`
 import OMX from 'omx-sdk';
 
@@ -263,8 +272,9 @@ await sdk.email.send({
 });
 `);
   } catch (error) {
-    console.error('\n❌ Integration test failed:', error.message);
-    console.error('🔍 Error details:', error.stack);
+    const err = error as any;
+    console.error("\n❌ Integration test failed:", err.message || 'Unknown error');
+    console.error("🔍 Error details:", err.stack || 'No stack trace available');
     process.exit(1);
   } finally {
     // 5. Cleanup
@@ -273,8 +283,8 @@ await sdk.email.send({
     }
   }
 
-  console.log('\n🎉 Integration test completed!');
-  console.log('📝 The OMX SDK is ready for geotrigger applications.');
+  console.log("\n🎉 Integration test completed!");
+  console.log("📝 The OMX SDK is ready for geotrigger applications.");
 }
 
 // Export for testing

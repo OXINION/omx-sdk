@@ -1,6 +1,6 @@
 {
   "name": "@omx-sdk/email",
-  "version": "2.0.0",
+  "version": "1.0.1",
   "description": "Email sending functionality for omx-sdk",
   "type": "module",
   "main": "dist/index.js",

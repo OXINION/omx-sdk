@@ -2,34 +2,8 @@
 > omx-sdk-examples@1.0.0 build /Users/brandonha/Documents/GitHub/omx-sdk/examples
 > tsc && vite build
 
-[91merror[0m[90m TS6059: [0mFile '/Users/brandonha/Documents/GitHub/omx-sdk/examples/auth-test.ts' is not under 'rootDir' '/Users/brandonha/Documents/GitHub/omx-sdk/src'. 'rootDir' is expected to contain all source files.
-  The file is in the program because:
-    Matched by include pattern '*.ts' in '/Users/brandonha/Documents/GitHub/omx-sdk/examples/tsconfig.json'
-
-  [96mtsconfig.json[0m:[93m10[0m:[93m15[0m
-    [7m10[0m   "include": ["*.ts", "*.js"],
-    [7m  [0m [96m              ~~~~~~[0m
-    File is matched by include pattern specified here.
-
-[91merror[0m[90m TS6059: [0mFile '/Users/brandonha/Documents/GitHub/omx-sdk/examples/example.ts' is not under 'rootDir' '/Users/brandonha/Documents/GitHub/omx-sdk/src'. 'rootDir' is expected to contain all source files.
-  The file is in the program because:
-    Matched by include pattern '*.ts' in '/Users/brandonha/Documents/GitHub/omx-sdk/examples/tsconfig.json'
-
-  [96mtsconfig.json[0m:[93m10[0m:[93m15[0m
-    [7m10[0m   "include": ["*.ts", "*.js"],
-    [7m  [0m [96m              ~~~~~~[0m
-    File is matched by include pattern specified here.
-
-[91merror[0m[90m TS6059: [0mFile '/Users/brandonha/Documents/GitHub/omx-sdk/examples/test-omx-integration.ts' is not under 'rootDir' '/Users/brandonha/Documents/GitHub/omx-sdk/src'. 'rootDir' is expected to contain all source files.
-  The file is in the program because:
-    Matched by include pattern '*.ts' in '/Users/brandonha/Documents/GitHub/omx-sdk/examples/tsconfig.json'
-
-  [96mtsconfig.json[0m:[93m10[0m:[93m15[0m
-    [7m10[0m   "include": ["*.ts", "*.js"],
-    [7m  [0m [96m              ~~~~~~[0m
-    File is matched by include pattern specified here.
-
-
-Found 3 errors.
-
-[41m[30m ELIFECYCLE [39m[49m [31mCommand failed with exit code 2.[39m
+[36mvite v5.4.19 [32mbuilding for production...[36m[39m
+[2K[1Gtransforming (1) [2mdemo.html[22m[2K[1G[32m✓[39m 4 modules transformed.
+[2K[1Grendering chunks (1)...[2K[1G[2K[1Gcomputing gzip size (0)...[2K[1Gcomputing gzip size (1)...[2K[1Gcomputing gzip size (2)...[2K[1G[2mdist/[22m[32mdemo.html                [39m[1m[2m 3.45 kB[22m[1m[22m[2m │ gzip: 1.04 kB[22m
+[2mdist/[22m[2massets/[22m[36mdemo-DOMKW3kW.js  [39m[1m[2m12.11 kB[22m[1m[22m[2m │ gzip: 2.73 kB[22m
+[32m✓ built in 60ms[39m

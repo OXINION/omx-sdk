@@ -1,20 +1,19 @@
 # @omx-sdk/geotrigger
 
-## 2.0.0
+## 1.0.0
 
 ### Major Changes
 
-- Initial release of OMX SDK
+- Initial release of @omx-sdk/geotrigger package
 
-  This is the first release of the modular OMX SDK with the following packages:
-  - Core authentication module with Supabase integration
-  - Email sending functionality
-  - Geotrigger/geofencing capabilities
-  - Webhook handling
-  - Beacon integration
-  - Push notification support
+Geolocation trigger functionality for the OMX SDK:
+- Create and manage geofence triggers
+- Location-based event handling
+- Coordinate system support
+- Integration with webhook events
+- Real-time location monitoring
 
 ### Patch Changes
 
 - Updated dependencies
-  - @omx-sdk/core@2.0.0
+  - @omx-sdk/core@1.0.0

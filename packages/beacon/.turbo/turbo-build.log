@@ -1,4 +1,4 @@
 
-> @omx-sdk/beacon@2.0.0 build /Users/brandonha/Documents/GitHub/omx-sdk/packages/beacon
+> @omx-sdk/beacon@1.0.1 build /Users/brandonha/Documents/GitHub/omx-sdk/packages/beacon
 > tsc --build
 

@@ -1,15 +1,16 @@
 # @omx-sdk/core
 
-## 2.0.0
+## 1.0.0
 
 ### Major Changes
 
-- Initial release of OMX SDK
+- Initial release of @omx-sdk/core package
 
-  This is the first release of the modular OMX SDK with the following packages:
-  - Core authentication module with Supabase integration
-  - Email sending functionality
-  - Geotrigger/geofencing capabilities
-  - Webhook handling
-  - Beacon integration
-  - Push notification support
+Core authentication and API functionality for the OMX SDK:
+
+- JWT token management and refresh
+- Supabase client integration
+- HTTP client with automatic authentication
+- Error handling and response management
+- TypeScript support with comprehensive type definitions
+- Environment-specific configuration support

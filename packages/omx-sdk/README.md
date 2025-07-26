@@ -23,24 +23,24 @@ This will install the main SDK along with all sub-packages:
 ### Unified SDK Usage
 
 ```typescript
-import OMX from 'omx-sdk';
+import OMX from "omx-sdk";
 
 // Create SDK instance with global configuration
 const omx = OMX({
-  apiKey: 'your-api-key',
-  baseUrl: 'https://api.oxinion.com', // optional global base URL
+  apiKey: "your-api-key",
+  baseUrl: "https://api.oxinion.com", // optional global base URL
   timeout: 10000, // optional global timeout
 
   // Service-specific overrides
   email: {
-    defaultFrom: 'noreply@yourcompany.com',
+    defaultFrom: "noreply@yourcompany.com",
   },
   beacon: {
     scanInterval: 2000,
   },
   pushNotification: {
-    vapidPublicKey: 'your-vapid-public-key',
-    serviceWorkerPath: '/custom-sw.js',
+    vapidPublicKey: "your-vapid-public-key",
+    serviceWorkerPath: "/custom-sw.js",
   },
 });
 
@@ -64,27 +64,27 @@ npm install @omx-sdk/email @omx-sdk/geotrigger
 ```
 
 ```typescript
-import { createEmailClient } from '@omx-sdk/email';
-import { createGeotrigger } from '@omx-sdk/geotrigger';
+import { createEmailClient } from "@omx-sdk/email";
+import { createGeotrigger } from "@omx-sdk/geotrigger";
 
-const emailClient = createEmailClient({ apiKey: 'your-api-key' });
-const geotrigger = createGeotrigger({ apiKey: 'your-api-key' });
+const emailClient = createEmailClient({ apiKey: "your-api-key" });
+const geotrigger = createGeotrigger({ apiKey: "your-api-key" });
 ```
 
 ## Complete Example
 
 ```typescript
-import { createOMXSDK } from 'omx-sdk';
+import { createOMXSDK } from "omx-sdk";
 
 async function main() {
   // Initialize the SDK
   const sdk = createOMXSDK({
-    apiKey: 'your-api-key',
+    apiKey: "your-api-key",
     email: {
-      defaultFrom: 'notifications@yourcompany.com',
+      defaultFrom: "notifications@yourcompany.com",
     },
     pushNotification: {
-      vapidPublicKey: 'your-vapid-public-key',
+      vapidPublicKey: "your-vapid-public-key",
     },
   });
 
@@ -93,24 +93,24 @@ async function main() {
 
   // Check health status
   const health = await sdk.healthCheck();
-  console.log('SDK Health:', health);
+  console.log("SDK Health:", health);
 
   // 1. Setup geofencing
   const geotrigger = sdk.geotrigger;
   geotrigger.addRegion({
-    id: 'store',
+    id: "store",
     center: { latitude: 37.7749, longitude: -122.4194 },
     radius: 100,
-    name: 'Store Location',
+    name: "Store Location",
   });
 
   await geotrigger.startMonitoring((event) => {
-    console.log('Geofence event:', event);
+    console.log("Geofence event:", event);
 
     // Send email notification
     sdk.email.send({
-      to: 'customer@example.com',
-      subject: 'Welcome!',
+      to: "customer@example.com",
+      subject: "Welcome!",
       body: `You've ${event.type}ed our store location.`,
     });
   });
@@ -120,38 +120,38 @@ async function main() {
   const subscription = await pushManager.subscribe();
 
   if (subscription.success) {
-    console.log('Push notifications subscribed');
+    console.log("Push notifications subscribed");
   }
 
   // 3. Setup webhook handlers
   const webhook = sdk.webhook;
-  await webhook.createSubscription('https://yourapp.com/webhook', [
-    'user.created',
-    'order.completed',
+  await webhook.createSubscription("https://yourapp.com/webhook", [
+    "user.created",
+    "order.completed",
   ]);
 
   // 4. Test webhook
-  const testResult = await webhook.testWebhook('https://yourapp.com/test');
-  console.log('Webhook test:', testResult);
+  const testResult = await webhook.testWebhook("https://yourapp.com/test");
+  console.log("Webhook test:", testResult);
 
   // 5. Setup beacon monitoring (if supported)
   const beacon = sdk.beacon;
   beacon.addRegion({
-    id: 'entrance',
-    uuid: 'B0702880-A295-A8AB-F734-031A98A512DE',
+    id: "entrance",
+    uuid: "B0702880-A295-A8AB-F734-031A98A512DE",
     major: 1,
     minor: 1,
   });
 
-  beacon.addEventListener('enter', (event) => {
-    console.log('Beacon detected:', event);
+  beacon.addEventListener("enter", (event) => {
+    console.log("Beacon detected:", event);
   });
 
   await beacon.startScanning();
 
   // Get aggregated analytics
   const analytics = sdk.getAnalytics();
-  console.log('SDK Analytics:', analytics);
+  console.log("SDK Analytics:", analytics);
 }
 
 main().catch(console.error);
@@ -182,18 +182,18 @@ interface OMXConfig {
 
 ```typescript
 const sdk = createOMXSDK({
-  apiKey: 'your-api-key',
+  apiKey: "your-api-key",
 
   // Geotrigger settings
   geotrigger: {
-    baseUrl: 'https://geo.api.oxinion.com',
+    baseUrl: "https://geo.api.oxinion.com",
     timeout: 15000,
   },
 
   // Email settings
   email: {
-    defaultFrom: 'notifications@yourcompany.com',
-    baseUrl: 'https://email.api.oxinion.com',
+    defaultFrom: "notifications@yourcompany.com",
+    baseUrl: "https://email.api.oxinion.com",
   },
 
   // Webhook settings
@@ -209,8 +209,8 @@ const sdk = createOMXSDK({
 
   // Push notification settings
   pushNotification: {
-    vapidPublicKey: 'BM...',
-    serviceWorkerPath: '/custom-sw.js',
+    vapidPublicKey: "BM...",
+    serviceWorkerPath: "/custom-sw.js",
   },
 });
 ```
@@ -221,8 +221,8 @@ const sdk = createOMXSDK({
 // Check the health of all services
 const health = await sdk.healthCheck();
 
-console.log('Overall health:', health.overall); // 'healthy' | 'degraded' | 'unhealthy'
-console.log('Service status:', health.services);
+console.log("Overall health:", health.overall); // 'healthy' | 'degraded' | 'unhealthy'
+console.log("Service status:", health.services);
 
 // Example response:
 // {
@@ -243,7 +243,7 @@ console.log('Service status:', health.services);
 // Get aggregated analytics from all services
 const analytics = sdk.getAnalytics();
 
-console.log('Analytics:', {
+console.log("Analytics:", {
   geotrigger: analytics.geotrigger.isMonitoring,
   webhook: analytics.webhook.subscriptions,
   beacon: analytics.beacon?.totalBeacons,
@@ -260,14 +260,14 @@ Location-based triggers and geofencing.
 ```typescript
 // Add geofence region
 sdk.geotrigger.addRegion({
-  id: 'office',
+  id: "office",
   center: { latitude: 37.7749, longitude: -122.4194 },
   radius: 100,
 });
 
 // Start monitoring
 await sdk.geotrigger.startMonitoring((event) => {
-  console.log('Geofence event:', event.type, event.regionId);
+  console.log("Geofence event:", event.type, event.regionId);
 });
 ```
 
@@ -278,10 +278,10 @@ Email sending with templates and bulk support.
 ```typescript
 // Send email
 await sdk.email.send({
-  to: 'user@example.com',
-  subject: 'Welcome!',
-  body: 'Thank you for signing up.',
-  html: '<h1>Welcome!</h1><p>Thank you for signing up.</p>',
+  to: "user@example.com",
+  subject: "Welcome!",
+  body: "Thank you for signing up.",
+  html: "<h1>Welcome!</h1><p>Thank you for signing up.</p>",
 });
 ```
 
@@ -291,16 +291,16 @@ Webhook management and event delivery.
 
 ```typescript
 // Create subscription
-await sdk.webhook.createSubscription('https://yourapp.com/webhook', [
-  'user.created',
-  'order.completed',
+await sdk.webhook.createSubscription("https://yourapp.com/webhook", [
+  "user.created",
+  "order.completed",
 ]);
 
 // Send webhook
 await sdk.webhook.send({
-  url: 'https://external-service.com/webhook',
-  method: 'POST',
-  data: { event: 'test', timestamp: Date.now() },
+  url: "https://external-service.com/webhook",
+  method: "POST",
+  data: { event: "test", timestamp: Date.now() },
 });
 ```
 
@@ -311,8 +311,8 @@ Bluetooth beacon detection and proximity monitoring.
 ```typescript
 // Add beacon region
 sdk.beacon.addRegion({
-  id: 'store-entrance',
-  uuid: 'B0702880-A295-A8AB-F734-031A98A512DE',
+  id: "store-entrance",
+  uuid: "B0702880-A295-A8AB-F734-031A98A512DE",
   major: 1,
 });
 
@@ -332,8 +332,8 @@ const result = await sdk.pushNotification.subscribe();
 if (result.success) {
   const subscription = await sdk.pushNotification.getSubscription();
   await sdk.pushNotification.sendNotification(subscription!, {
-    title: 'Hello!',
-    body: 'This is a test notification',
+    title: "Hello!",
+    body: "This is a test notification",
   });
 }
 ```
@@ -348,7 +348,7 @@ const config = sdk.getConfig();
 sdk.updateConfig({
   timeout: 20000,
   email: {
-    defaultFrom: 'updated@yourcompany.com',
+    defaultFrom: "updated@yourcompany.com",
   },
 });
 ```
@@ -367,13 +367,13 @@ try {
   await sdk.initialize();
 
   const health = await sdk.healthCheck();
-  if (health.overall === 'unhealthy') {
-    console.warn('Some services are not available');
+  if (health.overall === "unhealthy") {
+    console.warn("Some services are not available");
   }
 
   // Use services...
 } catch (error) {
-  console.error('SDK error:', error);
+  console.error("SDK error:", error);
 } finally {
   sdk.dispose();
 }
@@ -384,10 +384,10 @@ try {
 The SDK is built with TypeScript and provides full type definitions:
 
 ```typescript
-import { OMXSDK, OMXConfig, GeotriggerEvent } from 'omx-sdk';
+import { OMXSDK, OMXConfig, GeotriggerEvent } from "omx-sdk";
 
 const config: OMXConfig = {
-  apiKey: 'your-api-key',
+  apiKey: "your-api-key",
 };
 
 const sdk = new OMXSDK(config);
