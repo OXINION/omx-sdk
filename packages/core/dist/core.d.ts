@@ -3,6 +3,7 @@ import { ApiRequestOptions, ApiResponse, AuthConfig } from './types.js';
  * Core authentication manager for OMX SDK
  * Handles JWT token fetching, caching, and automatic refresh with Supabase Edge Function
  */
+export declare const SUPABASE_FN_BASE_URL = "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
 export declare class CoreAuth {
     private config;
     private readonly supabaseFnUrl;

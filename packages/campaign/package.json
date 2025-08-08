@@ -1,0 +1,21 @@
+{
+  "name": "@omx-sdk/campaign",
+  "version": "0.1.0",
+  "main": "index.ts",
+  "types": "src/types.ts",
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "require": "./index.ts"
+    }
+  },
+  "files": [
+    "src",
+    "index.ts"
+  ],
+  "dependencies": {
+    "@omx-sdk/core": "*",
+    "@supabase/supabase-js": "^2.50.5"
+  },
+  "license": "MIT"
+}

@@ -3,9 +3,10 @@ import { AuthenticationError, ConfigurationError, InvalidCredentialsError, Netwo
  * Core authentication manager for OMX SDK
  * Handles JWT token fetching, caching, and automatic refresh with Supabase Edge Function
  */
+export const SUPABASE_FN_BASE_URL = 'https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1';
 export class CoreAuth {
     constructor(config) {
-        this.supabaseFnUrl = 'https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1/create-jwt-token';
+        this.supabaseFnUrl = `${SUPABASE_FN_BASE_URL}/create-jwt-token`;
         this.cachedToken = null;
         this.refreshPromise = null;
         this.validateConfig(config);

@@ -70,6 +70,15 @@ importers:
         specifier: ^5.0.0
         version: 5.8.3
 
+  packages/campaign:
+    dependencies:
+      '@omx-sdk/core':
+        specifier: '*'
+        version: 1.0.1(typescript@5.8.3)
+      '@supabase/supabase-js':
+        specifier: ^2.50.5
+        version: 2.50.5
+
   packages/core:
     dependencies:
       '@supabase/supabase-js':
@@ -849,6 +858,11 @@ packages:
   '@nodelib/fs.walk@1.2.8':
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
+
+  '@omx-sdk/core@1.0.1':
+    resolution: {integrity: sha512-0yBdVDzuL+TMFvTtMNuod4RBzhpBJLR2nh5Y3YpU7pDBVIxZePoQX6AgbkjWH1kF9VCBWSSl2v2G5dVVcA7B5A==}
+    peerDependencies:
+      typescript: '>=4.5.0'
 
   '@rollup/rollup-android-arm-eabi@4.44.2':
     resolution: {integrity: sha512-g0dF8P1e2QYPOj1gu7s/3LVP6kze9A7m6x0BZ9iTdXK8N5c2V7cpBKHV3/9A4Zd8xxavdhK0t4PnqjkqVmUc9Q==}
@@ -3673,6 +3687,14 @@ snapshots:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
+
+  '@omx-sdk/core@1.0.1(typescript@5.8.3)':
+    dependencies:
+      '@supabase/supabase-js': 2.50.5
+      typescript: 5.8.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   '@rollup/rollup-android-arm-eabi@4.44.2':
     optional: true
