@@ -2,6 +2,12 @@
 
 Campaign management module for the OMX platform. Provides comprehensive CRUD operations and execution capabilities for marketing campaigns using dependency injection pattern.
 
+## Deployment
+
+```bash
+npm publish packages/campaign
+```
+
 ## ✅ Features
 
 | Feature                | Method Example                      | Description                                                          |
@@ -53,28 +59,28 @@ const campaignModule = createCampaignModule(supabase, teamId);
 ```typescript
 // Create a new campaign (calls Edge Function)
 const newCampaign = await campaignModule.createCampaign({
-	name: "Summer Sale 2024",
-	description: "Special summer promotion",
-	industry: "ecommerce",
-	target: "new-customers",
-	startDate: "2024-06-01",
-	sendTime: "10am",
-	frequency: "once",
-	fromName: "Your Store",
-	fromEmail: "hello@yourstore.com",
-	replyToEmail: "support@yourstore.com",
-	primaryGoal: "sales",
-	successMetric: "conversion-rate",
-	targetValue: "15%",
-	launchOption: "now",
-	status: "active",
+  name: "Summer Sale 2024",
+  description: "Special summer promotion",
+  industry: "ecommerce",
+  target: "new-customers",
+  startDate: "2024-06-01",
+  sendTime: "10am",
+  frequency: "once",
+  fromName: "Your Store",
+  fromEmail: "hello@yourstore.com",
+  replyToEmail: "support@yourstore.com",
+  primaryGoal: "sales",
+  successMetric: "conversion-rate",
+  targetValue: "15%",
+  launchOption: "now",
+  status: "active",
 });
 
 // List campaigns with filters (direct DB query)
 const activeCampaigns = await campaignModule.listCampaigns({
-	status: "active",
-	industry: "ecommerce",
-	search: "summer", // searches in campaign name
+  status: "active",
+  industry: "ecommerce",
+  search: "summer", // searches in campaign name
 });
 
 // Get specific campaign
@@ -82,8 +88,8 @@ const campaignDetails = await campaignModule.getCampaign("campaign-id");
 
 // Update campaign
 const updated = await campaignModule.updateCampaign("campaign-id", {
-	name: "Updated Summer Sale 2024",
-	targetValue: "20%",
+  name: "Updated Summer Sale 2024",
+  targetValue: "20%",
 });
 
 // Change campaign status
@@ -91,8 +97,8 @@ await campaignModule.updateCampaignStatus("campaign-id", "paused");
 
 // Duplicate campaign
 const duplicated = await campaignModule.duplicateCampaign(
-	"campaign-id",
-	"Winter Sale 2024"
+  "campaign-id",
+  "Winter Sale 2024"
 );
 
 // Delete campaign
@@ -119,9 +125,9 @@ console.log(stats);
 ```typescript
 // Execute a campaign (returns mock data)
 const executionResult = await campaignModule.executeCampaign("campaign-id", {
-	source: "geotrigger",
-	location: { lat: 37.5665, lng: 126.978 },
-	userId: "user-123",
+  source: "geotrigger",
+  location: { lat: 37.5665, lng: 126.978 },
+  userId: "user-123",
 });
 // Returns: { success: true, executionId: 'exec-campaign-id' }
 
@@ -136,17 +142,17 @@ const executions = await campaignModule.getCampaignExecutions("campaign-id");
 
 ```typescript
 export class CampaignClient {
-	private supabase: SupabaseClient;
-	private teamId: string;
+  private supabase: SupabaseClient;
+  private teamId: string;
 
-	constructor(supabase: SupabaseClient, teamId: string) {
-		this.supabase = supabase;
-		this.teamId = teamId;
-	}
+  constructor(supabase: SupabaseClient, teamId: string) {
+    this.supabase = supabase;
+    this.teamId = teamId;
+  }
 
-	// All methods automatically filter by teamId
-	// CREATE operations use Edge Functions
-	// READ/UPDATE/DELETE use direct Supabase queries
+  // All methods automatically filter by teamId
+  // CREATE operations use Edge Functions
+  // READ/UPDATE/DELETE use direct Supabase queries
 }
 ```
 
@@ -154,10 +160,10 @@ export class CampaignClient {
 
 ```typescript
 export function createCampaignModule(
-	supabase: SupabaseClient,
-	teamId?: string
+  supabase: SupabaseClient,
+  teamId?: string
 ): CampaignClient {
-	return new CampaignClient(supabase, teamId ?? "");
+  return new CampaignClient(supabase, teamId ?? "");
 }
 ```
 
@@ -168,9 +174,9 @@ export function createCampaignModule(
 ```typescript
 // Calls SUPABASE_FN_BASE_URL/campaign-create
 const response = await fetch(`${SUPABASE_FN_BASE_URL}/campaign-create`, {
-	method: "POST",
-	headers: { "Content-Type": "application/json" },
-	body: JSON.stringify({ ...data, teamId: this.teamId }),
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ ...data, teamId: this.teamId }),
 });
 ```
 
@@ -179,9 +185,9 @@ const response = await fetch(`${SUPABASE_FN_BASE_URL}/campaign-create`, {
 ```typescript
 // Direct Supabase query with automatic team filtering
 const { data } = await this.supabase
-	.from("business.campaigns")
-	.select("*")
-	.eq("team_id", this.teamId); // Auto-filtered by team
+  .from("business.campaigns")
+  .select("*")
+  .eq("team_id", this.teamId); // Auto-filtered by team
 ```
 
 ## 📁 Module Structure
@@ -210,10 +216,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 ```typescript
 import {
-	CampaignData,
-	CampaignUpdateData,
-	CampaignFilters,
-	CampaignStats,
+  CampaignData,
+  CampaignUpdateData,
+  CampaignFilters,
+  CampaignStats,
 } from "./types";
 ```
 
@@ -272,38 +278,38 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 serve(async (req) => {
-	try {
-		const { teamId, ...campaignData } = await req.json();
+  try {
+    const { teamId, ...campaignData } = await req.json();
 
-		const supabase = createClient(
-			Deno.env.get("SUPABASE_URL") ?? "",
-			Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-		);
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
 
-		const { data, error } = await supabase
-			.from("business.campaigns")
-			.insert([
-				{
-					...campaignData,
-					team_id: teamId,
-					created_at: new Date().toISOString(),
-					updated_at: new Date().toISOString(),
-				},
-			])
-			.select()
-			.single();
+    const { data, error } = await supabase
+      .from("business.campaigns")
+      .insert([
+        {
+          ...campaignData,
+          team_id: teamId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ])
+      .select()
+      .single();
 
-		if (error) throw error;
+    if (error) throw error;
 
-		return new Response(JSON.stringify(data), {
-			headers: { "Content-Type": "application/json" },
-		});
-	} catch (error) {
-		return new Response(JSON.stringify({ error: error.message }), {
-			status: 400,
-			headers: { "Content-Type": "application/json" },
-		});
-	}
+    return new Response(JSON.stringify(data), {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 });
 ```
 
@@ -330,10 +336,10 @@ All methods throw descriptive errors:
 
 ```typescript
 try {
-	const campaign = await campaignModule.createCampaign(data);
+  const campaign = await campaignModule.createCampaign(data);
 } catch (error) {
-	console.error("Campaign creation failed:", error.message);
-	// Handle error appropriately
+  console.error("Campaign creation failed:", error.message);
+  // Handle error appropriately
 }
 ```
 

@@ -5,11 +5,8 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "omx-sdk": ["../packages/omx-sdk/dist"]
-    },
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true
+      "omx-sdk": ["../packages/omx-sdk/src"]
+    }
   },
   "include": ["*.ts", "*.js"],
   "exclude": ["node_modules", "dist"]

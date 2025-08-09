@@ -6,9 +6,11 @@
 
 - Initial release of @omx-sdk/beacon package
 
-Bluetooth beacon functionality for the OMX SDK:
-- Bluetooth Low Energy beacon detection
+Bluetooth beacon integration for the OMX SDK:
+
+- BLE device detection and management
 - iBeacon and Eddystone support
-- Proximity-based triggers
-- Background scanning capabilities
-- Integration with location services
+- Proximity monitoring
+- Real-time beacon scanning
+- TypeScript support with comprehensive type definitions
+- Cross-platform compatibility

@@ -47,6 +47,6 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@omx-sdk/core": "workspace:^"
+    "@omx-sdk/core": "1.0.1"
   }
 }

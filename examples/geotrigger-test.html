@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GeoTrigger API Test</title>
-    <!-- Load Supabase from CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <!-- No Supabase CDN needed - using Edge Functions only -->
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -78,39 +77,34 @@
     </div>
 
     <script type="module">
-      // Browser-only implementation using CDN Supabase
-      const { createClient } = supabase;
+      // Secure Edge Function-only implementation (no CDN dependencies)
 
       // Global variables
-      window.omxClient = null;
-      window.supabaseClient = null;
       window.jwtToken = null;
 
-      // Load environment variables
+      // Load environment variables (secure approach - no anon key exposed)
       const env = {
-        clientId: 'f7b294c9-12d1-477b-b454-552dedd28de3',
-        secretKey: '87654321-4321-4321-4321-987654321cba',
-        baseUrl: 'https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1',
-        supabaseUrl: 'https://blhilidnsybhfdmwqsrx.supabase.co',
-        supabaseAnonKey:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c',
+        clientId: "f7b294c9-12d1-477b-b454-552dedd28de3",
+        secretKey: "87654321-4321-4321-4321-987654321cba",
+        baseUrl: "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1",
+        supabaseUrl: "https://blhilidnsybhfdmwqsrx.supabase.co",
+        // No supabaseAnonKey needed - we use Edge Functions with clientId/secretKey
       };
 
       // Initialize SDK function
       window.initSDK = async function () {
-        const resultDiv = document.getElementById('auth-result');
-        resultDiv.textContent = 'Initializing...';
-        resultDiv.className = 'result loading';
+        const resultDiv = document.getElementById("auth-result");
+        resultDiv.textContent = "Initializing...";
+        resultDiv.className = "result loading";
 
         try {
-          // 1. Fetch JWT token
-          console.log('🔑 Fetching JWT token...');
+          // 1. Fetch JWT token via Edge Function (secure authentication)
+          console.log("🔑 Fetching JWT token via Edge Function...");
           const response = await fetch(`${env.baseUrl}/create-jwt-token`, {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${env.supabaseAnonKey}`,
-              apikey: env.supabaseAnonKey,
+              "Content-Type": "application/json",
+              // No Authorization header needed for Edge Function
             },
             body: JSON.stringify({
               clientId: env.clientId,
@@ -126,98 +120,76 @@
 
           const data = await response.json();
           window.jwtToken = data.token;
-          console.log('✅ JWT token fetched successfully');
-          console.log('🔍 JWT Token:', window.jwtToken);
+          console.log("✅ JWT token fetched successfully");
+          console.log("🔍 JWT Token length:", window.jwtToken.length);
 
-          // JWT 토큰 구조 분석
-          const tokenParts = window.jwtToken.split('.');
-          console.log('🔍 JWT Parts:', tokenParts.length);
-
-          // JWT 토큰이 올바르지 않으면 anon key를 사용
-          if (tokenParts.length !== 3 || tokenParts[2] === 'signature') {
-            console.warn(
-              '⚠️ Invalid JWT token detected, using anon key instead'
-            );
-            window.jwtToken = env.supabaseAnonKey;
-            console.log('🔄 Using anon key as JWT token');
-          } else {
-            // 유효한 JWT 토큰인 경우 디코딩 시도
-            try {
-              const header = JSON.parse(atob(tokenParts[0]));
-              const payload = JSON.parse(atob(tokenParts[1] + '=='));
-              console.log('🔍 JWT Header:', header);
-              console.log('🔍 JWT Payload:', payload);
-              console.log('🔍 JWT Signature length:', tokenParts[2].length);
-            } catch (e) {
-              console.error(
-                '❌ Failed to decode JWT parts, using anon key instead:',
-                e
-              );
-              window.jwtToken = env.supabaseAnonKey;
-            }
+          // Validate JWT token structure
+          const tokenParts = window.jwtToken.split(".");
+          if (tokenParts.length !== 3) {
+            throw new Error("Invalid JWT token format received");
           }
 
-          // 2. Initialize Supabase client (기본 설정)
-          window.supabaseClient = createClient(
-            env.supabaseUrl,
-            env.supabaseAnonKey
-          );
+          // Decode JWT payload for validation
+          try {
+            const header = JSON.parse(atob(tokenParts[0]));
+            const payload = JSON.parse(atob(tokenParts[1] + "=="));
+            console.log("🔍 JWT Header:", header);
+            console.log("🔍 JWT Payload:", payload);
+            console.log("✅ JWT token is valid");
+          } catch (e) {
+            throw new Error("Failed to decode JWT token");
+          }
 
-          console.log('✅ Supabase client initialized with JWT token');
+          // 2. No direct Supabase client needed - use JWT for API calls
+          console.log("✅ Ready to make authenticated API calls with JWT");
 
-          resultDiv.textContent = '✅ SDK initialized successfully!';
-          resultDiv.className = 'result success';
+          resultDiv.textContent =
+            "✅ SDK initialized successfully with JWT authentication!";
+          resultDiv.className = "result success";
         } catch (error) {
-          console.error('❌ SDK initialization failed:', error);
+          console.error("❌ SDK initialization failed:", error);
           resultDiv.textContent = `❌ Error: ${error.message}`;
-          resultDiv.className = 'result error';
+          resultDiv.className = "result error";
         }
       };
 
       // Create GeoTrigger function
       window.createGeoTrigger = async function () {
-        if (!window.supabaseClient || !window.jwtToken) {
-          alert('Please initialize SDK first');
+        if (!window.jwtToken) {
+          alert("Please initialize SDK first");
           return;
         }
 
-        const resultDiv = document.getElementById('create-result');
-        resultDiv.textContent = 'Creating geotrigger...';
-        resultDiv.className = 'result loading';
+        const resultDiv = document.getElementById("create-result");
+        resultDiv.textContent = "Creating geotrigger...";
+        resultDiv.className = "result loading";
 
         try {
           const triggerData = {
             name: `Test Location ${Date.now()}`,
             coordinates: `POINT(127.0276 37.4979)`, // PostGIS format
             radius: 100,
-            event_type: 'enter',
-            event_payload: { message: 'Welcome to Seoul!' },
-            status: 'active',
+            event_type: "enter",
+            event_payload: { message: "Welcome to Seoul!" },
+            status: "active",
             created_at: new Date().toISOString(),
           };
 
-          console.log('🌍 Creating geotrigger:', triggerData);
+          console.log("🌍 Creating geotrigger:", triggerData);
 
-          // REST API 직접 호출로 JWT 토큰 전달
-          const response = await fetch(
-            `${env.supabaseUrl}/rest/v1/geotriggers`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${window.jwtToken}`,
-                apikey: env.supabaseAnonKey,
-                'Content-Profile': 'omx',
-                'Accept-Profile': 'omx',
-                Prefer: 'return=representation',
-              },
-              body: JSON.stringify(triggerData),
-            }
-          );
+          // Use Edge Function for secure geotrigger creation
+          const response = await fetch(`${env.baseUrl}/geotrigger-create`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${window.jwtToken}`,
+            },
+            body: JSON.stringify(triggerData),
+          });
 
           if (!response.ok) {
             const errorData = await response.text();
-            console.error('❌ Failed to create geotrigger:', errorData);
+            console.error("❌ Failed to create geotrigger:", errorData);
             throw new Error(
               `Failed to create geotrigger: ${response.statusText} - ${errorData}`
             );
@@ -226,46 +198,43 @@
           const data = await response.json();
           const geotrigger = Array.isArray(data) ? data[0] : data;
 
-          console.log('✅ GeoTrigger created:', geotrigger);
+          console.log("✅ GeoTrigger created:", geotrigger);
           resultDiv.textContent = `✅ Created: ${JSON.stringify(geotrigger, null, 2)}`;
-          resultDiv.className = 'result success';
+          resultDiv.className = "result success";
         } catch (error) {
-          console.error('❌ Create failed:', error);
+          console.error("❌ Create failed:", error);
           resultDiv.textContent = `❌ Error: ${error.message}`;
-          resultDiv.className = 'result error';
+          resultDiv.className = "result error";
         }
       };
 
       // List GeoTriggers function
       window.listGeoTriggers = async function () {
-        if (!window.supabaseClient || !window.jwtToken) {
-          alert('Please initialize SDK first');
+        if (!window.jwtToken) {
+          alert("Please initialize SDK first");
           return;
         }
 
-        const resultDiv = document.getElementById('list-result');
-        resultDiv.textContent = 'Fetching geotriggers...';
-        resultDiv.className = 'result loading';
+        const resultDiv = document.getElementById("list-result");
+        resultDiv.textContent = "Fetching geotriggers...";
+        resultDiv.className = "result loading";
 
         try {
-          console.log('📋 Fetching all geotriggers...');
+          console.log("📋 Fetching all geotriggers...");
 
-          const response = await fetch(
-            `${env.supabaseUrl}/rest/v1/geotriggers?order=created_at.desc`,
-            {
-              method: 'GET',
-              headers: {
-                Authorization: `Bearer ${window.jwtToken}`,
-                apikey: env.supabaseAnonKey,
-                'Content-Profile': 'omx',
-                'Accept-Profile': 'omx',
-              },
-            }
-          );
+          // Use Edge Function for secure geotrigger listing
+          const response = await fetch(`${env.baseUrl}/geotrigger-list`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${window.jwtToken}`,
+            },
+            body: JSON.stringify({}), // Empty filters for now
+          });
 
           if (!response.ok) {
             const errorData = await response.text();
-            console.error('❌ Failed to fetch geotriggers:', errorData);
+            console.error("❌ Failed to fetch geotriggers:", errorData);
             throw new Error(
               `Failed to fetch geotriggers: ${response.statusText} - ${errorData}`
             );
@@ -273,64 +242,61 @@
 
           const data = await response.json();
 
-          console.log('✅ GeoTriggers listed:', data);
+          console.log("✅ GeoTriggers listed:", data);
           resultDiv.textContent = `✅ Found ${data?.length || 0} geotriggers:\n${JSON.stringify(data, null, 2)}`;
-          resultDiv.className = 'result success';
+          resultDiv.className = "result success";
         } catch (error) {
-          console.error('❌ List failed:', error);
+          console.error("❌ List failed:", error);
           resultDiv.textContent = `❌ Error: ${error.message}`;
-          resultDiv.className = 'result error';
+          resultDiv.className = "result error";
         }
       };
 
       // Delete GeoTrigger function
       window.deleteGeoTrigger = async function () {
-        if (!window.supabaseClient || !window.jwtToken) {
-          alert('Please initialize SDK first');
+        if (!window.jwtToken) {
+          alert("Please initialize SDK first");
           return;
         }
 
-        const id = document.getElementById('deleteId').value;
+        const id = document.getElementById("deleteId").value;
         if (!id) {
-          alert('Please enter a GeoTrigger ID');
+          alert("Please enter a GeoTrigger ID");
           return;
         }
 
-        const resultDiv = document.getElementById('delete-result');
-        resultDiv.textContent = 'Deleting geotrigger...';
-        resultDiv.className = 'result loading';
+        const resultDiv = document.getElementById("delete-result");
+        resultDiv.textContent = "Deleting geotrigger...";
+        resultDiv.className = "result loading";
 
         try {
-          console.log('🗑️ Deleting geotrigger:', id);
+          console.log("🗑️ Deleting geotrigger:", id);
 
-          const response = await fetch(
-            `${env.supabaseUrl}/rest/v1/geotriggers?id=eq.${id}`,
-            {
-              method: 'DELETE',
-              headers: {
-                Authorization: `Bearer ${window.jwtToken}`,
-                apikey: env.supabaseAnonKey,
-                'Content-Profile': 'omx',
-                'Accept-Profile': 'omx',
-              },
-            }
-          );
+          // Use Edge Function for secure geotrigger deletion
+          const response = await fetch(`${env.baseUrl}/geotrigger-delete`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${window.jwtToken}`,
+            },
+            body: JSON.stringify({ id: id }),
+          });
 
           if (!response.ok) {
             const errorData = await response.text();
-            console.error('❌ Failed to delete geotrigger:', errorData);
+            console.error("❌ Failed to delete geotrigger:", errorData);
             throw new Error(
               `Failed to delete geotrigger: ${response.statusText} - ${errorData}`
             );
           }
 
-          console.log('✅ GeoTrigger deleted:', id);
+          console.log("✅ GeoTrigger deleted:", id);
           resultDiv.textContent = `✅ Deleted geotrigger with ID: ${id}`;
-          resultDiv.className = 'result success';
+          resultDiv.className = "result success";
         } catch (error) {
-          console.error('❌ Delete failed:', error);
+          console.error("❌ Delete failed:", error);
           resultDiv.textContent = `❌ Error: ${error.message}`;
-          resultDiv.className = 'result error';
+          resultDiv.className = "result error";
         }
       };
     </script>

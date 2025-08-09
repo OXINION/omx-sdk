@@ -1,21 +1,45 @@
 {
   "name": "@omx-sdk/campaign",
-  "version": "0.1.0",
-  "main": "index.ts",
-  "types": "src/types.ts",
+  "version": "1.0.1",
+  "description": "Campaign management module for OMX SDK",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./index.ts",
-      "require": "./index.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "files": [
-    "src",
-    "index.ts"
+    "dist"
   ],
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts",
+    "type-check": "tsc --noEmit"
+  },
   "dependencies": {
-    "@omx-sdk/core": "*",
+    "@omx-sdk/core": "1.0.1",
     "@supabase/supabase-js": "^2.50.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oxinion/omx-sdk.git",
+    "directory": "packages/campaign"
+  },
+  "bugs": {
+    "url": "https://github.com/oxinion/omx-sdk/issues"
   },
   "license": "MIT"
 }

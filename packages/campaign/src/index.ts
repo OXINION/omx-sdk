@@ -1,129 +1,133 @@
-import {
-	CampaignData,
-	CampaignUpdateData,
-	CampaignFilters,
-	CampaignStats,
-} from "./types";
+import type {
+  CampaignData,
+  CampaignFilters,
+  CampaignStats,
+  CampaignUpdateData,
+} from "./types.js";
 
 import { SUPABASE_FN_BASE_URL } from "@omx-sdk/core";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
 export class CampaignClient {
-	private supabase: SupabaseClient;
-	private teamId: string;
+  private clientId: string;
+  private secretKey: string;
+  private teamId: string;
+  private authToken: string | null = null;
 
-	constructor(supabase: SupabaseClient, teamId: string) {
-		this.supabase = supabase;
-		this.teamId = teamId;
-	}
+  constructor(config: {
+    clientId: string;
+    secretKey: string;
+    teamId?: string;
+  }) {
+    this.clientId = config.clientId;
+    this.secretKey = config.secretKey;
+    this.teamId = config.teamId || `team-${Date.now()}`;
+  }
 
-	async createCampaign(data: CampaignData): Promise<CampaignData> {
-		// Edge Function 호출 방식으로 변경
-		const response = await fetch(`${SUPABASE_FN_BASE_URL}/campaign-create`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ ...data, teamId: this.teamId }),
-		});
-		if (!response.ok) throw new Error("Failed to create campaign");
-		return await response.json();
-	}
+  private async getAuthToken(): Promise<string> {
+    if (!this.authToken) {
+      const response = await fetch(`${SUPABASE_FN_BASE_URL}/create-jwt-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: this.clientId,
+          secretKey: this.secretKey,
+        }),
+      });
 
-	async listCampaigns(filters: CampaignFilters = {}): Promise<CampaignData[]> {
-		let query = this.supabase
-			.from("business.campaigns")
-			.select("*")
-			.eq("team_id", this.teamId);
-		if (filters.status) query = query.eq("status", filters.status);
-		if (filters.industry) query = query.eq("industry", filters.industry);
-		if (filters.search) query = query.ilike("name", `%${filters.search}%`);
-		const { data, error } = await query;
-		if (error) throw new Error(error.message);
-		return data;
-	}
+      if (!response.ok) {
+        throw new Error(`Authentication failed: ${response.statusText}`);
+      }
 
-	async getCampaign(id: string): Promise<CampaignData> {
-		const { data, error } = await this.supabase
-			.from("business.campaigns")
-			.select("*")
-			.eq("id", id)
-			.single();
-		if (error) throw new Error(error.message);
-		return data;
-	}
+      const data = await response.json();
+      this.authToken = data.token;
+    }
+    return this.authToken!;
+  }
 
-	async updateCampaign(
-		id: string,
-		updates: CampaignUpdateData
-	): Promise<CampaignData> {
-		const { data, error } = await this.supabase
-			.from("business.campaigns")
-			.update(updates)
-			.eq("id", id)
-			.select()
-			.single();
-		if (error) throw new Error(error.message);
-		return data;
-	}
+  private async makeRequest(endpoint: string, data: any = {}): Promise<any> {
+    const token = await this.getAuthToken();
 
-	async deleteCampaign(id: string): Promise<void> {
-		const { error } = await this.supabase
-			.from("business.campaigns")
-			.delete()
-			.eq("id", id);
-		if (error) throw new Error(error.message);
-	}
+    const response = await fetch(`${SUPABASE_FN_BASE_URL}/${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ ...data, teamId: this.teamId }),
+    });
 
-	async updateCampaignStatus(id: string, status: string): Promise<void> {
-		const { error } = await this.supabase
-			.from("business.campaigns")
-			.update({ status })
-			.eq("id", id);
-		if (error) throw new Error(error.message);
-	}
+    if (!response.ok) {
+      throw new Error(`${endpoint} failed: ${response.statusText}`);
+    }
 
-	async duplicateCampaign(id: string, newName?: string): Promise<CampaignData> {
-		const original = await this.getCampaign(id);
-		const copy = {
-			...original,
-			id: undefined,
-			name: newName || `${original.name} (Copy)`,
-		};
-		return this.createCampaign(copy);
-	}
+    return await response.json();
+  }
 
-	async getCampaignStats(): Promise<CampaignStats> {
-		const { data, error } = await this.supabase
-			.from("business.campaigns")
-			.select("status", { count: "exact", head: false });
-		if (error) throw new Error(error.message);
-		const stats: CampaignStats = {
-			totalCampaigns: data.length,
-			activeCampaigns: data.filter((c: any) => c.status === "active").length,
-			draftCampaigns: data.filter((c: any) => c.status === "draft").length,
-			completedCampaigns: data.filter((c: any) => c.status === "completed")
-				.length,
-		};
-		return stats;
-	}
+  async createCampaign(data: CampaignData): Promise<CampaignData> {
+    return this.makeRequest("campaign-create", data);
+  }
 
-	async executeCampaign(id: string, _triggerData?: any): Promise<any> {
-		// This would call an Edge Function or similar
-		// Placeholder: just return a mock result
-		return { success: true, executionId: `exec-${id}` };
-	}
+  async listCampaigns(filters: CampaignFilters = {}): Promise<CampaignData[]> {
+    return this.makeRequest("campaign-list", { filters });
+  }
 
-	async getCampaignExecutions(_id: string): Promise<any[]> {
-		// Placeholder: would fetch from executions table/log
-		return [];
-	}
+  async getCampaign(id: string): Promise<CampaignData> {
+    return this.makeRequest("campaign-get", { id });
+  }
+
+  async updateCampaign(
+    id: string,
+    updates: CampaignUpdateData
+  ): Promise<CampaignData> {
+    return this.makeRequest("campaign-update", { id, updates });
+  }
+
+  async deleteCampaign(id: string): Promise<void> {
+    return this.makeRequest("campaign-delete", { id });
+  }
+
+  async updateCampaignStatus(id: string, status: string): Promise<void> {
+    return this.makeRequest("campaign-update-status", { id, status });
+  }
+
+  async duplicateCampaign(id: string, newName?: string): Promise<CampaignData> {
+    return this.makeRequest("campaign-duplicate", { id, newName });
+  }
+
+  async getCampaignStats(): Promise<CampaignStats> {
+    return this.makeRequest("campaign-stats", {});
+  }
+
+  async executeCampaign(id: string, triggerData?: any): Promise<any> {
+    return this.makeRequest("campaign-execute", { id, triggerData });
+  }
+
+  async getCampaignExecutions(id: string): Promise<any[]> {
+    return this.makeRequest("campaign-executions", { id });
+  }
+
+  // Public authentication method for testing
+  async authenticate(): Promise<string> {
+    return this.getAuthToken();
+  }
 }
 
-// 엔트리포인트: core에서 import할 수 있도록 factory 함수 제공
-export function createCampaignModule(
-	supabase: SupabaseClient,
-	teamId?: string
-) {
-	return new CampaignClient(supabase, teamId ?? "");
+// Factory 함수: clientId/secretKey 기반으로 Campaign Client 생성
+export function createCampaignClient(config: {
+  clientId: string;
+  secretKey: string;
+  teamId?: string;
+}) {
+  return new CampaignClient(config);
+}
+
+// Legacy 호환성을 위한 factory 함수 (deprecated)
+export function createCampaignModule(config: {
+  clientId: string;
+  secretKey: string;
+  teamId?: string;
+}) {
+  return new CampaignClient(config);
 }
 
 export * from "./types";

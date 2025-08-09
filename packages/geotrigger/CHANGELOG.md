@@ -7,13 +7,10 @@
 - Initial release of @omx-sdk/geotrigger package
 
 Geolocation trigger functionality for the OMX SDK:
-- Create and manage geofence triggers
-- Location-based event handling
-- Coordinate system support
-- Integration with webhook events
-- Real-time location monitoring
 
-### Patch Changes
-
-- Updated dependencies
-  - @omx-sdk/core@1.0.0
+- Geofence creation and management
+- Location monitoring and tracking
+- Real-time position updates
+- Webhook integration for location events
+- TypeScript support with comprehensive type definitions
+- Cross-platform compatibility

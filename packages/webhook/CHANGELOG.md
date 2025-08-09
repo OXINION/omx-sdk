@@ -6,14 +6,11 @@
 
 - Initial release of @omx-sdk/webhook package
 
-Webhook functionality for the OMX SDK:
-- Subscribe to event notifications
-- Webhook endpoint management
-- Event filtering and routing
-- Secure payload delivery
-- Integration with geotrigger events
+Webhook handling and event routing for the OMX SDK:
 
-### Patch Changes
-
-- Updated dependencies
-  - @omx-sdk/core@1.0.0
+- Event subscription management
+- Payload delivery and processing
+- Security and authentication
+- Real-time event notifications
+- TypeScript support with comprehensive type definitions
+- Scalable webhook infrastructure

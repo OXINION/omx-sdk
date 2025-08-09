@@ -7,6 +7,7 @@
 - Initial release of the unified omx-sdk package
 
 Complete SDK package that combines all OMX functionality:
+
 - Unified API for all services
 - Authentication management
 - Geotrigger capabilities

@@ -51,11 +51,11 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@omx-sdk/core": "workspace:^",
-    "@omx-sdk/geotrigger": "workspace:^",
-    "@omx-sdk/email": "workspace:^",
-    "@omx-sdk/webhook": "workspace:^",
-    "@omx-sdk/beacon": "workspace:^",
-    "@omx-sdk/push-notification": "workspace:^"
+    "@omx-sdk/core": "1.0.1",
+    "@omx-sdk/geotrigger": "1.0.1",
+    "@omx-sdk/email": "1.0.1",
+    "@omx-sdk/webhook": "1.0.1",
+    "@omx-sdk/beacon": "1.0.1",
+    "@omx-sdk/push-notification": "1.0.1"
   }
 }

@@ -6,14 +6,11 @@
 
 - Initial release of @omx-sdk/email package
 
-Email functionality for the OMX SDK:
-- Send transactional emails
-- Template support
+Email sending functionality for the OMX SDK:
+
+- Transactional email sending
+- Template support and management
 - Attachment handling
-- HTML and plain text content
-- Integration with authentication system
-
-### Patch Changes
-
-- Updated dependencies
-  - @omx-sdk/core@1.0.0
+- Email validation and verification
+- TypeScript support with comprehensive type definitions
+- Multiple provider integration

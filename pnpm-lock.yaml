@@ -38,6 +38,9 @@ importers:
 
   examples:
     dependencies:
+      '@supabase/supabase-js':
+        specifier: ^2.50.5
+        version: 2.50.5
       omx-sdk:
         specifier: workspace:*
         version: link:../packages/omx-sdk
@@ -73,11 +76,24 @@ importers:
   packages/campaign:
     dependencies:
       '@omx-sdk/core':
-        specifier: '*'
+        specifier: 1.0.1
         version: 1.0.1(typescript@5.8.3)
       '@supabase/supabase-js':
         specifier: ^2.50.5
         version: 2.50.5
+    devDependencies:
+      '@types/jest':
+        specifier: ^29.0.0
+        version: 29.5.14
+      jest:
+        specifier: ^29.0.0
+        version: 29.7.0(@types/node@24.0.12)
+      ts-jest:
+        specifier: ^29.0.0
+        version: 29.4.0(@babel/core@7.28.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.28.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@24.0.12))(typescript@5.8.3)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
 
   packages/core:
     dependencies:
@@ -119,8 +135,8 @@ importers:
   packages/geotrigger:
     dependencies:
       '@omx-sdk/core':
-        specifier: workspace:^
-        version: link:../core
+        specifier: 1.0.1
+        version: 1.0.1(typescript@5.8.3)
     devDependencies:
       '@types/jest':
         specifier: ^29.0.0
@@ -138,23 +154,23 @@ importers:
   packages/omx-sdk:
     dependencies:
       '@omx-sdk/beacon':
-        specifier: workspace:^
-        version: link:../beacon
+        specifier: 1.0.1
+        version: 1.0.1
       '@omx-sdk/core':
-        specifier: workspace:^
-        version: link:../core
+        specifier: 1.0.1
+        version: 1.0.1(typescript@5.8.3)
       '@omx-sdk/email':
-        specifier: workspace:^
-        version: link:../email
+        specifier: 1.0.1
+        version: 1.0.1
       '@omx-sdk/geotrigger':
-        specifier: workspace:^
-        version: link:../geotrigger
+        specifier: 1.0.1
+        version: 1.0.1
       '@omx-sdk/push-notification':
-        specifier: workspace:^
-        version: link:../push-notification
+        specifier: 1.0.1
+        version: 1.0.1
       '@omx-sdk/webhook':
-        specifier: workspace:^
-        version: link:../webhook
+        specifier: 1.0.1
+        version: 1.0.1
     devDependencies:
       '@types/jest':
         specifier: ^29.0.0
@@ -859,10 +875,25 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
+  '@omx-sdk/beacon@1.0.1':
+    resolution: {integrity: sha512-lk4ltzD7E3Iu3Co8pEoam8J754j49A+zGyDIY9tEZIVZQNEM0SGN9E3Y7IHFde/rGaNGvTbN6WvrhtLnKXXsng==}
+
   '@omx-sdk/core@1.0.1':
     resolution: {integrity: sha512-0yBdVDzuL+TMFvTtMNuod4RBzhpBJLR2nh5Y3YpU7pDBVIxZePoQX6AgbkjWH1kF9VCBWSSl2v2G5dVVcA7B5A==}
     peerDependencies:
       typescript: '>=4.5.0'
+
+  '@omx-sdk/email@1.0.1':
+    resolution: {integrity: sha512-KZvgPJ1lE9nxeZee9grkvccENmYjsS+BgoeEF1BvSYslStFwuuctsNpUVZSv21ZX6ymfQtN5YrdWOUiZWVEm4w==}
+
+  '@omx-sdk/geotrigger@1.0.1':
+    resolution: {integrity: sha512-tRDlR/LgatL4uOXH2MFbXfDxKvl+0GSswHTnhfYl/xuM35cvITPZBWIyqf9Kz9UbG+0UmF0O2LK9+tD4Y84gQw==}
+
+  '@omx-sdk/push-notification@1.0.1':
+    resolution: {integrity: sha512-HfPtUNP751wcVeZXvgWN0/hoqCcUFlG1cfpbMHn/FQC9d4jMmZpZ9RpgaQqnXsi62//pYNw6twU1WCPghSdj/Q==}
+
+  '@omx-sdk/webhook@1.0.1':
+    resolution: {integrity: sha512-6LcX9ZGyKVPVg5UmbcHsH8mOo1iRmmC0rO33kZ3Mx91yOtJw5uLxyeEIjW48OJA/Qw5C9p/8LyNtf96VSFTOog==}
 
   '@rollup/rollup-android-arm-eabi@4.44.2':
     resolution: {integrity: sha512-g0dF8P1e2QYPOj1gu7s/3LVP6kze9A7m6x0BZ9iTdXK8N5c2V7cpBKHV3/9A4Zd8xxavdhK0t4PnqjkqVmUc9Q==}
@@ -3688,6 +3719,8 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
 
+  '@omx-sdk/beacon@1.0.1': {}
+
   '@omx-sdk/core@1.0.1(typescript@5.8.3)':
     dependencies:
       '@supabase/supabase-js': 2.50.5
@@ -3695,6 +3728,16 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+
+  '@omx-sdk/email@1.0.1': {}
+
+  '@omx-sdk/geotrigger@1.0.1':
+    dependencies:
+      '@omx-sdk/core': link:packages/core
+
+  '@omx-sdk/push-notification@1.0.1': {}
+
+  '@omx-sdk/webhook@1.0.1': {}
 
   '@rollup/rollup-android-arm-eabi@4.44.2':
     optional: true

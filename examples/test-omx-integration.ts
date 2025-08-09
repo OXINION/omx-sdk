@@ -3,7 +3,7 @@
  * Tests the unified SDK with real authentication and geotrigger functionality
  */
 
-import OMX from 'omx-sdk';
+import OMX from "omx-sdk";
 
 // Test configuration
 const config = {
@@ -30,12 +30,8 @@ async function testOMXInitialization() {
     console.log("📦 Available services:", Object.keys(sdk));
 
     return sdk;
-  } catch (error) {
-    const err = error as any;
-    console.error(
-      "❌ OMX SDK initialization failed:",
-      err.message || "Unknown error"
-    );
+  } catch (error: any) {
+    console.error("❌ OMX SDK initialization failed:", error.message);
     throw error;
   }
 }
@@ -76,9 +72,8 @@ async function testGeotrigger(sdk: any) {
     });
 
     return trigger;
-  } catch (error) {
-    const err = error as any;
-    console.error("❌ Geotrigger test failed:", err.message || 'Unknown error');
+  } catch (error: any) {
+    console.error("❌ Geotrigger test failed:", error.message);
     // Don't throw here, just log the error
     return null;
   }
@@ -119,9 +114,8 @@ async function testEmail(sdk: any) {
     console.log("📨 Email result:", result);
 
     return result;
-  } catch (error) {
-    const err = error as any;
-    console.error("❌ Email test failed:", err.message || 'Unknown error');
+  } catch (error: any) {
+    console.error("❌ Email test failed:", error.message);
     return null;
   }
 }
@@ -150,9 +144,8 @@ async function testWebhook(sdk: any) {
     console.log("🔔 Subscription details:", subscription);
 
     return subscription;
-  } catch (error) {
-    const err = error as any;
-    console.error("❌ Webhook test failed:", err.message || 'Unknown error');
+  } catch (error: any) {
+    console.error("❌ Webhook test failed:", error.message);
     return null;
   }
 }
@@ -172,10 +165,9 @@ async function testSDKHealth(sdk: any) {
       console.log("ℹ️ Health check not available");
       return { status: "unknown" };
     }
-  } catch (error) {
-    const err = error as any;
-    console.error("❌ Health check failed:", err.message || 'Unknown error');
-    return { status: "error", error: err.message || 'Unknown error' };
+  } catch (error: any) {
+    console.error("❌ Health check failed:", error.message);
+    return { status: "error", error: error.message };
   }
 }
 
@@ -190,9 +182,8 @@ async function cleanup(sdk: any) {
       await sdk.dispose();
       console.log("✅ SDK disposed successfully");
     }
-  } catch (error) {
-    const err = error as any;
-    console.error("⚠️ Cleanup warning:", err.message || 'Unknown error');
+  } catch (error: any) {
+    console.error("⚠️ Cleanup warning:", error.message);
   }
 }
 
@@ -271,10 +262,9 @@ await sdk.email.send({
   body: 'You entered the geofenced area!'
 });
 `);
-  } catch (error) {
-    const err = error as any;
-    console.error("\n❌ Integration test failed:", err.message || 'Unknown error');
-    console.error("🔍 Error details:", err.stack || 'No stack trace available');
+  } catch (error: any) {
+    console.error("\n❌ Integration test failed:", error.message);
+    console.error("🔍 Error details:", error.stack);
     process.exit(1);
   } finally {
     // 5. Cleanup

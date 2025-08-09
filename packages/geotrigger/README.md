@@ -13,24 +13,24 @@ pnpm add @omx-sdk/geotrigger
 ## Usage
 
 ```typescript
-import { Geotrigger, createGeotrigger } from '@omx-sdk/geotrigger';
+import { Geotrigger, createGeotrigger } from "@omx-sdk/geotrigger";
 
 // Create a geotrigger instance
 const geotrigger = createGeotrigger({
-  apiKey: 'your-api-key',
-  baseUrl: 'https://api.oxinion.com', // optional
+  apiKey: "your-api-key",
+  baseUrl: "https://api.oxinion.com", // optional
   timeout: 10000, // optional
 });
 
 // Add geofence regions
 geotrigger.addRegion({
-  id: 'office',
+  id: "office",
   center: {
     latitude: 37.7749,
     longitude: -122.4194,
   },
   radius: 100, // meters
-  name: 'Office Building',
+  name: "Office Building",
 });
 
 // Start monitoring
@@ -39,15 +39,15 @@ geotrigger
     console.log(`Geofence ${event.type}: ${event.regionId}`, event);
   })
   .then(() => {
-    console.log('Geofence monitoring started');
+    console.log("Geofence monitoring started");
   })
   .catch((error) => {
-    console.error('Failed to start monitoring:', error);
+    console.error("Failed to start monitoring:", error);
   });
 
 // Get current location
 geotrigger.getCurrentLocation().then((location) => {
-  console.log('Current location:', location);
+  console.log("Current location:", location);
 });
 
 // Stop monitoring
@@ -88,7 +88,7 @@ Event fired when entering or exiting a geofence.
 ```typescript
 interface TriggerEvent {
   regionId: string; // ID of the triggered region
-  type: 'enter' | 'exit'; // Type of trigger
+  type: "enter" | "exit"; // Type of trigger
   location: Location; // Current location
   timestamp: Date; // When the event occurred
 }
