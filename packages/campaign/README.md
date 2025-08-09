@@ -29,23 +29,23 @@ npm publish packages/campaign
 npm install @omx-sdk/campaign
 ```
 
-> **Note**: @omx-sdk/campaign depends on @omx-sdk/core, which will be automatically installed.
+> **Note**: @omx-sdk/campaign has zero dependencies and works standalone.
 
 ## 🏗️ Architecture Pattern
 
-This module uses **Edge Function-only architecture** for clean separation:
+This module uses **Edge Function-only architecture** for complete independence:
 
-- **No direct Supabase client** dependency
-- **Only constants** imported: `SUPABASE_FN_BASE_URL`
+- **Zero dependencies**: No external package dependencies
+- **Hardcoded constants**: Supabase Edge Function URL included directly
 - **Authentication via Edge Functions**: Uses clientId/secretKey → JWT token flow
 - **All operations** go through Edge Functions for security
 
 ## 📖 Usage
 
-### Basic Setup (Edge Function Architecture)
+### Basic Setup (Zero Dependency Architecture)
 
 ```typescript
-import { createCampaignClient } from '@omx-sdk/campaign';
+import { createCampaignClient } from "@omx-sdk/campaign";
 
 // Create campaign client with your credentials
 const campaignClient = createCampaignClient({
@@ -238,11 +238,12 @@ packages/campaign/
 
 ## 🔧 Dependencies
 
-### Minimal Dependencies
+### Zero Dependencies
 
 ```typescript
-// Only imports constants from core
-import { SUPABASE_FN_BASE_URL } from "@omx-sdk/core";
+// No external dependencies - completely standalone
+const SUPABASE_FN_BASE_URL =
+  "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
 ```
 
 ### TypeScript Interfaces
@@ -400,10 +401,11 @@ try {
 
 ## 🎯 Architecture Benefits
 
-- **✅ Zero runtime dependencies**: Only constants imported from core
+- **✅ Zero dependencies**: Completely standalone package
 - **✅ High security**: All operations via authenticated Edge Functions
 - **✅ Easy to use**: Simple clientId/secretKey authentication
 - **✅ Type safety**: Full TypeScript support
 - **✅ Auto team isolation**: All operations automatically filtered by teamId
 - **✅ Pure Edge Function**: No direct database access from client
 - **✅ JWT token management**: Automatic authentication token handling
+- **✅ No version conflicts**: No dependency on other OMX SDK packages

@@ -5,7 +5,18 @@ import type {
   CampaignUpdateData,
 } from "./types.js";
 
-import { SUPABASE_FN_BASE_URL } from "@omx-sdk/core";
+// Supabase Edge Function base URL
+const SUPABASE_FN_BASE_URL =
+  "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
+
+// UUID v4 generation function
+function generateUUID(): string {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 export class CampaignClient {
   private clientId: string;
@@ -20,7 +31,7 @@ export class CampaignClient {
   }) {
     this.clientId = config.clientId;
     this.secretKey = config.secretKey;
-    this.teamId = config.teamId || `team-${Date.now()}`;
+    this.teamId = config.teamId || generateUUID(); // Generate in UUID format
   }
 
   private async getAuthToken(): Promise<string> {
@@ -40,27 +51,189 @@ export class CampaignClient {
 
       const data = await response.json();
       this.authToken = data.token;
+
+      // 🎯 Extract team_id from JWT or find from API keys
+      try {
+        if (this.authToken) {
+          const payload = JSON.parse(atob(this.authToken.split(".")[1]));
+          console.log(`🔍 JWT payload:`, payload);
+
+          if (payload.team_id) {
+            this.teamId = payload.team_id;
+            console.log(`🆔 Team ID from JWT: ${this.teamId}`);
+          } else {
+            // JWT에 team_id가 없으면 API 키 테이블에서 조회
+            console.log(`🔍 No team_id in JWT, looking up from API keys...`);
+            await this.loadTeamIdFromApiKeys();
+          }
+        }
+      } catch (error) {
+        console.warn(
+          "Failed to decode JWT, looking up team_id from API keys:",
+          error
+        );
+        await this.loadTeamIdFromApiKeys();
+      }
     }
     return this.authToken!;
+  }
+
+  // Method to find team_id from API keys
+  private async loadTeamIdFromApiKeys(): Promise<void> {
+    try {
+      console.log(`🔍 Looking up team_id for client_id: ${this.clientId}`);
+
+      const url = `${SUPABASE_FN_BASE_URL}/database-access?table=api_keys&schema=business`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.authToken}`,
+        },
+        body: JSON.stringify({
+          filters: { client_id: this.clientId },
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`🔍 API keys lookup result:`, result);
+
+        if (result.success && result.data && result.data.length > 0) {
+          const apiKey = result.data[0];
+          if (apiKey.team_id) {
+            this.teamId = apiKey.team_id;
+            console.log(`🆔 Team ID from API keys: ${this.teamId}`);
+          } else {
+            console.warn(`⚠️ API key found but no team_id:`, apiKey);
+          }
+        } else {
+          console.warn(`⚠️ No API key found for client_id: ${this.clientId}`);
+          console.warn(`⚠️ Using fallback team_id: ${this.teamId}`);
+        }
+      } else {
+        const errorText = await response.text();
+        console.warn(`⚠️ Failed to lookup API key:`, errorText);
+      }
+    } catch (error) {
+      console.warn("Failed to load team_id from API keys:", error);
+      console.warn(`⚠️ Using fallback team_id: ${this.teamId}`);
+    }
   }
 
   private async makeRequest(endpoint: string, data: any = {}): Promise<any> {
     const token = await this.getAuthToken();
 
-    const response = await fetch(`${SUPABASE_FN_BASE_URL}/${endpoint}`, {
-      method: "POST",
+    // Use database-access for all operations instead of specific campaign endpoints
+    let url: string;
+    let method = "POST";
+    let body: any;
+
+    switch (endpoint) {
+      case "campaign-list":
+        url = `${SUPABASE_FN_BASE_URL}/database-access?table=campaigns&schema=business`;
+        method = "POST";
+        body = JSON.stringify({
+          filters: { team_id: this.teamId, ...data.filters },
+        });
+        break;
+
+      case "campaign-create":
+        url = `${SUPABASE_FN_BASE_URL}/database-access?table=campaigns&schema=business`;
+        method = "POST";
+        body = JSON.stringify({
+          action: "create",
+          data: {
+            ...data,
+            team_id: this.teamId,
+            created_at: new Date().toISOString(),
+          },
+        });
+        break;
+
+      case "campaign-get":
+        url = `${SUPABASE_FN_BASE_URL}/database-access?table=campaigns&schema=business`;
+        method = "POST";
+        body = JSON.stringify({
+          filters: { id: data.id, team_id: this.teamId },
+        });
+        break;
+
+      case "campaign-update":
+        url = `${SUPABASE_FN_BASE_URL}/database-access?table=campaigns&schema=business`;
+        method = "POST";
+        body = JSON.stringify({
+          action: "update",
+          filters: { id: data.id, team_id: this.teamId },
+          data: {
+            ...data.updates,
+            updated_at: new Date().toISOString(),
+          },
+        });
+        break;
+
+      case "campaign-delete":
+        url = `${SUPABASE_FN_BASE_URL}/database-access?table=campaigns&schema=business`;
+        method = "POST";
+        body = JSON.stringify({
+          action: "delete",
+          filters: { id: data.id, team_id: this.teamId },
+        });
+        break;
+
+      // 🎯 Handle campaign-stats directly (without calling database-access)
+      case "campaign-stats":
+        const campaigns = await this.listCampaigns();
+        return {
+          totalCampaigns: campaigns.length,
+          activeCampaigns: campaigns.filter((c: any) => c.status === "active")
+            .length,
+          draftCampaigns: campaigns.filter((c: any) => c.status === "draft")
+            .length,
+          pausedCampaigns: campaigns.filter((c: any) => c.status === "paused")
+            .length,
+          completedCampaigns: campaigns.filter(
+            (c: any) => c.status === "completed"
+          ).length,
+          teamId: this.teamId,
+        };
+
+      default:
+        // Fallback to database-access for any other endpoint
+        url = `${SUPABASE_FN_BASE_URL}/database-access`;
+        method = "POST";
+        body = JSON.stringify({ ...data, teamId: this.teamId });
+    }
+
+    const response = await fetch(url, {
+      method,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ ...data, teamId: this.teamId }),
+      body,
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ ${endpoint} failed:`, errorText);
       throw new Error(`${endpoint} failed: ${response.statusText}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log(`✅ ${endpoint} response:`, result);
+
+    // Handle database-access response format
+    if (result.success !== undefined) {
+      if (!result.success) {
+        throw new Error(result.error || "Database operation failed");
+      }
+      return result.data;
+    }
+
+    // campaign-list나 campaign-get 같은 경우 data 배열 반환
+    return result.data || result;
   }
 
   async createCampaign(data: CampaignData): Promise<CampaignData> {
@@ -72,7 +245,9 @@ export class CampaignClient {
   }
 
   async getCampaign(id: string): Promise<CampaignData> {
-    return this.makeRequest("campaign-get", { id });
+    const result = await this.makeRequest("campaign-get", { id });
+    // Return first element if returned as array
+    return Array.isArray(result) ? result[0] : result;
   }
 
   async updateCampaign(
@@ -83,27 +258,39 @@ export class CampaignClient {
   }
 
   async deleteCampaign(id: string): Promise<void> {
-    return this.makeRequest("campaign-delete", { id });
+    await this.makeRequest("campaign-delete", { id });
   }
 
-  async updateCampaignStatus(id: string, status: string): Promise<void> {
-    return this.makeRequest("campaign-update-status", { id, status });
+  async updateCampaignStatus(
+    id: string,
+    status: "active" | "draft" | "paused" | "completed"
+  ): Promise<void> {
+    await this.updateCampaign(id, { status });
   }
 
   async duplicateCampaign(id: string, newName?: string): Promise<CampaignData> {
-    return this.makeRequest("campaign-duplicate", { id, newName });
+    const original = await this.getCampaign(id);
+    const duplicateData = {
+      ...original,
+      name: newName || `${original.name} (Copy)`,
+      status: "draft" as const,
+    };
+    delete (duplicateData as any).id; // Remove ID
+    return this.createCampaign(duplicateData);
   }
 
   async getCampaignStats(): Promise<CampaignStats> {
     return this.makeRequest("campaign-stats", {});
   }
 
-  async executeCampaign(id: string, triggerData?: any): Promise<any> {
-    return this.makeRequest("campaign-execute", { id, triggerData });
+  async executeCampaign(_id: string, _triggerData?: any): Promise<any> {
+    // To be implemented in the future
+    throw new Error("Campaign execution not yet implemented");
   }
 
-  async getCampaignExecutions(id: string): Promise<any[]> {
-    return this.makeRequest("campaign-executions", { id });
+  async getCampaignExecutions(_id: string): Promise<any[]> {
+    // To be implemented in the future
+    return [];
   }
 
   // Public authentication method for testing
