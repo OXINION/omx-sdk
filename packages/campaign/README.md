@@ -26,39 +26,43 @@ npm publish packages/campaign
 ## 🚀 Installation
 
 ```bash
-npm install @omx-sdk/campaign @omx-sdk/core @supabase/supabase-js
+npm install @omx-sdk/campaign
 ```
+
+> **Note**: @omx-sdk/campaign depends on @omx-sdk/core, which will be automatically installed.
 
 ## 🏗️ Architecture Pattern
 
-This module uses **dependency injection** for clean architecture:
+This module uses **Edge Function-only architecture** for clean separation:
 
-- **No direct imports** from `@omx-sdk/core` client
+- **No direct Supabase client** dependency
 - **Only constants** imported: `SUPABASE_FN_BASE_URL`
-- **Dependencies injected** via constructor: `SupabaseClient` and `teamId`
-- **Factory function** provided for easy instantiation
+- **Authentication via Edge Functions**: Uses clientId/secretKey → JWT token flow
+- **All operations** go through Edge Functions for security
 
 ## 📖 Usage
 
-### Basic Setup (Dependency Injection)
+### Basic Setup (Edge Function Architecture)
 
 ```typescript
-import { createCampaignModule } from '@omx-sdk/campaign';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createCampaignClient } from '@omx-sdk/campaign';
 
-// Dependencies are prepared elsewhere (e.g., in core)
-const supabase: SupabaseClient = /* initialized Supabase client */;
-const teamId: string = /* current user's team ID */;
+// Create campaign client with your credentials
+const campaignClient = createCampaignClient({
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
+  teamId: "your-team-id", // optional, defaults to auto-generated
+});
 
-// Campaign module receives dependencies
-const campaignModule = createCampaignModule(supabase, teamId);
+// All operations are automatically authenticated via Edge Functions
+const campaigns = await campaignClient.listCampaigns();
 ```
 
 ### Campaign CRUD Operations
 
 ```typescript
 // Create a new campaign (calls Edge Function)
-const newCampaign = await campaignModule.createCampaign({
+const newCampaign = await campaignClient.createCampaign({
   name: "Summer Sale 2024",
   description: "Special summer promotion",
   industry: "ecommerce",
@@ -76,40 +80,40 @@ const newCampaign = await campaignModule.createCampaign({
   status: "active",
 });
 
-// List campaigns with filters (direct DB query)
-const activeCampaigns = await campaignModule.listCampaigns({
+// List campaigns with filters (via Edge Function)
+const activeCampaigns = await campaignClient.listCampaigns({
   status: "active",
   industry: "ecommerce",
   search: "summer", // searches in campaign name
 });
 
 // Get specific campaign
-const campaignDetails = await campaignModule.getCampaign("campaign-id");
+const campaignDetails = await campaignClient.getCampaign("campaign-id");
 
 // Update campaign
-const updated = await campaignModule.updateCampaign("campaign-id", {
+const updated = await campaignClient.updateCampaign("campaign-id", {
   name: "Updated Summer Sale 2024",
   targetValue: "20%",
 });
 
 // Change campaign status
-await campaignModule.updateCampaignStatus("campaign-id", "paused");
+await campaignClient.updateCampaignStatus("campaign-id", "paused");
 
 // Duplicate campaign
-const duplicated = await campaignModule.duplicateCampaign(
+const duplicated = await campaignClient.duplicateCampaign(
   "campaign-id",
   "Winter Sale 2024"
 );
 
 // Delete campaign
-await campaignModule.deleteCampaign("campaign-id");
+await campaignClient.deleteCampaign("campaign-id");
 ```
 
 ### Campaign Analytics
 
 ```typescript
 // Get campaign statistics (counts by status)
-const stats = await campaignModule.getCampaignStats();
+const stats = await campaignClient.getCampaignStats();
 console.log(stats);
 // Output:
 // {
@@ -124,7 +128,7 @@ console.log(stats);
 
 ```typescript
 // Execute a campaign (returns mock data)
-const executionResult = await campaignModule.executeCampaign("campaign-id", {
+const executionResult = await campaignClient.executeCampaign("campaign-id", {
   source: "geotrigger",
   location: { lat: 37.5665, lng: 126.978 },
   userId: "user-123",
@@ -132,7 +136,7 @@ const executionResult = await campaignModule.executeCampaign("campaign-id", {
 // Returns: { success: true, executionId: 'exec-campaign-id' }
 
 // Get execution history (returns empty array - placeholder)
-const executions = await campaignModule.getCampaignExecutions("campaign-id");
+const executions = await campaignClient.getCampaignExecutions("campaign-id");
 // Returns: []
 ```
 
@@ -142,52 +146,84 @@ const executions = await campaignModule.getCampaignExecutions("campaign-id");
 
 ```typescript
 export class CampaignClient {
-  private supabase: SupabaseClient;
+  private clientId: string;
+  private secretKey: string;
   private teamId: string;
+  private authToken: string | null = null;
 
-  constructor(supabase: SupabaseClient, teamId: string) {
-    this.supabase = supabase;
-    this.teamId = teamId;
+  constructor(config: {
+    clientId: string;
+    secretKey: string;
+    teamId?: string;
+  }) {
+    this.clientId = config.clientId;
+    this.secretKey = config.secretKey;
+    this.teamId = config.teamId || `team-${Date.now()}`;
   }
 
-  // All methods automatically filter by teamId
-  // CREATE operations use Edge Functions
-  // READ/UPDATE/DELETE use direct Supabase queries
+  // All methods automatically authenticate via Edge Functions
+  // All operations go through Edge Functions (no direct DB access)
 }
 ```
 
 ### Factory Function
 
 ```typescript
-export function createCampaignModule(
-  supabase: SupabaseClient,
-  teamId?: string
-): CampaignClient {
-  return new CampaignClient(supabase, teamId ?? "");
+export function createCampaignClient(config: {
+  clientId: string;
+  secretKey: string;
+  teamId?: string;
+}): CampaignClient {
+  return new CampaignClient(config);
 }
 ```
 
-## 🏗️ Hybrid Architecture
+## 🏗️ Edge Function Architecture
 
-### CREATE Operations (Edge Function)
+### All Operations (Edge Function)
 
 ```typescript
-// Calls SUPABASE_FN_BASE_URL/campaign-create
-const response = await fetch(`${SUPABASE_FN_BASE_URL}/campaign-create`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ ...data, teamId: this.teamId }),
-});
+// All operations go through Edge Functions with JWT authentication
+private async makeRequest(endpoint: string, data: any = {}): Promise<any> {
+  const token = await this.getAuthToken();
+
+  const response = await fetch(`${SUPABASE_FN_BASE_URL}/${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ ...data, teamId: this.teamId }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`${endpoint} failed: ${response.statusText}`);
+  }
+
+  return await response.json();
+}
 ```
 
-### READ/UPDATE/DELETE Operations (Direct Query)
+### Authentication Flow
 
 ```typescript
-// Direct Supabase query with automatic team filtering
-const { data } = await this.supabase
-  .from("business.campaigns")
-  .select("*")
-  .eq("team_id", this.teamId); // Auto-filtered by team
+// JWT token is automatically managed
+private async getAuthToken(): Promise<string> {
+  if (!this.authToken) {
+    const response = await fetch(`${SUPABASE_FN_BASE_URL}/create-jwt-token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        clientId: this.clientId,
+        secretKey: this.secretKey,
+      }),
+    });
+
+    const data = await response.json();
+    this.authToken = data.token;
+  }
+  return this.authToken;
+}
 ```
 
 ## 📁 Module Structure
@@ -202,14 +238,11 @@ packages/campaign/
 
 ## 🔧 Dependencies
 
-### Core Dependencies
+### Minimal Dependencies
 
 ```typescript
 // Only imports constants from core
 import { SUPABASE_FN_BASE_URL } from "@omx-sdk/core";
-
-// Type-only import (no runtime dependency)
-import type { SupabaseClient } from "@supabase/supabase-js";
 ```
 
 ### TypeScript Interfaces
@@ -336,7 +369,7 @@ All methods throw descriptive errors:
 
 ```typescript
 try {
-  const campaign = await campaignModule.createCampaign(data);
+  const campaign = await campaignClient.createCampaign(data);
 } catch (error) {
   console.error("Campaign creation failed:", error.message);
   // Handle error appropriately
@@ -367,9 +400,10 @@ try {
 
 ## 🎯 Architecture Benefits
 
-- **✅ Zero strong dependencies**: Only constants imported from core
-- **✅ High testability**: Easy to mock dependencies
-- **✅ Flexible deployment**: Can be used with any Supabase instance
+- **✅ Zero runtime dependencies**: Only constants imported from core
+- **✅ High security**: All operations via authenticated Edge Functions
+- **✅ Easy to use**: Simple clientId/secretKey authentication
 - **✅ Type safety**: Full TypeScript support
-- **✅ Security by design**: Automatic team filtering
-- **✅ Hybrid performance**: Edge Functions for sensitive ops, direct queries for speed
+- **✅ Auto team isolation**: All operations automatically filtered by teamId
+- **✅ Pure Edge Function**: No direct database access from client
+- **✅ JWT token management**: Automatic authentication token handling

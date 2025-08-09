@@ -1,6 +1,6 @@
 {
   "name": "@omx-sdk/campaign",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Campaign management module for OMX SDK",
   "type": "module",
   "main": "./dist/index.js",
@@ -21,8 +21,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@omx-sdk/core": "1.0.1",
-    "@supabase/supabase-js": "^2.50.5"
+    "@omx-sdk/core": "1.0.1"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",
