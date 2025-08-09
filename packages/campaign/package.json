@@ -1,6 +1,6 @@
 {
   "name": "@omx-sdk/campaign",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Campaign management module for OMX SDK",
   "type": "module",
   "main": "./dist/index.js",

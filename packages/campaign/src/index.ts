@@ -62,7 +62,7 @@ export class CampaignClient {
             this.teamId = payload.team_id;
             console.log(`🆔 Team ID from JWT: ${this.teamId}`);
           } else {
-            // JWT에 team_id가 없으면 API 키 테이블에서 조회
+            // If JWT doesn't have team_id, look up from API keys table
             console.log(`🔍 No team_id in JWT, looking up from API keys...`);
             await this.loadTeamIdFromApiKeys();
           }
@@ -232,7 +232,7 @@ export class CampaignClient {
       return result.data;
     }
 
-    // campaign-list나 campaign-get 같은 경우 data 배열 반환
+    // Return data array for cases like campaign-list or campaign-get
     return result.data || result;
   }
 
