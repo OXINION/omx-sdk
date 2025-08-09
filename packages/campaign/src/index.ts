@@ -299,7 +299,7 @@ export class CampaignClient {
   }
 }
 
-// Factory 함수: clientId/secretKey 기반으로 Campaign Client 생성
+// Factory function: Create Campaign Client based on clientId/secretKey
 export function createCampaignClient(config: {
   clientId: string;
   secretKey: string;
@@ -308,7 +308,7 @@ export function createCampaignClient(config: {
   return new CampaignClient(config);
 }
 
-// Legacy 호환성을 위한 factory 함수 (deprecated)
+// Legacy compatibility factory function (deprecated)
 export function createCampaignModule(config: {
   clientId: string;
   secretKey: string;

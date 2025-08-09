@@ -121,12 +121,12 @@
       <h1>🚀 Campaign Module Test (No Auth Version)</h1>
 
       <div class="warning-box">
-        <h4>⚠️ 테스트 안내</h4>
+        <h4>⚠️ Test Guide</h4>
         <p>
-          • <strong>"Initialize Campaign Client"</strong>를 클릭해서 시작하세요
+          • Click <strong>"Initialize Campaign Client"</strong> to get started
         </p>
-        <p>• JWT 인증 없이 database-access 함수를 직접 테스트합니다</p>
-        <p>• SERVICE_ROLE_KEY로 모든 권한을 우회합니다</p>
+        <p>• Directly test database-access function without JWT authentication</p>
+        <p>• Bypass all permissions with SERVICE_ROLE_KEY</p>
       </div>
 
       <div class="section">
@@ -352,13 +352,13 @@ Campaign created via OMX SDK test interface</textarea
         constructor(clientId, secretKey, teamId) {
           this.clientId = clientId;
           this.secretKey = secretKey;
-          this.teamId = teamId || null; // 일단 null로 설정
+          this.teamId = teamId || null; // Set to null for now
           this.authToken = null;
           this.baseUrl =
             "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
         }
 
-        // UUID 생성 함수
+        // UUID generation function
         createUUID() {
           return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
             /[xy]/g,
@@ -370,7 +370,7 @@ Campaign created via OMX SDK test interface</textarea
           );
         }
 
-        // API 키에서 team_id를 찾는 메서드
+        // Method to find team_id from API keys
         async loadTeamIdFromApiKeys() {
           try {
             log("🔍 Loading team_id from API keys...", "info");
@@ -383,7 +383,7 @@ Campaign created via OMX SDK test interface</textarea
               log(`🆔 Team ID from API keys: ${this.teamId}`, "success");
             } else {
               log("⚠️ No team_id found in API keys", "warning");
-              // 최후의 수단으로 UUID 생성
+              // Generate UUID as last resort
               this.teamId = this.createUUID();
               log(`🆔 Generated new team_id: ${this.teamId}`, "info");
             }
@@ -392,7 +392,7 @@ Campaign created via OMX SDK test interface</textarea
               `⚠️ Could not load team_id from API keys: ${error.message}`,
               "warning"
             );
-            // 최후의 수단으로 UUID 생성
+            // Generate UUID as last resort
             this.teamId = this.createUUID();
             log(`🆔 Generated fallback team_id: ${this.teamId}`, "info");
           }
@@ -433,7 +433,7 @@ Campaign created via OMX SDK test interface</textarea
               "success"
             );
 
-            // JWT 토큰 디코딩해서 team_id 추출
+            // Decode JWT token to extract team_id
             try {
               const payload = JSON.parse(atob(this.authToken.split(".")[1]));
               log(
@@ -441,12 +441,12 @@ Campaign created via OMX SDK test interface</textarea
                 "info"
               );
 
-              // JWT에서 team_id 추출 및 설정
+              // Extract and set team_id from JWT
               if (payload.team_id) {
                 this.teamId = payload.team_id;
                 log(`🆔 Team ID from JWT: ${this.teamId}`, "success");
               } else if (payload.client_id) {
-                // team_id가 없으면 API 키에서 찾기
+                // If no team_id, find from API keys
                 log(
                   "🔍 No team_id in JWT, looking up from API keys...",
                   "info"
@@ -455,7 +455,7 @@ Campaign created via OMX SDK test interface</textarea
               }
             } catch (e) {
               log("⚠️ Could not decode JWT payload", "warning");
-              // JWT 디코딩 실패하면 API 키에서 찾기
+              // If JWT decoding fails, find from API keys
               await this.loadTeamIdFromApiKeys();
             }
 
