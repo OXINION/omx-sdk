@@ -40,9 +40,9 @@ npm install @omx-sdk/email @omx-sdk/geotrigger @omx-sdk/webhook
 ### Basic Usage
 
 ```typescript
-import { OmxClient } from "omx-sdk";
+import { omxClient } from "omx-sdk";
 
-const omx = new OmxClient({
+const omx = new omxClient({
   clientId: "your-client-id",
   secretKey: "your-secret-key",
 });

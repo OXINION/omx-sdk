@@ -16,14 +16,13 @@ pnpm add @omx-sdk/geotrigger
 import { Geotrigger, createGeotrigger } from "@omx-sdk/geotrigger";
 
 // Create a geotrigger instance
-const geotrigger = createGeotrigger({
-  apiKey: "your-api-key",
-  baseUrl: "https://api.oxinion.com", // optional
-  timeout: 10000, // optional
+const geotriggerClient = createGeotrigger({
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
 });
 
 // Add geofence regions
-geotrigger.addRegion({
+geotriggerClient.addRegion({
   id: "office",
   center: {
     latitude: 37.7749,
@@ -62,9 +61,8 @@ Configuration object for initializing the Geotrigger.
 
 ```typescript
 interface GeotriggerConfig {
-  apiKey: string; // Required API key
-  baseUrl?: string; // Optional base URL
-  timeout?: number; // Optional timeout in milliseconds
+  clientId: string; // Your client ID
+  secretKey: string; // Your secret key
 }
 ```
 
