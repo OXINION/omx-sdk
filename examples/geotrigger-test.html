@@ -3,302 +3,1282 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GeoTrigger API Test</title>
-    <!-- No Supabase CDN needed - using Edge Functions only -->
+    <title>Geotrigger Module Test</title>
     <style>
       body {
         font-family: Arial, sans-serif;
-        margin: 20px;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #4ade80 0%, #22d3ee 100%);
+        min-height: 100vh;
       }
-      .test-section {
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+      .section {
         margin: 20px 0;
-        padding: 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-      }
-      .result {
-        margin: 10px 0;
-        padding: 10px;
-        background: #f5f5f5;
-        border-radius: 3px;
-      }
-      .error {
-        background: #ffebee;
-        color: #c62828;
-      }
-      .success {
-        background: #e8f5e8;
-        color: #2e7d32;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #10b981;
       }
       button {
-        margin: 5px;
-        padding: 10px 15px;
-        background: #007bff;
+        background: #10b981;
         color: white;
         border: none;
-        border-radius: 3px;
+        padding: 12px 24px;
+        border-radius: 8px;
         cursor: pointer;
+        margin: 5px;
+        transition: all 0.3s ease;
       }
       button:hover {
-        background: #0056b3;
+        background: #059669;
+        transform: translateY(-2px);
       }
-      .loading {
-        opacity: 0.6;
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      #output {
+        background: #1a202c;
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: 10px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        max-height: 500px;
+        overflow-y: auto;
+        margin-top: 20px;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+      .full-width {
+        grid-column: 1 / -1;
+      }
+      .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+      .status-connected {
+        background-color: #10b981;
+      }
+      .status-disconnected {
+        background-color: #ef4444;
+      }
+      .status-pending {
+        background-color: #f59e0b;
+      }
+      .warning-box {
+        background: #fef3c7;
+        border: 1px solid #fcd34d;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+        color: #92400e;
+      }
+      .success-box {
+        background: #d1fae5;
+        border: 1px solid #a7f3d0;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+        color: #065f46;
+      }
+      .error-box {
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+        color: #991b1b;
+      }
+      .location-display {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+        color: #1e40af;
+      }
+      .map-container {
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        color: #6b7280;
       }
     </style>
   </head>
   <body>
-    <h1>🌍 GeoTrigger API Test</h1>
-    <p>Test the new GeoTrigger create, list, and delete functionality</p>
+    <div class="container">
+      <h1>🌍 Geotrigger Module Test (Enhanced Version)</h1>
 
-    <div class="test-section">
-      <h3>🔑 Authentication</h3>
-      <button onclick="initSDK()">Initialize SDK</button>
-      <div id="auth-result" class="result">Not initialized</div>
+      <div class="warning-box">
+        <h4>⚠️ Test Guide</h4>
+        <p>
+          • Click <strong>"Initialize Geotrigger Client"</strong> to get started
+        </p>
+        <p>
+          • Test database-access function through Edge Functions with JWT authentication
+        </p>
+        <p>• Full CRUD operations and browser location services</p>
+      </div>
+
+      <div class="section">
+        <h3>📊 Connection Status</h3>
+        <p id="connection-status">
+          <span
+            class="status-indicator status-pending"
+            id="status-indicator"
+          ></span>
+          <span id="status-text">Ready to initialize</span>
+        </p>
+      </div>
+
+      <div class="section">
+        <h3>🔑 Authentication</h3>
+        <div class="form-grid">
+          <div>
+            <label for="clientId">Client ID:</label>
+            <input
+              type="text"
+              id="clientId"
+              value="8ac9ed2e-7a81-4caf-b2ed-ecb8f025fef9"
+            />
+          </div>
+          <div>
+            <label for="secretKey">Secret Key:</label>
+            <input
+              type="password"
+              id="secretKey"
+              value="9c5fc630-5304-4b6d-957d-f8767e5fe809"
+            />
+          </div>
+          <div class="full-width">
+            <label for="teamId">Team ID (optional):</label>
+            <input
+              type="text"
+              id="teamId"
+              placeholder="Leave empty to auto-generate"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>🧪 SDK Actions</h3>
+        <button onclick="initializeGeotriggerClient()">
+          Initialize Geotrigger Client
+        </button>
+        <button onclick="testAuthentication()" id="authBtn" disabled>
+          Test Authentication
+        </button>
+        <button onclick="listGeotriggers()" id="listBtn" disabled>
+          List Geotriggers
+        </button>
+        <button onclick="getGeotriggerStats()" id="statsBtn" disabled>
+          Get Geotrigger Stats
+        </button>
+        <button onclick="clearOutput()">Clear Output</button>
+      </div>
+
+      <div class="section">
+        <h3>📍 Location Services</h3>
+        <button onclick="getCurrentLocation()" id="locationBtn" disabled>
+          Get Current Location
+        </button>
+        <button onclick="startMonitoring()" id="monitorBtn" disabled>
+          Start Geofence Monitoring
+        </button>
+        <button onclick="stopMonitoring()" id="stopBtn" disabled>
+          Stop Monitoring
+        </button>
+        <div id="location-display" class="location-display" style="display: none;">
+          <h4>📍 Current Location</h4>
+          <p id="location-info">No location data yet</p>
+        </div>
+        <div class="map-container">
+          <p>🗺️ Map integration coming soon</p>
+          <small>Use browser location services to test geofence functionality</small>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>➕ Create Geotrigger</h3>
+        <div class="form-grid">
+          <div>
+            <label for="geotriggerName">Name: *</label>
+            <input
+              type="text"
+              id="geotriggerName"
+              value="SDK Test Geotrigger"
+              required
+            />
+          </div>
+          <div>
+            <label for="geotriggerRadius">Radius (meters): *</label>
+            <input
+              type="number"
+              id="geotriggerRadius"
+              value="100"
+              min="1"
+              max="10000"
+              required
+            />
+          </div>
+          <div>
+            <label for="geotriggerLatitude">Latitude: *</label>
+            <input
+              type="number"
+              id="geotriggerLatitude"
+              value="37.7749"
+              step="0.000001"
+              required
+            />
+          </div>
+          <div>
+            <label for="geotriggerLongitude">Longitude: *</label>
+            <input
+              type="number"
+              id="geotriggerLongitude"
+              value="-122.4194"
+              step="0.000001"
+              required
+            />
+          </div>
+          <div>
+            <label for="geotriggerEventType">Event Type:</label>
+            <select id="geotriggerEventType">
+              <option value="webhook">Webhook</option>
+              <option value="email">Email</option>
+              <option value="campaign">Campaign</option>
+            </select>
+          </div>
+          <div>
+            <label for="geotriggerStatus">Status:</label>
+            <select id="geotriggerStatus">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="full-width">
+            <label for="geotriggerDescription">Description:</label>
+            <textarea id="geotriggerDescription" rows="3">
+Geotrigger created via OMX SDK test interface</textarea>
+          </div>
+          <div class="full-width">
+            <label for="geotriggerPayload">Event Payload (JSON):</label>
+            <textarea id="geotriggerPayload" rows="4">{
+  "webhook_url": "https://your-app.com/webhook",
+  "message": "Welcome to this location!",
+  "priority": "high"
+}</textarea>
+          </div>
+          <div class="full-width">
+            <button onclick="createGeotrigger()" id="createBtn" disabled>
+              Create Geotrigger
+            </button>
+            <button onclick="useCurrentLocation()" id="useLocationBtn" disabled>
+              Use Current Location
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>🔄 Geotrigger Management</h3>
+        <div class="form-grid">
+          <div>
+            <label for="managementId">Geotrigger ID:</label>
+            <input
+              type="text"
+              id="managementId"
+              placeholder="Enter geotrigger ID"
+            />
+          </div>
+          <div>
+            <label for="newStatus">New Status:</label>
+            <select id="newStatus">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="full-width">
+            <button onclick="getGeotrigger()" id="getBtn" disabled>
+              Get Geotrigger
+            </button>
+            <button onclick="updateGeotriggerStatus()" id="updateStatusBtn" disabled>
+              Update Status
+            </button>
+            <button onclick="duplicateGeotrigger()" id="duplicateBtn" disabled>
+              Duplicate Geotrigger
+            </button>
+            <button onclick="deleteGeotrigger()" id="deleteBtn" disabled>
+              Delete Geotrigger
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>📄 Test Output</h3>
+        <div id="output">Geotrigger Module Test Ready (Enhanced Version)...\n</div>
+      </div>
     </div>
 
-    <div class="test-section">
-      <h3>➕ Create GeoTrigger</h3>
-      <button onclick="createGeoTrigger()">Create Test GeoTrigger</button>
-      <div id="create-result" class="result">No result yet</div>
-    </div>
+    <script>
+      let geotriggerClient = null;
+      let authToken = null;
+      let currentTeamId = null;
+      let watchId = null;
+      let currentLocation = null;
 
-    <div class="test-section">
-      <h3>📋 List GeoTriggers</h3>
-      <button onclick="listGeoTriggers()">List All GeoTriggers</button>
-      <div id="list-result" class="result">No result yet</div>
-    </div>
+      function log(message, type = "info") {
+        const output = document.getElementById("output");
+        const timestamp = new Date().toLocaleTimeString();
+        const prefix =
+          {
+            success: "✅",
+            error: "❌",
+            warning: "⚠️",
+            info: "ℹ️",
+            location: "📍",
+          }[type] || "ℹ️";
 
-    <div class="test-section">
-      <h3>🗑️ Delete GeoTrigger</h3>
-      <input type="text" id="deleteId" placeholder="Enter GeoTrigger ID" />
-      <button onclick="deleteGeoTrigger()">Delete GeoTrigger</button>
-      <div id="delete-result" class="result">No result yet</div>
-    </div>
+        output.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+        output.scrollTop = output.scrollHeight;
+      }
 
-    <script type="module">
-      // Secure Edge Function-only implementation (no CDN dependencies)
+      function updateStatus(status, text) {
+        const indicator = document.getElementById("status-indicator");
+        const statusText = document.getElementById("status-text");
+        indicator.className = `status-indicator status-${status}`;
+        statusText.textContent = text;
+      }
 
-      // Global variables
-      window.jwtToken = null;
+      function enableButtons() {
+        ["authBtn", "listBtn", "statsBtn", "createBtn", "getBtn", "updateStatusBtn", 
+         "duplicateBtn", "deleteBtn", "locationBtn", "monitorBtn", "useLocationBtn"].forEach(
+          (id) => {
+            document.getElementById(id).disabled = false;
+          }
+        );
+      }
 
-      // Load environment variables (secure approach - no anon key exposed)
-      const env = {
-        clientId: "f7b294c9-12d1-477b-b454-552dedd28de3",
-        secretKey: "87654321-4321-4321-4321-987654321cba",
-        baseUrl: "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1",
-        supabaseUrl: "https://blhilidnsybhfdmwqsrx.supabase.co",
-        // No supabaseAnonKey needed - we use Edge Functions with clientId/secretKey
-      };
+      function clearOutput() {
+        document.getElementById("output").textContent = "Output cleared...\n";
+      }
 
-      // Initialize SDK function
-      window.initSDK = async function () {
-        const resultDiv = document.getElementById("auth-result");
-        resultDiv.textContent = "Initializing...";
-        resultDiv.className = "result loading";
+      // Enhanced Geotrigger Client
+      class GeotriggerClient {
+        constructor(clientId, secretKey, teamId) {
+          this.clientId = clientId;
+          this.secretKey = secretKey;
+          this.teamId = teamId || this.createUUID();
+          this.authToken = null;
+          this.baseUrl =
+            "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
+          this.regions = new Map();
+          this.isWatching = false;
+          this.watchId = null;
+        }
 
-        try {
-          // 1. Fetch JWT token via Edge Function (secure authentication)
-          console.log("🔑 Fetching JWT token via Edge Function...");
-          const response = await fetch(`${env.baseUrl}/create-jwt-token`, {
+        createUUID() {
+          return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+            /[xy]/g,
+            function (c) {
+              const r = (Math.random() * 16) | 0;
+              const v = c == "x" ? r : (r & 0x3) | 0x8;
+              return v.toString(16);
+            }
+          );
+        }
+
+        async getAuthToken() {
+          if (!this.authToken) {
+            log("🔐 Authenticating with Edge Function...", "info");
+
+            const response = await fetch(`${this.baseUrl}/create-jwt-token`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                clientId: this.clientId,
+                secretKey: this.secretKey,
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error(`Authentication failed: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            this.authToken = data.token;
+
+            // Extract client_id from JWT (simplified - no team lookup needed)
+            try {
+              if (this.authToken) {
+                const payload = JSON.parse(atob(this.authToken.split(".")[1]));
+                log(`🔍 JWT payload: ${JSON.stringify(payload, null, 2)}`, "info");
+                
+                if (payload.client_id) {
+                  log(`🆔 Client ID from JWT: ${payload.client_id}`, "success");
+                  // Use a generated teamId since we don't need to look it up from API keys
+                  if (!this.teamId) {
+                    this.teamId = this.createUUID();
+                  }
+                  log(`🆔 Using Team ID: ${this.teamId}`, "info");
+                }
+              }
+            } catch (error) {
+              log("⚠️ Failed to decode JWT", "warning");
+              throw new Error("Invalid JWT received");
+            }
+          }
+          return this.authToken;
+        }
+
+        async loadTeamIdFromApiKeys() {
+          try {
+            log(`🔍 Looking up team_id for client_id: ${this.clientId}`, "info");
+
+            const url = `${this.baseUrl}/database-access?table=api_keys&schema=business`;
+
+            const response = await fetch(url, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.authToken}`,
+              },
+              body: JSON.stringify({
+                filters: { client_id: this.clientId },
+              }),
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+              log(`🔍 API keys lookup result: ${JSON.stringify(result, null, 2)}`, "info");
+
+              if (result.success && result.data && result.data.length > 0) {
+                const apiKey = result.data[0];
+                if (apiKey.team_id) {
+                  this.teamId = apiKey.team_id;
+                  log(`🆔 Team ID from API keys: ${this.teamId}`, "success");
+                } else {
+                  log(`⚠️ API key found but no team_id: ${JSON.stringify(apiKey)}`, "warning");
+                }
+              } else {
+                log(`⚠️ No API key found for client_id: ${this.clientId}`, "warning");
+                log(`⚠️ Using fallback team_id: ${this.teamId}`, "warning");
+              }
+            } else {
+              const errorText = await response.text();
+              log(`⚠️ Failed to lookup API key: ${errorText}`, "warning");
+            }
+          } catch (error) {
+            log(`⚠️ Failed to load team_id from API keys: ${error.message}`, "warning");
+            log(`⚠️ Using fallback team_id: ${this.teamId}`, "warning");
+          }
+        }
+
+        async makeRequest(endpoint, data = {}) {
+          const token = await this.getAuthToken();
+
+          let url, method = "POST", body;
+
+          switch (endpoint) {
+            case "geotrigger-list":
+              url = `${this.baseUrl}/database-access?table=workflow_nodes&schema=omx`;
+              body = JSON.stringify({
+                filters: { 
+                  type: "geotrigger",
+                  ...data.filters 
+                },
+                // Note: team_id filtering will need to be handled via workflow join or config filter
+              });
+              break;
+
+            case "geotrigger-create":
+              // Ensure we have a workflow_id
+              const workflowId = data.workflow_id || await this.ensureDefaultWorkflow();
+              
+              url = `${this.baseUrl}/database-access?table=workflow_nodes&schema=omx`;
+              body = JSON.stringify({
+                action: "create",
+                data: {
+                  workflow_id: workflowId, // Required field
+                  type: "geotrigger",
+                  config: {
+                    name: data.name,
+                    description: data.description,
+                    location: data.location,
+                    coordinates: data.coordinates,
+                    radius: data.radius,
+                    event_type: data.event_type,
+                    event_payload: data.event_payload,
+                    status: data.status || "active",
+                    team_id: this.teamId,
+                  },
+                  position: data.position || { x: 0, y: 0 },
+                  node_key: data.node_key || `geotrigger-${Date.now()}`,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                },
+              });
+              break;
+
+            case "geotrigger-get":
+              url = `${this.baseUrl}/database-access?table=workflow_nodes&schema=omx`;
+              body = JSON.stringify({
+                filters: { 
+                  id: data.id, 
+                  type: "geotrigger"
+                },
+              });
+              break;
+
+            case "geotrigger-update":
+              url = `${this.baseUrl}/database-access?table=workflow_nodes&schema=omx`;
+              const updatePayload = {
+                action: "update",
+                filters: { 
+                  id: data.id, 
+                  type: "geotrigger"
+                },
+                data: {
+                  config: data.updates, // data.updates is now the complete merged config
+                  updated_at: new Date().toISOString(),
+                },
+              };
+              body = JSON.stringify(updatePayload);
+              log(`🔍 Update payload: ${JSON.stringify(updatePayload, null, 2)}`, "info");
+              break;
+
+            case "geotrigger-delete":
+              url = `${this.baseUrl}/database-access?table=workflow_nodes&schema=omx`;
+              body = JSON.stringify({
+                action: "delete",
+                filters: { 
+                  id: data.id, 
+                  type: "geotrigger"
+                },
+              });
+              break;
+
+            case "geotrigger-stats":
+              const geotriggers = await this.listGeotriggers();
+              return {
+                totalGeotriggers: geotriggers.length,
+                activeGeotriggers: geotriggers.filter((g) => g.config?.status === "active").length,
+                inactiveGeotriggers: geotriggers.filter((g) => g.config?.status === "inactive").length,
+                teamId: this.teamId,
+              };
+
+            default:
+              url = `${this.baseUrl}/database-access`;
+              body = JSON.stringify({ ...data, teamId: this.teamId });
+          }
+
+          const response = await fetch(url, {
+            method,
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body,
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            log(`❌ ${endpoint} failed: ${errorText}`, "error");
+            throw new Error(`${endpoint} failed: ${response.statusText}`);
+          }
+
+          const result = await response.json();
+          log(`✅ ${endpoint} response: ${JSON.stringify(result, null, 2)}`, "info");
+
+          if (result.success !== undefined) {
+            if (!result.success) {
+              throw new Error(result.error || "Database operation failed");
+            }
+            return result.data;
+          }
+
+          return result.data || result;
+        }
+
+        async createGeotrigger(data) {
+          return this.makeRequest("geotrigger-create", data);
+        }
+
+        async listGeotriggers(filters = {}) {
+          return this.makeRequest("geotrigger-list", { filters });
+        }
+
+        async getGeotrigger(id) {
+          const result = await this.makeRequest("geotrigger-get", { id });
+          return Array.isArray(result) ? result[0] : result;
+        }
+
+        async updateGeotrigger(id, updates) {
+          // First get the current geotrigger to merge configs properly
+          const current = await this.getGeotrigger(id);
+          const mergedConfig = {
+            ...current.config,
+            ...updates,
+            team_id: this.teamId // Ensure team_id is always present
+          };
+          
+          return this.makeRequest("geotrigger-update", { 
+            id, 
+            updates: mergedConfig 
+          });
+        }
+
+        async deleteGeotrigger(id) {
+          await this.makeRequest("geotrigger-delete", { id });
+        }
+
+        async updateGeotriggerStatus(id, status) {
+          await this.updateGeotrigger(id, { status });
+        }
+
+        async duplicateGeotrigger(id, newName) {
+          const original = await this.getGeotrigger(id);
+          const duplicateData = {
+            name: newName || `${original.config?.name || 'Geotrigger'} (Copy)`,
+            description: original.config?.description,
+            location: original.config?.location,
+            coordinates: original.config?.coordinates,
+            radius: original.config?.radius,
+            event_type: original.config?.event_type,
+            event_payload: original.config?.event_payload,
+            status: "inactive",
+            team_id: this.teamId,
+          };
+          return this.createGeotrigger(duplicateData);
+        }
+
+        async getGeotriggerStats() {
+          return this.makeRequest("geotrigger-stats", {});
+        }
+
+        async authenticate() {
+          return this.getAuthToken();
+        }
+
+        async ensureDefaultWorkflow() {
+          const token = await this.getAuthToken();
+          
+          // First, try to find existing default workflow for geotriggers
+          const listUrl = `${this.baseUrl}/database-access?table=workflows&schema=business`;
+          const listResponse = await fetch(listUrl, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              // No Authorization header needed for Edge Function
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-              clientId: env.clientId,
-              secretKey: env.secretKey,
+              filters: { 
+                team_id: this.teamId,
+                name: "Default Geotrigger Workflow"
+              },
             }),
           });
 
-          if (!response.ok) {
-            throw new Error(
-              `Failed to fetch JWT token: ${response.statusText}`
-            );
+          if (listResponse.ok) {
+            const result = await listResponse.json();
+            if (result.success && result.data && result.data.length > 0) {
+              log(`✅ Found existing default workflow: ${result.data[0].id}`, "success");
+              return result.data[0].id;
+            }
           }
 
-          const data = await response.json();
-          window.jwtToken = data.token;
-          console.log("✅ JWT token fetched successfully");
-          console.log("🔍 JWT Token length:", window.jwtToken.length);
+          // Create default workflow if it doesn't exist
+          log(`🔄 Creating default workflow for team: ${this.teamId}`, "info");
+          const createUrl = `${this.baseUrl}/database-access?table=workflows&schema=business`;
+          const createResponse = await fetch(createUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              action: "create",
+              data: {
+                team_id: this.teamId,
+                name: "Default Geotrigger Workflow",
+                description: "Automatically created workflow for geotrigger nodes",
+                status: "active",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              },
+            }),
+          });
 
-          // Validate JWT token structure
-          const tokenParts = window.jwtToken.split(".");
-          if (tokenParts.length !== 3) {
-            throw new Error("Invalid JWT token format received");
+          if (!createResponse.ok) {
+            throw new Error(`Failed to create default workflow: ${createResponse.statusText}`);
           }
 
-          // Decode JWT payload for validation
-          try {
-            const header = JSON.parse(atob(tokenParts[0]));
-            const payload = JSON.parse(atob(tokenParts[1] + "=="));
-            console.log("🔍 JWT Header:", header);
-            console.log("🔍 JWT Payload:", payload);
-            console.log("✅ JWT token is valid");
-          } catch (e) {
-            throw new Error("Failed to decode JWT token");
+          const createResult = await createResponse.json();
+          if (!createResult.success) {
+            throw new Error(createResult.error || "Failed to create default workflow");
           }
 
-          // 2. No direct Supabase client needed - use JWT for API calls
-          console.log("✅ Ready to make authenticated API calls with JWT");
-
-          resultDiv.textContent =
-            "✅ SDK initialized successfully with JWT authentication!";
-          resultDiv.className = "result success";
-        } catch (error) {
-          console.error("❌ SDK initialization failed:", error);
-          resultDiv.textContent = `❌ Error: ${error.message}`;
-          resultDiv.className = "result error";
+          const workflowId = createResult.data.id || createResult.data[0]?.id;
+          log(`✅ Created default workflow: ${workflowId}`, "success");
+          return workflowId;
         }
-      };
 
-      // Create GeoTrigger function
-      window.createGeoTrigger = async function () {
-        if (!window.jwtToken) {
-          alert("Please initialize SDK first");
+        // Browser location methods
+        addRegion(region) {
+          this.regions.set(region.id, region);
+          log(`Added geofence region: ${region.id}`, "location");
+        }
+
+        removeRegion(regionId) {
+          const removed = this.regions.delete(regionId);
+          if (removed) {
+            log(`Removed geofence region: ${regionId}`, "location");
+          }
+          return removed;
+        }
+
+        getRegions() {
+          return Array.from(this.regions.values());
+        }
+
+        startMonitoring(onTrigger, options = {}) {
+          return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+              reject(new Error("Geolocation is not supported by this browser"));
+              return;
+            }
+
+            if (this.isWatching) {
+              resolve();
+              return;
+            }
+
+            const watchOptions = {
+              enableHighAccuracy: options.enableHighAccuracy ?? true,
+              timeout: options.timeout ?? 10000,
+              maximumAge: options.maximumAge ?? 60000,
+            };
+
+            this.watchId = navigator.geolocation.watchPosition(
+              (position) => {
+                const currentLocation = {
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                  accuracy: position.coords.accuracy,
+                };
+
+                this.checkRegions(currentLocation, onTrigger);
+              },
+              (error) => {
+                log(`Geolocation error: ${error.message}`, "error");
+                reject(error);
+              },
+              watchOptions
+            );
+
+            this.isWatching = true;
+            resolve();
+          });
+        }
+
+        stopMonitoring() {
+          if (this.watchId !== null) {
+            navigator.geolocation.clearWatch(this.watchId);
+            this.watchId = null;
+          }
+          this.isWatching = false;
+          log("Stopped geofence monitoring", "location");
+        }
+
+        getCurrentLocation(options = {}) {
+          return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+              reject(new Error("Geolocation is not supported by this browser"));
+              return;
+            }
+
+            const locationOptions = {
+              enableHighAccuracy: options.enableHighAccuracy ?? true,
+              timeout: options.timeout ?? 10000,
+              maximumAge: options.maximumAge ?? 60000,
+            };
+
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                resolve({
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                  accuracy: position.coords.accuracy,
+                });
+              },
+              (error) => {
+                reject(error);
+              },
+              locationOptions
+            );
+          });
+        }
+
+        calculateDistance(loc1, loc2) {
+          const R = 6371e3; // Earth's radius in meters
+          const φ1 = (loc1.latitude * Math.PI) / 180;
+          const φ2 = (loc2.latitude * Math.PI) / 180;
+          const Δφ = ((loc2.latitude - loc1.latitude) * Math.PI) / 180;
+          const Δλ = ((loc2.longitude - loc1.longitude) * Math.PI) / 180;
+
+          const a =
+            Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+          return R * c;
+        }
+
+        checkRegions(currentLocation, onTrigger) {
+          this.regions.forEach((region) => {
+            const distance = this.calculateDistance(currentLocation, region.center);
+            const isInside = distance <= region.radius;
+
+            if (isInside) {
+              const event = {
+                regionId: region.id,
+                type: "enter",
+                location: currentLocation,
+                timestamp: new Date(),
+              };
+              onTrigger(event);
+            }
+          });
+        }
+
+        isMonitoring() {
+          return this.isWatching;
+        }
+      }
+
+      // Global functions
+      window.initializeGeotriggerClient = function () {
+        const clientId = document.getElementById("clientId").value.trim();
+        const secretKey = document.getElementById("secretKey").value.trim();
+        const teamId = document.getElementById("teamId").value.trim();
+
+        if (!clientId || !secretKey) {
+          log("❌ Please enter both clientId and secretKey", "error");
           return;
         }
 
-        const resultDiv = document.getElementById("create-result");
-        resultDiv.textContent = "Creating geotrigger...";
-        resultDiv.className = "result loading";
+        try {
+          log("🚀 Initializing Geotrigger Client...", "info");
+          log(`📋 Client ID: ${clientId}`, "info");
+          log(`🔑 Secret Key: ${secretKey.substring(0, 8)}...`, "info");
+          updateStatus("pending", "Initializing...");
+
+          geotriggerClient = new GeotriggerClient(clientId, secretKey, teamId);
+          currentTeamId = geotriggerClient.teamId;
+
+          log("✅ Geotrigger Client initialized successfully!", "success");
+          log(`📋 Team ID: ${currentTeamId}`, "info");
+          log("🔗 Client configured to use database-access", "info");
+
+          updateStatus("connected", "Geotrigger Client Ready");
+          enableButtons();
+        } catch (error) {
+          log(
+            `❌ Failed to initialize Geotrigger Client: ${error.message}`,
+            "error"
+          );
+          updateStatus("disconnected", "Initialization Failed");
+        }
+      };
+
+      window.testAuthentication = async function () {
+        if (!geotriggerClient) {
+          log("❌ Geotrigger client not initialized", "error");
+          return;
+        }
 
         try {
-          const triggerData = {
-            name: `Test Location ${Date.now()}`,
-            coordinates: `POINT(127.0276 37.4979)`, // PostGIS format
-            radius: 100,
-            event_type: "enter",
-            event_payload: { message: "Welcome to Seoul!" },
-            status: "active",
-            created_at: new Date().toISOString(),
+          const token = await geotriggerClient.authenticate();
+          log("✅ Authentication test successful!", "success");
+          log(`🎟️ Token preview: ${token.substring(0, 50)}...`, "info");
+          authToken = token;
+        } catch (error) {
+          log(`❌ Authentication test failed: ${error.message}`, "error");
+        }
+      };
+
+      window.listGeotriggers = async function () {
+        if (!geotriggerClient) {
+          log("❌ Geotrigger client not initialized", "error");
+          return;
+        }
+
+        try {
+          log("📋 Fetching geotriggers...", "info");
+          const geotriggers = await geotriggerClient.listGeotriggers();
+          log(`✅ Found ${geotriggers.length} geotriggers`, "success");
+
+          geotriggers.forEach((geotrigger, index) => {
+            const config = geotrigger.config || {};
+            log(
+              `  ${index + 1}. ${config.name || 'Unnamed'} (${config.status || 'unknown'}) - ${config.event_type || "N/A"}`,
+              "info"
+            );
+            log(`     ID: ${geotrigger.id}`, "info");
+            if (config.radius) {
+              log(`     Radius: ${config.radius}m`, "info");
+            }
+            if (config.location) {
+              log(`     Location: ${config.location.latitude}, ${config.location.longitude}`, "info");
+            }
+            if (config.description) {
+              log(`     Description: ${config.description}`, "info");
+            }
+          });
+
+          if (geotriggers.length === 0) {
+            log("ℹ️ No geotriggers found", "info");
+          }
+        } catch (error) {
+          log(`❌ Failed to list geotriggers: ${error.message}`, "error");
+        }
+      };
+
+      window.getGeotriggerStats = async function () {
+        if (!geotriggerClient) {
+          log("❌ Geotrigger client not initialized", "error");
+          return;
+        }
+
+        try {
+          log("📊 Fetching geotrigger statistics...", "info");
+          const stats = await geotriggerClient.getGeotriggerStats();
+          log("✅ Geotrigger stats retrieved:", "success");
+          log(`  📈 Total: ${stats.totalGeotriggers}`, "info");
+          log(`  🟢 Active: ${stats.activeGeotriggers}`, "info");
+          log(`  ⚪ Inactive: ${stats.inactiveGeotriggers}`, "info");
+          log(`  🆔 Team ID: ${stats.teamId}`, "info");
+        } catch (error) {
+          log(`❌ Failed to get geotrigger stats: ${error.message}`, "error");
+        }
+      };
+
+      window.createGeotrigger = async function () {
+        if (!geotriggerClient) {
+          log("❌ Geotrigger client not initialized", "error");
+          return;
+        }
+
+        try {
+          const name = document.getElementById("geotriggerName").value.trim();
+          const latitude = parseFloat(document.getElementById("geotriggerLatitude").value);
+          const longitude = parseFloat(document.getElementById("geotriggerLongitude").value);
+          const radius = parseInt(document.getElementById("geotriggerRadius").value);
+
+          if (!name || isNaN(latitude) || isNaN(longitude) || isNaN(radius)) {
+            log("❌ Please fill in all required fields", "error");
+            return;
+          }
+
+          let eventPayload;
+          try {
+            eventPayload = JSON.parse(document.getElementById("geotriggerPayload").value);
+          } catch (e) {
+            log("❌ Invalid JSON in event payload", "error");
+            return;
+          }
+
+          const geotriggerData = {
+            name: name,
+            description: document.getElementById("geotriggerDescription").value.trim(),
+            location: {
+              latitude: latitude,
+              longitude: longitude,
+            },
+            coordinates: `POINT(${longitude} ${latitude})`, // PostGIS format
+            radius: radius,
+            event_type: document.getElementById("geotriggerEventType").value,
+            event_payload: eventPayload,
+            status: document.getElementById("geotriggerStatus").value,
+            team_id: geotriggerClient.teamId,
           };
 
-          console.log("🌍 Creating geotrigger:", triggerData);
+          log("➕ Creating geotrigger...", "info");
+          log(`📝 Location: ${latitude}, ${longitude}`, "info");
+          log(`📏 Radius: ${radius}m`, "info");
+          log(`🎯 Event Type: ${geotriggerData.event_type}`, "info");
 
-          // Use Edge Function for secure geotrigger creation
-          const response = await fetch(`${env.baseUrl}/geotrigger-create`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${window.jwtToken}`,
-            },
-            body: JSON.stringify(triggerData),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.text();
-            console.error("❌ Failed to create geotrigger:", errorData);
-            throw new Error(
-              `Failed to create geotrigger: ${response.statusText} - ${errorData}`
-            );
-          }
-
-          const data = await response.json();
-          const geotrigger = Array.isArray(data) ? data[0] : data;
-
-          console.log("✅ GeoTrigger created:", geotrigger);
-          resultDiv.textContent = `✅ Created: ${JSON.stringify(geotrigger, null, 2)}`;
-          resultDiv.className = "result success";
+          const result = await geotriggerClient.createGeotrigger(geotriggerData);
+          log("✅ Geotrigger created successfully!", "success");
+          log(`📊 Created geotrigger ID: ${result.id || result[0]?.id}`, "success");
         } catch (error) {
-          console.error("❌ Create failed:", error);
-          resultDiv.textContent = `❌ Error: ${error.message}`;
-          resultDiv.className = "result error";
+          log(`❌ Failed to create geotrigger: ${error.message}`, "error");
         }
       };
 
-      // List GeoTriggers function
-      window.listGeoTriggers = async function () {
-        if (!window.jwtToken) {
-          alert("Please initialize SDK first");
+      window.getGeotrigger = async function () {
+        if (!geotriggerClient) {
+          log("❌ Geotrigger client not initialized", "error");
           return;
         }
 
-        const resultDiv = document.getElementById("list-result");
-        resultDiv.textContent = "Fetching geotriggers...";
-        resultDiv.className = "result loading";
-
-        try {
-          console.log("📋 Fetching all geotriggers...");
-
-          // Use Edge Function for secure geotrigger listing
-          const response = await fetch(`${env.baseUrl}/geotrigger-list`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${window.jwtToken}`,
-            },
-            body: JSON.stringify({}), // Empty filters for now
-          });
-
-          if (!response.ok) {
-            const errorData = await response.text();
-            console.error("❌ Failed to fetch geotriggers:", errorData);
-            throw new Error(
-              `Failed to fetch geotriggers: ${response.statusText} - ${errorData}`
-            );
-          }
-
-          const data = await response.json();
-
-          console.log("✅ GeoTriggers listed:", data);
-          resultDiv.textContent = `✅ Found ${data?.length || 0} geotriggers:\n${JSON.stringify(data, null, 2)}`;
-          resultDiv.className = "result success";
-        } catch (error) {
-          console.error("❌ List failed:", error);
-          resultDiv.textContent = `❌ Error: ${error.message}`;
-          resultDiv.className = "result error";
-        }
-      };
-
-      // Delete GeoTrigger function
-      window.deleteGeoTrigger = async function () {
-        if (!window.jwtToken) {
-          alert("Please initialize SDK first");
-          return;
-        }
-
-        const id = document.getElementById("deleteId").value;
+        const id = document.getElementById("managementId").value.trim();
         if (!id) {
-          alert("Please enter a GeoTrigger ID");
+          log("❌ Please enter a geotrigger ID", "error");
           return;
         }
 
-        const resultDiv = document.getElementById("delete-result");
-        resultDiv.textContent = "Deleting geotrigger...";
-        resultDiv.className = "result loading";
-
         try {
-          console.log("🗑️ Deleting geotrigger:", id);
-
-          // Use Edge Function for secure geotrigger deletion
-          const response = await fetch(`${env.baseUrl}/geotrigger-delete`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${window.jwtToken}`,
-            },
-            body: JSON.stringify({ id: id }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.text();
-            console.error("❌ Failed to delete geotrigger:", errorData);
-            throw new Error(
-              `Failed to delete geotrigger: ${response.statusText} - ${errorData}`
-            );
-          }
-
-          console.log("✅ GeoTrigger deleted:", id);
-          resultDiv.textContent = `✅ Deleted geotrigger with ID: ${id}`;
-          resultDiv.className = "result success";
+          log(`🔍 Fetching geotrigger: ${id}`, "info");
+          const geotrigger = await geotriggerClient.getGeotrigger(id);
+          log("✅ Geotrigger retrieved:", "success");
+          log(JSON.stringify(geotrigger, null, 2), "info");
         } catch (error) {
-          console.error("❌ Delete failed:", error);
-          resultDiv.textContent = `❌ Error: ${error.message}`;
-          resultDiv.className = "result error";
+          log(`❌ Failed to get geotrigger: ${error.message}`, "error");
         }
       };
+
+      window.updateGeotriggerStatus = async function () {
+        if (!geotriggerClient) {
+          log("❌ Geotrigger client not initialized", "error");
+          return;
+        }
+
+        const id = document.getElementById("managementId").value.trim();
+        const status = document.getElementById("newStatus").value;
+        if (!id) {
+          log("❌ Please enter a geotrigger ID", "error");
+          return;
+        }
+
+        try {
+          // First, verify the geotrigger exists
+          log(`🔍 Verifying geotrigger exists: ${id}`, "info");
+          const geotrigger = await geotriggerClient.getGeotrigger(id);
+          log(`✅ Found geotrigger: ${geotrigger.config?.name || 'Unnamed'}`, "info");
+          log(`📊 Current status: ${geotrigger.config?.status || 'unknown'}`, "info");
+
+          log(`🔄 Updating geotrigger status: ${id} -> ${status}`, "info");
+          
+          // Debug: Log the exact request being made
+          log(`🔍 Debug: About to call updateGeotriggerStatus with:`, "info");
+          log(`  - ID: ${id}`, "info");
+          log(`  - Status: ${status}`, "info");
+          
+          await geotriggerClient.updateGeotriggerStatus(id, status);
+          log("✅ Geotrigger status updated successfully!", "success");
+          
+          // Verify the update worked
+          const updated = await geotriggerClient.getGeotrigger(id);
+          if (updated.config?.status === status) {
+            log(`✅ Confirmed: Status is now ${updated.config.status}`, "success");
+          } else {
+            log(`⚠️ Warning: Status may not have updated (current: ${updated.config?.status})`, "warning");
+            log("💡 Tip: This might be a database permissions (RLS) issue", "info");
+          }
+        } catch (error) {
+          log(`❌ Failed to update geotrigger status: ${error.message}`, "error");
+          if (error.message.includes("Failed to get geotrigger")) {
+            log("💡 Tip: Check if the geotrigger ID is correct", "info");
+          } else {
+            log("💡 Tip: This might be a database permissions (RLS) issue", "info");
+          }
+        }
+      };
+
+      window.duplicateGeotrigger = async function () {
+        if (!geotriggerClient) {
+          log("❌ Geotrigger client not initialized", "error");
+          return;
+        }
+
+        const id = document.getElementById("managementId").value.trim();
+        if (!id) {
+          log("❌ Please enter a geotrigger ID", "error");
+          return;
+        }
+
+        try {
+          log(`📋 Duplicating geotrigger: ${id}`, "info");
+          const duplicate = await geotriggerClient.duplicateGeotrigger(id);
+          log("✅ Geotrigger duplicated successfully!", "success");
+          log(`📊 New geotrigger ID: ${duplicate.id}`, "success");
+        } catch (error) {
+          log(`❌ Failed to duplicate geotrigger: ${error.message}`, "error");
+        }
+      };
+
+      window.deleteGeotrigger = async function () {
+        if (!geotriggerClient) {
+          log("❌ Geotrigger client not initialized", "error");
+          return;
+        }
+
+        const id = document.getElementById("managementId").value.trim();
+        if (!id) {
+          log("❌ Please enter a geotrigger ID", "error");
+          return;
+        }
+
+        if (!confirm(`Are you sure you want to delete geotrigger ${id}?`)) {
+          return;
+        }
+
+        try {
+          // First, verify the geotrigger exists and get its details
+          log(`🔍 Verifying geotrigger exists: ${id}`, "info");
+          const geotrigger = await geotriggerClient.getGeotrigger(id);
+          log(`✅ Found geotrigger: ${geotrigger.config?.name || 'Unnamed'}`, "info");
+          log(`🆔 Team ID in config: ${geotrigger.config?.team_id}`, "info");
+          log(`🔗 Workflow ID: ${geotrigger.workflow_id}`, "info");
+
+          // Now attempt deletion
+          log(`🗑️ Deleting geotrigger: ${id}`, "info");
+          await geotriggerClient.deleteGeotrigger(id);
+          log("✅ Geotrigger deleted successfully!", "success");
+          
+          // Verify deletion worked
+          try {
+            const verifyResult = await geotriggerClient.getGeotrigger(id);
+            if (!verifyResult || (Array.isArray(verifyResult) && verifyResult.length === 0)) {
+              log("✅ Confirmed: Geotrigger no longer exists", "success");
+            } else {
+              log("⚠️ Warning: Geotrigger still exists after deletion - may be RLS policy issue", "warning");
+            }
+          } catch (verifyError) {
+            log("✅ Confirmed: Geotrigger no longer exists (threw error)", "success");
+          }
+        } catch (error) {
+          log(`❌ Failed to delete geotrigger: ${error.message}`, "error");
+          if (error.message.includes("Failed to get geotrigger")) {
+            log("💡 Tip: Check if the geotrigger ID is correct", "info");
+          } else {
+            log("💡 Tip: This might be a database permissions (RLS) issue", "info");
+          }
+        }
+      };
+
+      window.getCurrentLocation = async function () {
+        if (!geotriggerClient) {
+          log("❌ Geotrigger client not initialized", "error");
+          return;
+        }
+
+        try {
+          log("📍 Getting current location...", "location");
+          const location = await geotriggerClient.getCurrentLocation();
+          currentLocation = location;
+
+          log(`✅ Location: ${location.latitude}, ${location.longitude}`, "location");
+          log(`📊 Accuracy: ${location.accuracy}m`, "location");
+
+          // Update location display
+          document.getElementById("location-display").style.display = "block";
+          document.getElementById("location-info").innerHTML = `
+            <strong>Latitude:</strong> ${location.latitude.toFixed(6)}<br>
+            <strong>Longitude:</strong> ${location.longitude.toFixed(6)}<br>
+            <strong>Accuracy:</strong> ${location.accuracy}m
+          `;
+
+          // Update form fields
+          document.getElementById("geotriggerLatitude").value = location.latitude.toFixed(6);
+          document.getElementById("geotriggerLongitude").value = location.longitude.toFixed(6);
+        } catch (error) {
+          log(`❌ Failed to get location: ${error.message}`, "error");
+        }
+      };
+
+      window.useCurrentLocation = async function () {
+        if (!currentLocation) {
+          log("❌ No current location available. Get location first.", "error");
+          return;
+        }
+
+        document.getElementById("geotriggerLatitude").value = currentLocation.latitude.toFixed(6);
+        document.getElementById("geotriggerLongitude").value = currentLocation.longitude.toFixed(6);
+        log("✅ Current location applied to form", "location");
+      };
+
+      window.startMonitoring = async function () {
+        if (!geotriggerClient) {
+          log("❌ Geotrigger client not initialized", "error");
+          return;
+        }
+
+        if (geotriggerClient.isMonitoring()) {
+          log("⚠️ Already monitoring", "warning");
+          return;
+        }
+
+        try {
+          // Add a test region
+          geotriggerClient.addRegion({
+            id: "test-region",
+            center: {
+              latitude: 37.7749,
+              longitude: -122.4194,
+            },
+            radius: 100,
+            name: "Test Region",
+          });
+
+          log("🔍 Starting geofence monitoring...", "location");
+          await geotriggerClient.startMonitoring((event) => {
+            log(`🎯 Geofence ${event.type}: ${event.regionId}`, "location");
+            log(`📍 Location: ${event.location.latitude}, ${event.location.longitude}`, "location");
+          });
+
+          log("✅ Geofence monitoring started", "location");
+          document.getElementById("stopBtn").disabled = false;
+        } catch (error) {
+          log(`❌ Failed to start monitoring: ${error.message}`, "error");
+        }
+      };
+
+      window.stopMonitoring = function () {
+        if (!geotriggerClient) {
+          log("❌ Geotrigger client not initialized", "error");
+          return;
+        }
+
+        geotriggerClient.stopMonitoring();
+        document.getElementById("stopBtn").disabled = true;
+        log("✅ Geofence monitoring stopped", "location");
+      };
+
+      // Initialize
+      log("🌐 Geotrigger Module Test Ready (Enhanced Version)", "info");
+      log('📋 Enter your credentials and click "Initialize Geotrigger Client"', "info");
+      log("🌍 Full CRUD operations and browser location services available", "info");
     </script>
   </body>
 </html>

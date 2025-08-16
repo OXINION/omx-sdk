@@ -2,79 +2,37 @@
  * @omx-sdk/geotrigger
  * Geotrigger module for creating and managing location-based triggers
  */
-export interface GeotriggerConfig {
-    clientId: string;
-    secretKey: string;
-    baseUrl?: string;
-    timeout?: number;
-}
-export interface Location {
-    latitude: number;
-    longitude: number;
-    accuracy?: number;
-}
-export interface GeofenceRegion {
-    id: string;
-    center: Location;
-    radius: number;
-    name?: string;
-}
-export interface TriggerEvent {
-    regionId: string;
-    type: 'enter' | 'exit';
-    location: Location;
-    timestamp: Date;
-}
+import type { GeofenceRegion, GeotriggerData, GeotriggerFilters, GeotriggerStats, GeotriggerUpdateData, Location, TriggerEvent } from "./types.js";
 export interface GeotriggerOptions {
     enableHighAccuracy?: boolean;
     timeout?: number;
     maximumAge?: number;
 }
-export interface CreateGeoTriggerInput {
-    name: string;
-    coordinates: [number, number];
-    radius: number;
-    event: {
-        type: 'webhook' | 'email';
-        payload: any;
-    };
-}
-export interface GeoTriggerRecord {
-    id: string;
-    name: string;
-    coordinates: string;
-    radius: number;
-    event_type: string;
-    event_payload: any;
-    created_at: string;
-    updated_at: string;
-    status: 'active' | 'inactive';
-}
-export declare class GeoTrigger {
+export declare class GeotriggerClient {
+    private clientId;
+    private secretKey;
+    private teamId;
+    private authToken;
     private regions;
     private isWatching;
     private watchId;
-    constructor(_config?: GeotriggerConfig);
-    /**
-     * Create a new geotrigger
-     */
-    create(input: CreateGeoTriggerInput): Promise<GeoTriggerRecord>;
-    /**
-     * List all geotriggers
-     */
-    list(): Promise<GeoTriggerRecord[]>;
-    /**
-     * Delete a geotrigger
-     */
-    delete(id: string): Promise<void>;
-    /**
-     * Get a specific geotrigger by ID
-     */
-    get(id: string): Promise<GeoTriggerRecord | null>;
-    /**
-     * Update a geotrigger
-     */
-    update(id: string, updates: Partial<CreateGeoTriggerInput>): Promise<GeoTriggerRecord>;
+    constructor(config: {
+        clientId: string;
+        secretKey: string;
+        teamId?: string;
+    });
+    private getAuthToken;
+    private loadTeamIdFromApiKeys;
+    private ensureDefaultWorkflow;
+    private makeRequest;
+    createGeotrigger(data: GeotriggerData): Promise<GeotriggerData>;
+    listGeotriggers(filters?: GeotriggerFilters): Promise<GeotriggerData[]>;
+    deleteGeotrigger(id: string): Promise<void>;
+    getGeotrigger(id: string): Promise<GeotriggerData>;
+    updateGeotrigger(id: string, updates: GeotriggerUpdateData): Promise<GeotriggerData>;
+    updateGeotriggerStatus(id: string, status: "active" | "inactive"): Promise<void>;
+    duplicateGeotrigger(id: string, newName?: string): Promise<GeotriggerData>;
+    getGeotriggerStats(): Promise<GeotriggerStats>;
     /**
      * Add a geofence region to monitor
      */
@@ -111,6 +69,17 @@ export declare class GeoTrigger {
      * Check if the service is currently monitoring
      */
     isMonitoring(): boolean;
+    authenticate(): Promise<string>;
 }
-export declare function createGeotrigger(config?: GeotriggerConfig): GeoTrigger;
+export declare function createGeotriggerClient(config: {
+    clientId: string;
+    secretKey: string;
+    teamId?: string;
+}): GeotriggerClient;
+export declare function createGeotrigger(config: {
+    clientId: string;
+    secretKey: string;
+    teamId?: string;
+}): GeotriggerClient;
+export * from "./types";
 //# sourceMappingURL=index.d.ts.map

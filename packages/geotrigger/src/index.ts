@@ -3,33 +3,27 @@
  * Geotrigger module for creating and managing location-based triggers
  */
 
-import { isClientInitialized, omxClient } from '@omx-sdk/core';
+import type {
+  GeofenceRegion,
+  GeotriggerData,
+  GeotriggerFilters,
+  GeotriggerStats,
+  GeotriggerUpdateData,
+  Location,
+  TriggerEvent,
+} from "./types.js";
 
-export interface GeotriggerConfig {
-  clientId: string;
-  secretKey: string;
-  baseUrl?: string;
-  timeout?: number;
-}
+// Supabase Edge Function base URL
+const SUPABASE_FN_BASE_URL =
+  "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
 
-export interface Location {
-  latitude: number;
-  longitude: number;
-  accuracy?: number;
-}
-
-export interface GeofenceRegion {
-  id: string;
-  center: Location;
-  radius: number; // meters
-  name?: string;
-}
-
-export interface TriggerEvent {
-  regionId: string;
-  type: 'enter' | 'exit';
-  location: Location;
-  timestamp: Date;
+// UUID v4 generation function
+function generateUUID(): string {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
 export interface GeotriggerOptions {
@@ -38,206 +32,358 @@ export interface GeotriggerOptions {
   maximumAge?: number;
 }
 
-// New interfaces for the updated API
-export interface CreateGeoTriggerInput {
-  name: string;
-  coordinates: [number, number]; // [lng, lat]
-  radius: number;
-  event: {
-    type: 'webhook' | 'email';
-    payload: any;
-  };
-}
-
-export interface GeoTriggerRecord {
-  id: string;
-  name: string;
-  coordinates: string; // PostGIS POINT format
-  radius: number;
-  event_type: string;
-  event_payload: any;
-  created_at: string;
-  updated_at: string;
-  status: 'active' | 'inactive';
-}
-
-export class GeoTrigger {
+export class GeotriggerClient {
+  private clientId: string;
+  private secretKey: string;
+  private teamId: string;
+  private authToken: string | null = null;
   private regions: Map<string, GeofenceRegion> = new Map();
   private isWatching = false;
   private watchId: number | null = null;
 
-  constructor(_config?: GeotriggerConfig) {
-    // Config reserved for future use
+  constructor(config: {
+    clientId: string;
+    secretKey: string;
+    teamId?: string;
+  }) {
+    this.clientId = config.clientId;
+    this.secretKey = config.secretKey;
+    this.teamId = config.teamId || generateUUID();
   }
 
-  /**
-   * Create a new geotrigger
-   */
-  async create(input: CreateGeoTriggerInput): Promise<GeoTriggerRecord> {
-    try {
-      if (!isClientInitialized()) {
-        throw new Error(
-          'OMX client not initialized. Call initClient(jwt) first.'
-        );
-      }
-
-      const { name, coordinates, radius, event } = input;
-
-      // Convert coordinates to PostGIS POINT format
-      const point = `POINT(${coordinates[0]} ${coordinates[1]})`;
-
-      console.log('🌍 Creating geotrigger:', {
-        name,
-        coordinates,
-        radius,
-        eventType: event.type,
+  private async getAuthToken(): Promise<string> {
+    if (!this.authToken) {
+      const response = await fetch(`${SUPABASE_FN_BASE_URL}/create-jwt-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientId: this.clientId,
+          secretKey: this.secretKey,
+        }),
       });
 
-      const { data, error } = await omxClient
-        .from('geotriggers')
-        .insert({
-          name,
-          coordinates: point,
-          radius,
-          event_type: event.type,
-          event_payload: event.payload,
-          status: 'active',
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('❌ Failed to create geotrigger:', error);
-        throw new Error(`Failed to create geotrigger: ${error.message}`);
+      if (!response.ok) {
+        throw new Error(`Authentication failed: ${response.statusText}`);
       }
 
-      console.log('✅ Geotrigger created successfully:', data);
-      return data as unknown as GeoTriggerRecord;
-    } catch (error: any) {
-      console.error('❌ Error creating geotrigger:', error);
-      throw error;
-    }
-  }
+      const data = await response.json();
+      this.authToken = data.token;
 
-  /**
-   * List all geotriggers
-   */
-  async list(): Promise<GeoTriggerRecord[]> {
-    try {
-      console.log('📋 Fetching all geotriggers...');
+      // Extract team_id from JWT or find from API keys
+      try {
+        if (this.authToken) {
+          const payload = JSON.parse(atob(this.authToken.split(".")[1]));
+          console.log(`🔍 JWT payload:`, payload);
 
-      const { data, error } = await omxClient
-        .from('geotriggers')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('❌ Failed to fetch geotriggers:', error);
-        throw new Error(`Failed to fetch geotriggers: ${error.message}`);
-      }
-
-      console.log(`✅ Found ${data?.length || 0} geotriggers`);
-      return (data as unknown as GeoTriggerRecord[]) || [];
-    } catch (error: any) {
-      console.error('❌ Error fetching geotriggers:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Delete a geotrigger
-   */
-  async delete(id: string): Promise<void> {
-    try {
-      console.log('🗑️ Deleting geotrigger:', id);
-
-      const { error } = await omxClient
-        .from('geotriggers')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('❌ Failed to delete geotrigger:', error);
-        throw new Error(`Failed to delete geotrigger: ${error.message}`);
-      }
-
-      console.log('✅ Geotrigger deleted successfully');
-    } catch (error: any) {
-      console.error('❌ Error deleting geotrigger:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get a specific geotrigger by ID
-   */
-  async get(id: string): Promise<GeoTriggerRecord | null> {
-    try {
-      console.log('🔍 Fetching geotrigger:', id);
-
-      const { data, error } = await omxClient
-        .from('geotriggers')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No rows returned
-          return null;
+          if (payload.team_id) {
+            this.teamId = payload.team_id;
+            console.log(`🆔 Team ID from JWT: ${this.teamId}`);
+          } else {
+            console.log(`🔍 No team_id in JWT, looking up from API keys...`);
+            await this.loadTeamIdFromApiKeys();
+          }
         }
-        console.error('❌ Failed to fetch geotrigger:', error);
-        throw new Error(`Failed to fetch geotrigger: ${error.message}`);
+      } catch (error) {
+        console.warn(
+          "Failed to decode JWT, looking up team_id from API keys:",
+          error
+        );
+        await this.loadTeamIdFromApiKeys();
       }
+    }
+    return this.authToken!;
+  }
 
-      console.log('✅ Geotrigger found:', data);
-      return data as unknown as GeoTriggerRecord;
-    } catch (error: any) {
-      console.error('❌ Error fetching geotrigger:', error);
-      throw error;
+  private async loadTeamIdFromApiKeys(): Promise<void> {
+    try {
+      console.log(`🔍 Looking up team_id for client_id: ${this.clientId}`);
+
+      const url = `${SUPABASE_FN_BASE_URL}/database-access?table=api_keys&schema=business`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.authToken}`,
+        },
+        body: JSON.stringify({
+          filters: { client_id: this.clientId },
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`🔍 API keys lookup result:`, result);
+
+        if (result.success && result.data && result.data.length > 0) {
+          const apiKey = result.data[0];
+          if (apiKey.team_id) {
+            this.teamId = apiKey.team_id;
+            console.log(`🆔 Team ID from API keys: ${this.teamId}`);
+          } else {
+            console.warn(`⚠️ API key found but no team_id:`, apiKey);
+          }
+        } else {
+          console.warn(`⚠️ No API key found for client_id: ${this.clientId}`);
+          console.warn(`⚠️ Using fallback team_id: ${this.teamId}`);
+        }
+      } else {
+        const errorText = await response.text();
+        console.warn(`⚠️ Failed to lookup API key:`, errorText);
+      }
+    } catch (error) {
+      console.warn("Failed to load team_id from API keys:", error);
+      console.warn(`⚠️ Using fallback team_id: ${this.teamId}`);
     }
   }
 
-  /**
-   * Update a geotrigger
-   */
-  async update(
-    id: string,
-    updates: Partial<CreateGeoTriggerInput>
-  ): Promise<GeoTriggerRecord> {
-    try {
-      console.log('📝 Updating geotrigger:', id, updates);
+  private async ensureDefaultWorkflow(): Promise<string> {
+    const token = await this.getAuthToken();
+    
+    // First, try to find existing default workflow for geotriggers
+    const listUrl = `${SUPABASE_FN_BASE_URL}/database-access?table=workflows&schema=business`;
+    const listResponse = await fetch(listUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        filters: { 
+          team_id: this.teamId,
+          name: "Default Geotrigger Workflow"
+        },
+      }),
+    });
 
-      const updateData: any = {};
-
-      if (updates.name) updateData.name = updates.name;
-      if (updates.radius) updateData.radius = updates.radius;
-      if (updates.coordinates) {
-        updateData.coordinates = `POINT(${updates.coordinates[0]} ${updates.coordinates[1]})`;
+    if (listResponse.ok) {
+      const result = await listResponse.json();
+      if (result.success && result.data && result.data.length > 0) {
+        console.log(`✅ Found existing default workflow: ${result.data[0].id}`);
+        return result.data[0].id;
       }
-      if (updates.event) {
-        updateData.event_type = updates.event.type;
-        updateData.event_payload = updates.event.payload;
-      }
-
-      const { data, error } = await omxClient
-        .from('geotriggers')
-        .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('❌ Failed to update geotrigger:', error);
-        throw new Error(`Failed to update geotrigger: ${error.message}`);
-      }
-
-      console.log('✅ Geotrigger updated successfully:', data);
-      return data as unknown as GeoTriggerRecord;
-    } catch (error: any) {
-      console.error('❌ Error updating geotrigger:', error);
-      throw error;
     }
+
+    // Create default workflow if it doesn't exist
+    console.log(`🔄 Creating default workflow for team: ${this.teamId}`);
+    const createUrl = `${SUPABASE_FN_BASE_URL}/database-access?table=workflows&schema=business`;
+    const createResponse = await fetch(createUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        action: "create",
+        data: {
+          team_id: this.teamId,
+          name: "Default Geotrigger Workflow",
+          description: "Automatically created workflow for geotrigger nodes",
+          status: "active",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      }),
+    });
+
+    if (!createResponse.ok) {
+      throw new Error(`Failed to create default workflow: ${createResponse.statusText}`);
+    }
+
+    const createResult = await createResponse.json();
+    if (!createResult.success) {
+      throw new Error(createResult.error || "Failed to create default workflow");
+    }
+
+    const workflowId = createResult.data.id || createResult.data[0]?.id;
+    console.log(`✅ Created default workflow: ${workflowId}`);
+    return workflowId;
+  }
+
+  private async makeRequest(endpoint: string, data: any = {}): Promise<any> {
+    const token = await this.getAuthToken();
+
+    let url: string;
+    let method = "POST";
+    let body: any;
+
+    switch (endpoint) {
+      case "geotrigger-list":
+        url = `${SUPABASE_FN_BASE_URL}/database-access?table=workflow_nodes&schema=omx`;
+        method = "POST";
+        body = JSON.stringify({
+          filters: { 
+            type: "geotrigger",
+            ...data.filters 
+          },
+          // Note: team_id filtering will need to be handled via workflow join or config filter
+        });
+        break;
+
+      case "geotrigger-create":
+        // Ensure we have a workflow_id
+        const workflowId = data.workflow_id || await this.ensureDefaultWorkflow();
+        
+        url = `${SUPABASE_FN_BASE_URL}/database-access?table=workflow_nodes&schema=omx`;
+        method = "POST";
+        body = JSON.stringify({
+          action: "create",
+          data: {
+            workflow_id: workflowId, // Required field
+            type: "geotrigger",
+            config: {
+              name: data.name,
+              description: data.description,
+              location: data.location,
+              coordinates: data.coordinates,
+              radius: data.radius,
+              event_type: data.event_type,
+              event_payload: data.event_payload,
+              status: data.status || "active",
+              team_id: this.teamId, // Store team_id in config since it's not in the table
+            },
+            position: data.position || { x: 0, y: 0 },
+            node_key: data.node_key || `geotrigger-${Date.now()}`,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        });
+        break;
+
+      case "geotrigger-get":
+        url = `${SUPABASE_FN_BASE_URL}/database-access?table=workflow_nodes&schema=omx`;
+        method = "POST";
+        body = JSON.stringify({
+          filters: { 
+            id: data.id, 
+            type: "geotrigger"
+          },
+        });
+        break;
+
+      case "geotrigger-update":
+        url = `${SUPABASE_FN_BASE_URL}/database-access?table=workflow_nodes&schema=omx`;
+        method = "POST";
+        body = JSON.stringify({
+          action: "update",
+          filters: { 
+            id: data.id, 
+            type: "geotrigger"
+          },
+          data: {
+            config: {
+              ...data.updates,
+              team_id: this.teamId, // Maintain team_id in config
+            },
+            updated_at: new Date().toISOString(),
+          },
+        });
+        break;
+
+      case "geotrigger-delete":
+        url = `${SUPABASE_FN_BASE_URL}/database-access?table=workflow_nodes&schema=omx`;
+        method = "POST";
+        body = JSON.stringify({
+          action: "delete",
+          filters: { 
+            id: data.id, 
+            type: "geotrigger"
+          },
+        });
+        break;
+
+      case "geotrigger-stats":
+        const geotriggers = await this.listGeotriggers();
+        return {
+          totalGeotriggers: geotriggers.length,
+          activeGeotriggers: geotriggers.filter((g: any) => g.config?.status === "active").length,
+          inactiveGeotriggers: geotriggers.filter((g: any) => g.config?.status === "inactive").length,
+          teamId: this.teamId,
+        };
+
+      default:
+        url = `${SUPABASE_FN_BASE_URL}/database-access`;
+        method = "POST";
+        body = JSON.stringify({ ...data, teamId: this.teamId });
+    }
+
+    const response = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ ${endpoint} failed:`, errorText);
+      throw new Error(`${endpoint} failed: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log(`✅ ${endpoint} response:`, result);
+
+    if (result.success !== undefined) {
+      if (!result.success) {
+        throw new Error(result.error || "Database operation failed");
+      }
+      return result.data;
+    }
+
+    return result.data || result;
+  }
+
+  async createGeotrigger(data: GeotriggerData): Promise<GeotriggerData> {
+    return this.makeRequest("geotrigger-create", data);
+  }
+
+  async listGeotriggers(filters: GeotriggerFilters = {}): Promise<GeotriggerData[]> {
+    return this.makeRequest("geotrigger-list", { filters });
+  }
+
+  async deleteGeotrigger(id: string): Promise<void> {
+    await this.makeRequest("geotrigger-delete", { id });
+  }
+
+  async getGeotrigger(id: string): Promise<GeotriggerData> {
+    const result = await this.makeRequest("geotrigger-get", { id });
+    return Array.isArray(result) ? result[0] : result;
+  }
+
+  async updateGeotrigger(
+    id: string,
+    updates: GeotriggerUpdateData
+  ): Promise<GeotriggerData> {
+    return this.makeRequest("geotrigger-update", { id, updates });
+  }
+
+  async updateGeotriggerStatus(
+    id: string,
+    status: "active" | "inactive"
+  ): Promise<void> {
+    await this.updateGeotrigger(id, { config: { status } });
+  }
+
+  async duplicateGeotrigger(id: string, newName?: string): Promise<GeotriggerData> {
+    const original = await this.getGeotrigger(id);
+    const duplicateData = {
+      team_id: this.teamId,
+      name: newName || `${original.name} (Copy)`,
+      description: original.description,
+      location: original.config?.location,
+      coordinates: original.config?.coordinates,
+      radius: original.config?.radius,
+      event_type: original.config?.event_type,
+      event_payload: original.config?.event_payload,
+      status: "inactive" as const,
+    };
+    return this.createGeotrigger(duplicateData);
+  }
+
+  async getGeotriggerStats(): Promise<GeotriggerStats> {
+    return this.makeRequest("geotrigger-stats", {});
   }
 
   // Legacy browser-based monitoring methods (for backward compatibility)
@@ -407,9 +553,29 @@ export class GeoTrigger {
   isMonitoring(): boolean {
     return this.isWatching;
   }
+
+  // Public authentication method for testing
+  async authenticate(): Promise<string> {
+    return this.getAuthToken();
+  }
 }
 
-// Export default instance creation helper
-export function createGeotrigger(config?: GeotriggerConfig): GeoTrigger {
-  return new GeoTrigger(config);
+// Factory function: Create Geotrigger Client based on clientId/secretKey
+export function createGeotriggerClient(config: {
+  clientId: string;
+  secretKey: string;
+  teamId?: string;
+}) {
+  return new GeotriggerClient(config);
 }
+
+// Legacy compatibility factory function (deprecated)
+export function createGeotrigger(config: {
+  clientId: string;
+  secretKey: string;
+  teamId?: string;
+}) {
+  return new GeotriggerClient(config);
+}
+
+export * from "./types";

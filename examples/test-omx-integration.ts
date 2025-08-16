@@ -8,7 +8,7 @@ import OMX from "omx-sdk";
 // Test configuration
 const config = {
   clientId: "f7b294c9-12d1-477b-b454-552dedd28de3",
-  secretKey: "87654321-4321-4321-4321-987654321cba",
+  secretKey: "your-secret-key",
   baseUrl: "https://blhilidnsybhfdmwqsrx.supabase.co",
 };
 

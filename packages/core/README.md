@@ -30,7 +30,7 @@ yarn add @omx-sdk/core
 Create a Supabase Edge Function at `/functions/create-jwt-token/index.ts`:
 
 ```typescript
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
 serve(async (req) => {
   try {
@@ -38,17 +38,17 @@ serve(async (req) => {
 
     // Validate credentials against your database
     const { data: business, error } = await supabaseClient
-      .from('businesses')
-      .select('*')
-      .eq('client_id', clientId)
-      .eq('secret_key', secretKey)
-      .eq('is_active', true)
+      .from("businesses")
+      .select("*")
+      .eq("client_id", clientId)
+      .eq("secret_key", secretKey)
+      .eq("is_active", true)
       .single();
 
     if (error || !business) {
       return new Response(
-        JSON.stringify({ error: 'Invalid client credentials' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "Invalid client credentials" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -59,24 +59,24 @@ serve(async (req) => {
       client_id: business.client_id,
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour
-      iss: 'omx-auth',
+      iss: "omx-auth",
       scope: business.permissions,
     };
 
-    const token = await jwt.sign(payload, Deno.env.get('JWT_SECRET'));
+    const token = await jwt.sign(payload, Deno.env.get("JWT_SECRET"));
 
     return new Response(
       JSON.stringify({
         token: token,
-        token_type: 'Bearer',
+        token_type: "Bearer",
         expires_in: 3600,
       }),
-      { headers: { 'Content-Type': 'application/json' } }
+      { headers: { "Content-Type": "application/json" } }
     );
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 });
@@ -85,14 +85,14 @@ serve(async (req) => {
 ### 2. Basic Usage
 
 ```typescript
-import { CoreAuth, AuthConfig } from '@omx-sdk/core';
+import { CoreAuth, AuthConfig } from "@omx-sdk/core";
 
 // Configure authentication
 const config: AuthConfig = {
-  clientId: 'your-business-client-id',
-  secretKey: 'your-business-secret-key',
+  clientId: "your-business-client-id",
+  secretKey: "your-business-secret-key",
   supabaseFnUrl:
-    'https://your-project.supabase.co/functions/v1/create-jwt-token', // Optional: uses default if not provided
+    "https://your-project.supabase.co/functions/v1/create-jwt-token", // Optional: uses default if not provided
   tokenCacheTtl: 50 * 60 * 1000, // Cache for 50 minutes (optional)
 };
 
@@ -104,16 +104,16 @@ const token = await auth.getToken();
 
 // Make authenticated API requests
 const response = await auth.makeAuthenticatedRequest(
-  'https://api.yourdomain.com/data',
+  "https://api.yourdomain.com/data",
   {
-    method: 'GET',
+    method: "GET",
   }
 );
 
 if (response.success) {
-  console.log('Data:', response.data);
+  console.log("Data:", response.data);
 } else {
-  console.error('Error:', response.error);
+  console.error("Error:", response.error);
 }
 ```
 
@@ -146,9 +146,9 @@ const freshToken = await auth.getToken(true);
 Makes an authenticated HTTP request with automatic token handling.
 
 ```typescript
-const response = await auth.makeAuthenticatedRequest('/api/users', {
-  method: 'POST',
-  body: { name: 'John Doe', email: 'john@example.com' },
+const response = await auth.makeAuthenticatedRequest("/api/users", {
+  method: "POST",
+  body: { name: "John Doe", email: "john@example.com" },
   timeout: 10000,
   retries: 3,
 });
@@ -160,8 +160,8 @@ Returns information about the current cached token.
 
 ```typescript
 const info = auth.getTokenInfo();
-console.log('Token valid:', info.isValid);
-console.log('Expires at:', new Date(info.expiresAt));
+console.log("Token valid:", info.isValid);
+console.log("Expires at:", new Date(info.expiresAt));
 ```
 
 ##### clearToken(): void
@@ -178,8 +178,8 @@ Updates the configuration and clears cached tokens.
 
 ```typescript
 auth.updateConfig({
-  clientId: 'new-client-id',
-  secretKey: 'new-secret-key',
+  clientId: "new-client-id",
+  secretKey: "new-secret-key",
 });
 ```
 
@@ -208,7 +208,7 @@ interface AuthConfig {
 
 ```typescript
 interface ApiRequestOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   headers?: Record<string, string>;
   body?: any;
   timeout?: number; // Request timeout in ms
@@ -227,19 +227,19 @@ import {
   NetworkError,
   RateLimitError,
   ConfigurationError,
-} from '@omx-sdk/core';
+} from "@omx-sdk/core";
 
 try {
-  const response = await auth.makeAuthenticatedRequest('/api/data');
+  const response = await auth.makeAuthenticatedRequest("/api/data");
 } catch (error) {
   if (error instanceof InvalidCredentialsError) {
-    console.error('Invalid credentials:', error.message);
+    console.error("Invalid credentials:", error.message);
   } else if (error instanceof TokenExpiredError) {
-    console.error('Token expired:', error.message);
+    console.error("Token expired:", error.message);
   } else if (error instanceof NetworkError) {
-    console.error('Network error:', error.message);
+    console.error("Network error:", error.message);
   } else if (error instanceof RateLimitError) {
-    console.error('Rate limited. Retry after:', error.details?.retryAfter);
+    console.error("Rate limited. Retry after:", error.details?.retryAfter);
   }
 }
 ```
@@ -249,13 +249,13 @@ try {
 ### Example 1: Basic Token Management
 
 ```typescript
-import { CoreAuth } from '@omx-sdk/core';
+import { CoreAuth } from "@omx-sdk/core";
 
 const auth = new CoreAuth({
-  clientId: 'business-123',
-  secretKey: 'secret-456',
+  clientId: "business-123",
+  secretKey: "secret-456",
   supabaseFnUrl:
-    'https://your-project.supabase.co/functions/v1/create-jwt-token', // Optional
+    "https://your-project.supabase.co/functions/v1/create-jwt-token", // Optional
 });
 
 // Get token
@@ -263,31 +263,31 @@ const token = await auth.getToken();
 
 // Check token status
 const tokenInfo = auth.getTokenInfo();
-console.log('Token expires:', new Date(tokenInfo.expiresAt));
+console.log("Token expires:", new Date(tokenInfo.expiresAt));
 ```
 
 ### Example 2: Making API Requests
 
 ```typescript
 // GET request
-const users = await auth.makeAuthenticatedRequest('/api/users');
+const users = await auth.makeAuthenticatedRequest("/api/users");
 
 // POST request with data
-const newUser = await auth.makeAuthenticatedRequest('/api/users', {
-  method: 'POST',
+const newUser = await auth.makeAuthenticatedRequest("/api/users", {
+  method: "POST",
   body: {
-    name: 'John Doe',
-    email: 'john@example.com',
+    name: "John Doe",
+    email: "john@example.com",
   },
 });
 
 // PUT request with custom headers
-const updated = await auth.makeAuthenticatedRequest('/api/users/123', {
-  method: 'PUT',
+const updated = await auth.makeAuthenticatedRequest("/api/users/123", {
+  method: "PUT",
   headers: {
-    'X-Custom-Header': 'value',
+    "X-Custom-Header": "value",
   },
-  body: { name: 'Jane Doe' },
+  body: { name: "Jane Doe" },
 });
 ```
 
@@ -295,16 +295,16 @@ const updated = await auth.makeAuthenticatedRequest('/api/users/123', {
 
 ```typescript
 try {
-  const response = await auth.makeAuthenticatedRequest('/api/protected');
+  const response = await auth.makeAuthenticatedRequest("/api/protected");
 
   if (response.success) {
-    console.log('Success:', response.data);
+    console.log("Success:", response.data);
   } else {
-    console.error('API Error:', response.error);
+    console.error("API Error:", response.error);
   }
 } catch (error) {
   if (error instanceof NetworkError) {
-    console.error('Network issue - retrying...');
+    console.error("Network issue - retrying...");
     // Implement retry logic
   } else if (error instanceof RateLimitError) {
     const waitTime = error.details?.retryAfter || 60000;
@@ -319,8 +319,8 @@ try {
 ### Custom Retry Logic
 
 ```typescript
-const response = await auth.makeAuthenticatedRequest('/api/critical-data', {
-  method: 'POST',
+const response = await auth.makeAuthenticatedRequest("/api/critical-data", {
+  method: "POST",
   body: criticalData,
   timeout: 30000, // 30 second timeout
   retries: 5, // 5 retry attempts
@@ -334,7 +334,7 @@ const response = await auth.makeAuthenticatedRequest('/api/critical-data', {
 setInterval(() => {
   const tokenInfo = auth.getTokenInfo();
   if (!tokenInfo.isValid) {
-    console.log('Token expired, will refresh on next request');
+    console.log("Token expired, will refresh on next request");
   }
 }, 60000); // Check every minute
 ```
@@ -346,8 +346,8 @@ const businessAuth = new Map();
 
 // Configure multiple businesses
 const businesses = [
-  { id: 'business1', clientId: 'client1', secretKey: 'secret1' },
-  { id: 'business2', clientId: 'client2', secretKey: 'secret2' },
+  { id: "business1", clientId: "client1", secretKey: "secret1" },
+  { id: "business2", clientId: "client2", secretKey: "secret2" },
 ];
 
 businesses.forEach((business) => {
@@ -356,15 +356,14 @@ businesses.forEach((business) => {
     new CoreAuth({
       clientId: business.clientId,
       secretKey: business.secretKey,
-      supabaseUrl: 'https://project.supabase.co',
-      supabaseAnonKey: 'anon-key',
+      supabaseUrl: "https://project.supabase.co",
     })
   );
 });
 
 // Use specific business auth
-const auth = businessAuth.get('business1');
-const data = await auth.makeAuthenticatedRequest('/api/business-data');
+const auth = businessAuth.get("business1");
+const data = await auth.makeAuthenticatedRequest("/api/business-data");
 ```
 
 ## Best Practices

@@ -24,7 +24,7 @@ Modify the main SDK configuration to include Supabase settings:
 // packages/omx-sdk/src/index.ts
 
 // Import the core auth module
-import { CoreAuth, AuthConfig } from '@omx-sdk/core';
+import { CoreAuth, AuthConfig } from "@omx-sdk/core";
 
 // Updated SDK configuration interface
 export interface OMXConfig {
@@ -33,7 +33,6 @@ export interface OMXConfig {
 
   // Supabase configuration
   supabaseUrl: string;
-  supabaseAnonKey: string;
 
   // Optional authentication settings
   tokenCacheTtl?: number;
@@ -95,14 +94,14 @@ export class OMXSDK {
    * Initialize all services
    */
   private async init(): Promise<void> {
-    console.log('Initializing OMX SDK...');
+    console.log("Initializing OMX SDK...");
 
     // Get initial JWT token to validate credentials
     try {
       await this.coreAuth.getToken();
-      console.log('✅ Authentication successful');
+      console.log("✅ Authentication successful");
     } catch (error) {
-      console.error('❌ Authentication failed:', error);
+      console.error("❌ Authentication failed:", error);
       throw error;
     }
 
@@ -128,7 +127,7 @@ export class OMXSDK {
 
     // ... initialize other services
 
-    console.log('OMX SDK initialized successfully');
+    console.log("OMX SDK initialized successfully");
   }
 
   /**
@@ -143,8 +142,8 @@ export class OMXSDK {
    */
   async makeAuthenticatedRequest<T = any>(
     url: string,
-    options?: import('@omx-sdk/core').ApiRequestOptions
-  ): Promise<import('@omx-sdk/core').ApiResponse<T>> {
+    options?: import("@omx-sdk/core").ApiRequestOptions
+  ): Promise<import("@omx-sdk/core").ApiResponse<T>> {
     return this.coreAuth.makeAuthenticatedRequest<T>(url, options);
   }
 
@@ -207,7 +206,7 @@ Update individual packages to use the CoreAuth client:
 ```typescript
 // packages/email/src/index.ts
 
-import { CoreAuth } from '@omx-sdk/core';
+import { CoreAuth } from "@omx-sdk/core";
 
 export interface EmailConfig {
   clientId: string;
@@ -228,12 +227,12 @@ export class EmailClient {
   }
 
   async send(message: EmailMessage): Promise<EmailResponse> {
-    const url = `${this.config.baseUrl || 'https://api.oxinion.com'}/email/send`;
+    const url = `${this.config.baseUrl || "https://api.oxinion.com"}/email/send`;
 
     if (this.authClient) {
       // Use authenticated request if auth client is available
       const response = await this.authClient.makeAuthenticatedRequest(url, {
-        method: 'POST',
+        method: "POST",
         body: message,
       });
 
@@ -244,7 +243,7 @@ export class EmailClient {
       };
     } else {
       // Fallback to direct API call with client credentials
-      console.log('API Call to', url, message);
+      console.log("API Call to", url, message);
       // ... existing implementation
     }
   }
@@ -258,43 +257,43 @@ With the integrated authentication, your examples become simpler:
 ```typescript
 // examples/example.ts
 
-import OMX from 'omx-sdk';
+import OMX from "omx-sdk";
 
 const config = {
-  clientId: 'your-client-id',
-  secretKey: 'your-secret-key',
-  supabaseUrl: 'https://your-project.supabase.co',
-  supabaseAnonKey: 'your-supabase-anon-key',
-  baseUrl: 'https://api.oxinion.com', // Optional, for your API endpoints
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
+  supabaseUrl: "https://your-project.supabase.co",
+  supabaseAnonKey: "your-supabase-anon-key",
+  baseUrl: "https://api.oxinion.com", // Optional, for your API endpoints
 };
 
 async function main() {
   try {
     // Initialize SDK (will authenticate automatically)
     const omx = await OMX.initialize(config);
-    console.log('🚀 OMX SDK initialized and authenticated');
+    console.log("🚀 OMX SDK initialized and authenticated");
 
     // All service calls now use authenticated requests automatically
     const emailResult = await omx.email.send({
-      to: 'user@example.com',
-      subject: 'Test Email',
-      body: 'Hello from OMX SDK with authentication!',
+      to: "user@example.com",
+      subject: "Test Email",
+      body: "Hello from OMX SDK with authentication!",
     });
 
     // Direct authenticated API calls
     const customApiResponse = await omx.makeAuthenticatedRequest(
-      '/api/custom-endpoint',
+      "/api/custom-endpoint",
       {
-        method: 'POST',
-        body: { data: 'custom data' },
+        method: "POST",
+        body: { data: "custom data" },
       }
     );
 
     // Access auth info
     const tokenInfo = omx.auth.getTokenInfo();
-    console.log('Token expires at:', new Date(tokenInfo.expiresAt!));
+    console.log("Token expires at:", new Date(tokenInfo.expiresAt!));
   } catch (error) {
-    console.error('❌ SDK initialization or operation failed:', error);
+    console.error("❌ SDK initialization or operation failed:", error);
   }
 }
 
@@ -310,23 +309,23 @@ Create environment-specific configurations:
 
 export const environments = {
   development: {
-    supabaseUrl: 'https://dev-project.supabase.co',
-    supabaseAnonKey: 'dev-anon-key',
-    baseUrl: 'https://dev-api.yourdomain.com',
+    supabaseUrl: "https://dev-project.supabase.co",
+    supabaseAnonKey: "dev-anon-key",
+    baseUrl: "https://dev-api.yourdomain.com",
   },
   staging: {
-    supabaseUrl: 'https://staging-project.supabase.co',
-    supabaseAnonKey: 'staging-anon-key',
-    baseUrl: 'https://staging-api.yourdomain.com',
+    supabaseUrl: "https://staging-project.supabase.co",
+    supabaseAnonKey: "staging-anon-key",
+    baseUrl: "https://staging-api.yourdomain.com",
   },
   production: {
-    supabaseUrl: 'https://prod-project.supabase.co',
-    supabaseAnonKey: 'prod-anon-key',
-    baseUrl: 'https://api.yourdomain.com',
+    supabaseUrl: "https://prod-project.supabase.co",
+    supabaseAnonKey: "prod-anon-key",
+    baseUrl: "https://api.yourdomain.com",
   },
 };
 
-export function getEnvironmentConfig(env: string = 'development') {
+export function getEnvironmentConfig(env: string = "development") {
   return (
     environments[env as keyof typeof environments] || environments.development
   );
@@ -344,7 +343,7 @@ import {
   AuthenticationError,
   InvalidCredentialsError,
   NetworkError,
-} from '@omx-sdk/core';
+} from "@omx-sdk/core";
 
 export class WebhookClient {
   // ... existing code
@@ -357,9 +356,9 @@ export class WebhookClient {
     try {
       if (this.authClient) {
         const response = await this.authClient.makeAuthenticatedRequest(
-          '/api/webhooks/subscribe',
+          "/api/webhooks/subscribe",
           {
-            method: 'POST',
+            method: "POST",
             body: { url, events, secret },
           }
         );
@@ -368,7 +367,7 @@ export class WebhookClient {
           return response.data;
         } else {
           throw new Error(
-            response.error?.message || 'Failed to create webhook subscription'
+            response.error?.message || "Failed to create webhook subscription"
           );
         }
       }
@@ -377,11 +376,11 @@ export class WebhookClient {
     } catch (error) {
       if (error instanceof InvalidCredentialsError) {
         throw new Error(
-          'Invalid credentials. Please check your clientId and secretKey.'
+          "Invalid credentials. Please check your clientId and secretKey."
         );
       } else if (error instanceof NetworkError) {
         throw new Error(
-          'Network error while creating webhook subscription. Please try again.'
+          "Network error while creating webhook subscription. Please try again."
         );
       } else {
         throw error;
@@ -398,19 +397,19 @@ Update your tests to mock the authentication:
 ```typescript
 // packages/omx-sdk/src/__tests__/omx-sdk.test.ts
 
-import { OMXSDK } from '../index';
-import { CoreAuth } from '@omx-sdk/core';
+import { OMXSDK } from "../index";
+import { CoreAuth } from "@omx-sdk/core";
 
 // Mock CoreAuth
-jest.mock('@omx-sdk/core');
+jest.mock("@omx-sdk/core");
 
-describe('OMXSDK', () => {
+describe("OMXSDK", () => {
   beforeEach(() => {
     const mockCoreAuth = {
-      getToken: jest.fn().mockResolvedValue('mock-token'),
+      getToken: jest.fn().mockResolvedValue("mock-token"),
       makeAuthenticatedRequest: jest.fn().mockResolvedValue({
         success: true,
-        data: { result: 'success' },
+        data: { result: "success" },
       }),
       dispose: jest.fn(),
     };
@@ -418,12 +417,12 @@ describe('OMXSDK', () => {
     (CoreAuth as jest.Mock).mockImplementation(() => mockCoreAuth);
   });
 
-  it('should initialize with authentication', async () => {
+  it("should initialize with authentication", async () => {
     const config = {
-      clientId: 'test-client',
-      secretKey: 'test-secret',
-      supabaseUrl: 'https://test.supabase.co',
-      supabaseAnonKey: 'test-anon-key',
+      clientId: "test-client",
+      secretKey: "test-secret",
+      supabaseUrl: "https://test.supabase.co",
+      supabaseAnonKey: "test-anon-key",
     };
 
     const sdk = await OMXSDK.initialize(config);
