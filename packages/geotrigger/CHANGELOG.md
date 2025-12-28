@@ -1,5 +1,15 @@
 # @omx-sdk/geotrigger
 
+## 1.0.3
+
+### Patch Changes
+
+- Unified SDK release with improved configuration and better service integration.
+  - Renamed main SDK class to `omxClient`.
+  - Added support for custom Supabase credentials in `OMXConfig`.
+  - Integrated `@omx-sdk/campaign` into the unified client.
+  - Fixed various linting and build issues across packages.
+
 ## 1.0.0
 
 ### Major Changes

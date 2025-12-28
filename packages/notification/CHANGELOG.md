@@ -1,4 +1,4 @@
-# @omx-sdk/core
+# @omx-sdk/notification
 
 ## 1.0.2
 
@@ -9,3 +9,6 @@
   - Added support for custom Supabase credentials in `OMXConfig`.
   - Integrated `@omx-sdk/campaign` into the unified client.
   - Fixed various linting and build issues across packages.
+
+- Updated dependencies
+  - @omx-sdk/core@1.0.2

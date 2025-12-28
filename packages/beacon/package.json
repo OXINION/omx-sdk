@@ -1,6 +1,6 @@
 {
   "name": "@omx-sdk/beacon",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Beacon integration functionality for omx-sdk",
   "type": "module",
   "main": "dist/index.js",
