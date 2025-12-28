@@ -1,6 +1,6 @@
 {
   "name": "omx-sdk",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Unified SDK for Oxinion services integration",
   "type": "module",
   "main": "dist/index.js",

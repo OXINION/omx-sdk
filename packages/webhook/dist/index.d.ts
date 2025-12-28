@@ -1,14 +1,11 @@
-export interface WebhookConfig {
-    clientId: string;
-    secretKey: string;
-    baseUrl?: string;
-    timeout?: number;
-    retryAttempts?: number;
-    retryDelay?: number;
-}
+/**
+ * @omx-sdk/webhook
+ * Webhook management functionality for omx-sdk
+ */
+import { createOmxClient } from "@omx-sdk/core";
 export interface WebhookPayload {
     url: string;
-    method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+    method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
     headers?: Record<string, string>;
     data?: unknown;
     timeout?: number;
@@ -42,7 +39,7 @@ export interface WebhookDelivery {
     subscriptionId: string;
     eventId: string;
     url: string;
-    status: 'pending' | 'success' | 'failed' | 'retrying';
+    status: "pending" | "success" | "failed" | "retrying";
     attempts: number;
     maxAttempts: number;
     lastAttemptAt?: Date;
@@ -52,81 +49,25 @@ export interface WebhookDelivery {
 export interface RetryOptions {
     maxAttempts?: number;
     delay?: number;
-    backoff?: 'linear' | 'exponential';
+    backoff?: "linear" | "exponential";
     maxDelay?: number;
 }
 export declare class WebhookClient {
-    private config;
+    private omx;
     private subscriptions;
-    constructor(config: WebhookConfig);
+    constructor(omx: ReturnType<typeof createOmxClient>);
     /**
      * Send a webhook request
      */
     send(payload: WebhookPayload, retryOptions?: RetryOptions): Promise<WebhookResponse>;
-    /**
-     * Create a webhook subscription
-     */
     createSubscription(url: string, events: string[], secret?: string): Promise<WebhookSubscription>;
-    /**
-     * Update a webhook subscription
-     */
-    updateSubscription(id: string, updates: Partial<Pick<WebhookSubscription, 'url' | 'events' | 'secret' | 'active'>>): Promise<WebhookSubscription>;
-    /**
-     * Delete a webhook subscription
-     */
+    updateSubscription(id: string, updates: Partial<Pick<WebhookSubscription, "url" | "events" | "secret" | "active">>): Promise<WebhookSubscription>;
     deleteSubscription(id: string): Promise<boolean>;
-    /**
-     * Get all subscriptions
-     */
     getSubscriptions(): WebhookSubscription[];
-    /**
-     * Get a specific subscription
-     */
-    getSubscription(id: string): WebhookSubscription | undefined;
-    /**
-     * Test a webhook URL
-     */
-    testWebhook(url: string, testEvent?: WebhookEvent): Promise<WebhookResponse>;
-    /**
-     * Verify webhook signature
-     */
-    verifySignature(payload: string, signature: string, secret: string, algorithm?: 'sha256' | 'sha1'): boolean;
-    /**
-     * Generate webhook signature
-     */
-    generateSignature(payload: string, secret: string, algorithm?: 'sha256' | 'sha1'): string;
-    /**
-     * Simulate webhook event delivery
-     */
-    deliverEvent(event: WebhookEvent): Promise<WebhookDelivery[]>;
-    /**
-     * Make HTTP request
-     */
-    private makeRequest;
-    /**
-     * Make API call to webhook service
-     */
-    private makeApiCall;
-    /**
-     * Calculate retry delay with backoff
-     */
     private calculateRetryDelay;
-    /**
-     * Secure string comparison to prevent timing attacks
-     */
-    private secureCompare;
-    /**
-     * Generate unique ID
-     */
-    private generateId;
-    /**
-     * Sleep utility
-     */
-    private sleep;
-    /**
-     * Get client configuration
-     */
-    getConfig(): Readonly<WebhookConfig>;
 }
-export declare function createWebhookClient(config: WebhookConfig): WebhookClient;
+/**
+ * Attacher function: Attach Webhook module to an existing OmxClient
+ */
+export declare function webhook(omx: ReturnType<typeof createOmxClient>): WebhookClient;
 //# sourceMappingURL=index.d.ts.map

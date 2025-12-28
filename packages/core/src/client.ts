@@ -1,63 +1,85 @@
 /**
  * @omx-sdk/core
- * Core client module for OMX SDK with Supabase integration
+ * Core client module for OMX SDK
  */
 
 import { createClient } from "@supabase/supabase-js";
-
-let supabase: ReturnType<typeof createClient>;
-
-/**
- * Initialize Supabase client with JWT token
- */
-export function initClient(
-  jwt: string,
-  options?: { supabaseUrl?: string; anonKey?: string }
-) {
-  const supabaseUrl =
-    options?.supabaseUrl || "https://blhilidnsybhfdmwqsrx.supabase.co";
-  const anonKey =
-    options?.anonKey ||
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c";
-
-  supabase = createClient(supabaseUrl, anonKey, {
-    global: {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    },
-  });
-
-  console.log("✅ Supabase client initialized with JWT token");
-}
+import { CoreAuth } from "./core.js";
+import { OmxConfig } from "./types.js";
 
 /**
- * Proxy to ensure client is initialized before use
+ * Main OMX Client class that manages authentication and shared state
  */
-export const omxClient = new Proxy(
-  {},
-  {
-    get(_, key) {
-      if (!supabase) {
-        throw new Error(
-          "OMX client not initialized. Call OMX.initialize() first."
-        );
-      }
-      return (supabase as any)[key];
-    },
+export class OmxClient {
+  public auth: CoreAuth;
+  private _supabase: ReturnType<typeof createClient> | null = null;
+  public config: OmxConfig;
+
+  constructor(config: OmxConfig) {
+    this.config = config;
+    this.auth = new CoreAuth(config);
   }
-) as ReturnType<typeof createClient>;
 
-/**
- * Check if client is initialized
- */
-export function isClientInitialized(): boolean {
-  return !!supabase;
+  /**
+   * Get an authenticated Supabase client
+   */
+  async getSupabase(): Promise<ReturnType<typeof createClient>> {
+    const jwt = await this.auth.getToken();
+    const supabaseUrl =
+      this.config.supabaseUrl || "https://blhilidnsybhfdmwqsrx.supabase.co";
+    const anonKey =
+      this.config.supabaseAnonKey ||
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c";
+
+    // Re-create client if JWT changed or not yet created
+    // Simplified for now: always create a fresh proxy or check if existing one is valid
+    // For now, let's just create it if it doesn't exist
+    if (!this._supabase) {
+      this._supabase = createClient(supabaseUrl, anonKey, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        },
+      });
+    } else {
+      // Update headers if already exists
+      // Note: supabase-js doesn't easily allow updating headers on an existing client instance's global headers
+      // but we can create a new one as it's lightweight.
+      this._supabase = createClient(supabaseUrl, anonKey, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        },
+      });
+    }
+
+    return this._supabase;
+  }
+
+  /**
+   * Helper to make authenticated requests directly
+   */
+  async request<T = any>(endpoint: string, options: any = {}): Promise<T> {
+    const baseUrl =
+      this.config.baseUrl ||
+      "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
+    const url = endpoint.startsWith("http")
+      ? endpoint
+      : `${baseUrl}/${endpoint}`;
+
+    const response = await this.auth.makeAuthenticatedRequest<T>(url, options);
+    if (!response.success) {
+      throw new Error(response.error?.message || "Request failed");
+    }
+    return response.data as T;
+  }
 }
 
 /**
- * Get current client instance (for debugging)
+ * The sole initializer for the OMX SDK
  */
-export function getClient() {
-  return supabase;
+export function createOmxClient(config: OmxConfig): OmxClient {
+  return new OmxClient(config);
 }

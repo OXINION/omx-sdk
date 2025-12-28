@@ -7,10 +7,10 @@ This directory contains examples demonstrating how to use the OMX SDK.
 The OMX SDK supports the preferred default import pattern:
 
 ```typescript
-import omxClient from "omx-sdk";
+import { createOmxClient } from "omx-sdk";
 
 // Initialize the SDK
-const sdk = await omxClient.initialize({
+const sdk = await createOmxClient.initialize({
   clientId: "your-client-id",
   secretKey: "your-secret-key",
   baseUrl: "https://api.oxinion.com",
@@ -30,7 +30,7 @@ Alternative import patterns are also supported:
 
 ```typescript
 // Named imports
-import { omxClient, createOMXClient } from "omx-sdk";
+import { createOmxClient } from "omx-sdk";
 
 // Individual packages
 import { EmailClient } from "@omx-sdk/email";

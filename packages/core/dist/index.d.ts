@@ -6,7 +6,4 @@ export * from "./client.js";
 export { CoreAuth, SUPABASE_FN_BASE_URL } from "./core.js";
 export * from "./errors.js";
 export * from "./types.js";
-import { CoreAuth } from "./core.js";
-import type { AuthConfig } from "./types.js";
-export declare function createCoreAuth(config: AuthConfig): CoreAuth;
 //# sourceMappingURL=index.d.ts.map

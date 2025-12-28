@@ -1,6 +1,6 @@
 {
   "name": "@omx-sdk/campaign",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Campaign management module for OMX SDK",
   "type": "module",
   "main": "./dist/index.js",
@@ -20,7 +20,9 @@
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@omx-sdk/core": "workspace:*"
+  },
   "devDependencies": {
     "@types/jest": "^29.0.0",
     "jest": "^29.0.0",

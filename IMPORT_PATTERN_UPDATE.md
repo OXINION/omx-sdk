@@ -33,9 +33,9 @@
 ## 🚀 **Now You Can Use:**
 
 ```typescript
-import omxClient from "omx-sdk";
+import { createOmxClient } from "omx-sdk";
 
-const sdk = await omxClient.initialize({
+const sdk = await createOmxClient.initialize({
   clientId: "your-client-id",
   secretKey: "your-secret-key",
   baseUrl: "https://api.oxinion.com",
@@ -61,8 +61,8 @@ await sdk.webhook.createSubscription(/* ... */);
 
 ## 📊 **Current Status**
 
-- ✅ **Import Pattern**: `import { omxClient } from 'omx-sdk';` or `import omxClient from 'omx-sdk';` works perfectly
-- ✅ **Static Initialize**: `omxClient.initialize(config)` returns initialized SDK instance
+- ✅ **Import Pattern**: `import { createOmxClient } from 'omx-sdk';` works perfectly
+- ✅ **Static Initialize**: `createOmxClient.initialize(config)` returns initialized SDK instance
 - ✅ **All Services**: Geotrigger, Email, Webhook, Beacon, Push Notification available
 - ✅ **Workspace Setup**: Examples can properly import and use the SDK
 - ✅ **Build Pipeline**: All packages compile and link correctly
@@ -72,8 +72,8 @@ await sdk.webhook.createSubscription(/* ... */);
 
 Your OMX SDK now supports the exact import pattern you requested:
 
-- **Simple and clean**: `import { omxClient } from 'omx-sdk';`
-- **Async initialization**: `await omxClient.initialize(config)`
+- **Simple and clean**: `import { createOmxClient } from 'omx-sdk';`
+- **Async initialization**: `await createOmxClient.initialize(config)`
 - **All services accessible**: `sdk.email`, `sdk.geotrigger`, etc.
 - **Type-safe**: Full TypeScript support with proper type inference
 - **Well-documented**: Examples and usage patterns clearly explained

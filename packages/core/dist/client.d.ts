@@ -1,25 +1,29 @@
 /**
  * @omx-sdk/core
- * Core client module for OMX SDK with Supabase integration
+ * Core client module for OMX SDK
  */
 import { createClient } from "@supabase/supabase-js";
+import { CoreAuth } from "./core.js";
+import { OmxConfig } from "./types.js";
 /**
- * Initialize Supabase client with JWT token
+ * Main OMX Client class that manages authentication and shared state
  */
-export declare function initClient(jwt: string, options?: {
-    supabaseUrl?: string;
-    anonKey?: string;
-}): void;
+export declare class OmxClient {
+    auth: CoreAuth;
+    private _supabase;
+    config: OmxConfig;
+    constructor(config: OmxConfig);
+    /**
+     * Get an authenticated Supabase client
+     */
+    getSupabase(): Promise<ReturnType<typeof createClient>>;
+    /**
+     * Helper to make authenticated requests directly
+     */
+    request<T = any>(endpoint: string, options?: any): Promise<T>;
+}
 /**
- * Proxy to ensure client is initialized before use
+ * The sole initializer for the OMX SDK
  */
-export declare const omxClient: ReturnType<typeof createClient>;
-/**
- * Check if client is initialized
- */
-export declare function isClientInitialized(): boolean;
-/**
- * Get current client instance (for debugging)
- */
-export declare function getClient(): import("@supabase/supabase-js").SupabaseClient<unknown, never, import("@supabase/supabase-js/dist/module/lib/types").GenericSchema>;
+export declare function createOmxClient(config: OmxConfig): OmxClient;
 //# sourceMappingURL=client.d.ts.map

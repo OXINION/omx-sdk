@@ -40,9 +40,9 @@ npm install @omx-sdk/email @omx-sdk/geotrigger @omx-sdk/webhook
 ### Basic Usage
 
 ```typescript
-import { omxClient } from "@omx-sdk/core";
+import { createOmxClient } from "@omx-sdk/core";
 
-const omx = new omxClient({
+const omx = await createOmxClient.initialize({
   clientId: "your-client-id",
   secretKey: "your-secret-key",
 });
@@ -99,7 +99,7 @@ const geotrigger = new GeotriggerClient({
 ```bash
 omx-sdk/
 ├── packages/
-│   ├── omx-sdk/                    # 📦 Unified SDK (exports OmxClient)
+│   ├── omx-sdk/                    # 📦 Unified SDK
 │   ├── core/                       # 🔧 Auth, Config, HttpClient
 │   ├── email/                      # 📧 @omx-sdk/email
 │   ├── geotrigger/                 # 📍 @omx-sdk/geotrigger

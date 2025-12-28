@@ -1,10 +1,8 @@
-export interface BeaconConfig {
-    clientId: string;
-    secretKey: string;
-    baseUrl?: string;
-    timeout?: number;
-    scanInterval?: number;
-}
+/**
+ * @omx-sdk/beacon
+ * Beacon management functionality for omx-sdk
+ */
+import { createOmxClient } from "@omx-sdk/core";
 export interface BeaconDevice {
     id: string;
     uuid: string;
@@ -12,7 +10,7 @@ export interface BeaconDevice {
     minor: number;
     rssi: number;
     distance?: number;
-    proximity: 'immediate' | 'near' | 'far' | 'unknown';
+    proximity: "immediate" | "near" | "far" | "unknown";
     lastSeen: Date;
     name?: string;
     manufacturer?: string;
@@ -25,7 +23,7 @@ export interface BeaconRegion {
     name?: string;
 }
 export interface BeaconEvent {
-    type: 'enter' | 'exit' | 'range';
+    type: "enter" | "exit" | "range";
     region: BeaconRegion;
     beacons?: BeaconDevice[];
     timestamp: Date;
@@ -49,7 +47,7 @@ export interface BeaconAnalytics {
     uptime: number;
 }
 export declare class BeaconManager {
-    private config;
+    private omx;
     private regions;
     private discoveredBeacons;
     private isScanning;
@@ -57,95 +55,27 @@ export declare class BeaconManager {
     private eventListeners;
     private analytics;
     private startTime;
-    constructor(config: BeaconConfig);
-    /**
-     * Initialize beacon scanning (request permissions, etc.)
-     */
+    constructor(omx: ReturnType<typeof createOmxClient>);
     initialize(): Promise<void>;
-    /**
-     * Add a beacon region to monitor
-     */
     addRegion(region: BeaconRegion): void;
-    /**
-     * Remove a beacon region
-     */
     removeRegion(regionId: string): boolean;
-    /**
-     * Get all registered regions
-     */
     getRegions(): BeaconRegion[];
-    /**
-     * Start scanning for beacons
-     */
     startScanning(options?: ScanOptions): Promise<void>;
-    /**
-     * Stop scanning for beacons
-     */
     stopScanning(): void;
-    /**
-     * Get all discovered beacons
-     */
     getDiscoveredBeacons(): BeaconDevice[];
-    /**
-     * Get beacons in a specific region
-     */
     getBeaconsInRegion(regionId: string): BeaconDevice[];
-    /**
-     * Add event listener
-     */
-    addEventListener(eventType: 'enter' | 'exit' | 'range', listener: (event: BeaconEvent) => void): void;
-    /**
-     * Remove event listener
-     */
-    removeEventListener(eventType: 'enter' | 'exit' | 'range', listener: (event: BeaconEvent) => void): void;
-    /**
-     * Get beacon analytics
-     */
+    addEventListener(eventType: "enter" | "exit" | "range", listener: (event: BeaconEvent) => void): void;
+    removeEventListener(eventType: "enter" | "exit" | "range", listener: (event: BeaconEvent) => void): void;
     getAnalytics(): BeaconAnalytics;
-    /**
-     * Clear discovered beacons
-     */
-    clearDiscoveredBeacons(): void;
-    /**
-     * Estimate distance from RSSI
-     */
-    estimateDistance(rssi: number, txPower?: number): number;
-    /**
-     * Get proximity category from distance
-     */
-    getProximity(distance: number): 'immediate' | 'near' | 'far' | 'unknown';
-    /**
-     * Check if the manager is currently scanning
-     */
-    isCurrentlyScanning(): boolean;
-    /**
-     * Perform a single scan cycle
-     */
     private performScan;
-    /**
-     * Generate simulated beacon data for testing
-     */
     private generateSimulatedBeacons;
-    /**
-     * Find matching region for a beacon
-     */
     private findMatchingRegion;
-    /**
-     * Emit event to listeners
-     */
     private emitEvent;
-    /**
-     * Clean up beacons not seen recently
-     */
     private cleanupOldBeacons;
-    /**
-     * Sleep utility
-     */
-    private sleep;
-    /**
-     * Get client configuration
-     */
-    getConfig(): Readonly<BeaconConfig>;
+    isCurrentlyScanning(): boolean;
 }
-export declare function createBeaconManager(config: BeaconConfig): BeaconManager;
+/**
+ * Attacher function: Attach Beacon module to an existing OmxClient
+ */
+export declare function beacon(omx: ReturnType<typeof createOmxClient>): BeaconManager;
 //# sourceMappingURL=index.d.ts.map

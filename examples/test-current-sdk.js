@@ -78,7 +78,7 @@ async function testCurrentSDK() {
       console.log("\n4. 💡 Integration Pattern:");
       console.log(`
 // Step 1: Initialize SDK
-const sdk = await omxClient.initialize({
+const sdk = await createOmxClient.initialize({
   clientId: '${config.clientId}',
   secretKey: '${config.secretKey.substring(0, 8)}...'
 });
@@ -131,7 +131,7 @@ function showImplementationPlan() {
   console.log("=".repeat(50));
 
   console.log("\n🔨 What needs to be built:");
-  console.log("1. 🏗️ Complete omxClient.initialize() method");
+  console.log("1. 🏗️ Complete SDK initialization method");
   console.log("   - Real authentication with Supabase");
   console.log("   - Token management and storage");
   console.log("   - Service initialization");

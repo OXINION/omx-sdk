@@ -1,6 +1,6 @@
 {
   "name": "@omx-sdk/notification",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Premium notification transport for Oxinion Marketing Exchange",
   "type": "module",
   "main": "dist/index.js",
@@ -42,14 +42,13 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "dependencies": {
+    "@omx-sdk/core": "workspace:*"
+  },
   "devDependencies": {
-    "@omx-sdk/core": "workspace:*",
     "@types/jest": "^29.0.0",
     "jest": "^29.0.0",
     "ts-jest": "^29.0.0",
     "typescript": "^5.0.0"
-  },
-  "peerDependencies": {
-    "@omx-sdk/core": "workspace:*"
   }
 }

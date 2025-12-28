@@ -1,10 +1,8 @@
-export interface EmailConfig {
-    clientId: string;
-    secretKey: string;
-    baseUrl?: string;
-    timeout?: number;
-    defaultFrom?: string;
-}
+/**
+ * @omx-sdk/email
+ * Email sending functionality for omx-sdk
+ */
+import { createOmxClient } from "@omx-sdk/core";
 export interface EmailAttachment {
     filename: string;
     content: string | Uint8Array;
@@ -39,8 +37,8 @@ export interface BulkEmailOptions {
     delay?: number;
 }
 export declare class EmailClient {
-    private config;
-    constructor(config: EmailConfig);
+    private omx;
+    constructor(omx: ReturnType<typeof createOmxClient>);
     /**
      * Send a single email
      */
@@ -53,58 +51,16 @@ export declare class EmailClient {
      * Send email using a template
      */
     sendTemplate(template: EmailTemplate, recipients: string | string[], variables?: Record<string, unknown>): Promise<EmailResponse>;
-    /**
-     * Validate email address format
-     */
     validateEmail(email: string): boolean;
-    /**
-     * Get delivery status of an email
-     */
-    getDeliveryStatus(messageId: string): Promise<{
-        messageId: string;
-        status: "pending" | "sent" | "delivered" | "failed" | "bounced";
-        timestamp?: Date;
-        error?: string;
-    }>;
-    /**
-     * Get email statistics
-     */
-    getStats(dateFrom?: Date, dateTo?: Date): Promise<{
-        sent: number;
-        delivered: number;
-        failed: number;
-        bounced: number;
-        opened?: number;
-        clicked?: number;
-    }>;
-    /**
-     * Validate email message
-     */
+    getDeliveryStatus(messageId: string): Promise<any>;
+    getStats(dateFrom?: Date, dateTo?: Date): Promise<any>;
     private validateMessage;
-    /**
-     * Prepare email payload for API
-     */
     private preparePayload;
-    /**
-     * Make API call (simulated)
-     */
-    private makeApiCall;
-    /**
-     * Process email template
-     */
     private processTemplate;
-    /**
-     * Generate unique message ID
-     */
     private generateMessageId;
-    /**
-     * Sleep utility
-     */
-    private sleep;
-    /**
-     * Get client configuration
-     */
-    getConfig(): Readonly<EmailConfig>;
 }
-export declare function createEmailClient(config: EmailConfig): EmailClient;
+/**
+ * Attacher function: Attach Email module to an existing OmxClient
+ */
+export declare function email(omx: ReturnType<typeof createOmxClient>): EmailClient;
 //# sourceMappingURL=index.d.ts.map

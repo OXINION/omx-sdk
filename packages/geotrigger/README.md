@@ -26,33 +26,36 @@ npm publish packages/geotrigger
 ## 🚀 Installation
 
 ```bash
-npm install @omx-sdk/geotrigger
+npm install @omx-sdk/geotrigger @omx-sdk/core
 ```
 
-> **Note**: @omx-sdk/geotrigger has zero dependencies and works standalone.
+> **Note**: @omx-sdk/geotrigger requires @omx-sdk/core for client functionality.
 
 ## 🏗️ Architecture Pattern
 
-This module uses **Edge Function-only architecture** for complete independence:
+This module uses the **attachment pattern** with the core OMX client:
 
-- **Zero dependencies**: No external package dependencies
-- **Hardcoded constants**: Supabase Edge Function URL included directly
-- **Authentication via Edge Functions**: Uses clientId/secretKey → JWT token flow
-- **All operations** go through Edge Functions for security
+- **Core dependency**: Depends on `@omx-sdk/core` for client functionality
+- **Attachment pattern**: Attaches to existing `OmxClient` instances
+- **Shared authentication**: Uses core client's JWT token management
+- **All operations** go through the core client's request system
 
 ## 📖 Usage
 
-### Basic Setup (Zero Dependency Architecture)
+### Basic Setup (Attachment Pattern)
 
 ```typescript
-import { createGeotriggerClient } from "@omx-sdk/geotrigger";
+import { createOmxClient } from "@omx-sdk/core";
+import { geoTrigger } from "@omx-sdk/geotrigger";
 
-// Create geotrigger client with your credentials
-const geotriggerClient = createGeotriggerClient({
+// Create core client with your credentials
+const omx = createOmxClient({
   clientId: "your-client-id",
   secretKey: "your-secret-key",
-  teamId: "your-team-id", // optional, defaults to auto-generated
 });
+
+// Attach geotrigger service
+const geotriggerClient = geoTrigger(omx);
 
 // All operations are automatically authenticated via Edge Functions
 const geotriggers = await geotriggerClient.listGeotriggers();
@@ -149,90 +152,94 @@ console.log("Current location:", location);
 geotriggerClient.stopMonitoring();
 ```
 
-## 🔧 Class Structure
+## 🔧 Architecture
+
+### Attachment Pattern
+
+The geotrigger module uses the attachment pattern to work with the core OMX client:
+
+```typescript
+import { createOmxClient } from "@omx-sdk/core";
+import { geoTrigger } from "@omx-sdk/geotrigger";
+
+// Core client handles authentication and configuration
+const omx = createOmxClient({
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
+});
+
+// Geotrigger service attaches to the core client
+const geotriggerClient = geoTrigger(omx);
+```
 
 ### GeotriggerClient Class
 
 ```typescript
 export class GeotriggerClient {
-  private clientId: string;
-  private secretKey: string;
-  private teamId: string;
-  private authToken: string | null = null;
+  private omx: ReturnType<typeof createOmxClient>;
+  private teamId: string | null = null;
 
-  constructor(config: {
-    clientId: string;
-    secretKey: string;
-    teamId?: string;
-  }) {
-    this.clientId = config.clientId;
-    this.secretKey = config.secretKey;
-    this.teamId = config.teamId || generateUUID();
+  constructor(omx: ReturnType<typeof createOmxClient>) {
+    this.omx = omx;
   }
 
-  // All methods automatically authenticate via Edge Functions
+  // All methods use the core client for authentication
   // All operations go through Edge Functions (no direct DB access)
 }
 ```
 
-### Factory Function
+### Attachment Function
 
 ```typescript
-export function createGeotriggerClient(config: {
-  clientId: string;
-  secretKey: string;
-  teamId?: string;
-}): GeotriggerClient {
-  return new GeotriggerClient(config);
+export function geoTrigger(omx: ReturnType<typeof createOmxClient>): GeotriggerClient {
+  return new GeotriggerClient(omx);
 }
 ```
 
 ## 🏗️ Edge Function Architecture
 
-### All Operations (Edge Function)
+### All Operations (via Core Client)
 
 ```typescript
-// All operations go through Edge Functions with JWT authentication
-private async makeRequest(endpoint: string, data: any = {}): Promise<any> {
-  const token = await this.getAuthToken();
+// All operations go through the core client with automatic JWT authentication
+async createGeotrigger(data: GeotriggerData): Promise<GeotriggerData> {
+  const teamId = await this.getTeamId();
+  const workflowId = data.workflow_id || (await this.ensureDefaultWorkflow());
 
-  const response = await fetch(`${SUPABASE_FN_BASE_URL}/${endpoint}`, {
+  return this.omx.request("database-access?table=workflow_nodes&schema=omx", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+    body: {
+      action: "create",
+      data: {
+        workflow_id: workflowId,
+        type: "geotrigger",
+        config: {
+          name: data.name,
+          description: data.description,
+          location: data.location,
+          coordinates: data.coordinates,
+          radius: data.radius,
+          event_type: data.event_type,
+          event_payload: data.event_payload,
+          status: data.status || "active",
+          team_id: teamId,
+        },
+        position: data.position || { x: 0, y: 0 },
+        node_key: data.node_key || `geotrigger-${Date.now()}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
     },
-    body: JSON.stringify({ ...data, teamId: this.teamId }),
   });
-
-  if (!response.ok) {
-    throw new Error(`${endpoint} failed: ${response.statusText}`);
-  }
-
-  return await response.json();
 }
 ```
 
 ### Authentication Flow
 
 ```typescript
-// JWT token is automatically managed
-private async getAuthToken(): Promise<string> {
-  if (!this.authToken) {
-    const response = await fetch(`${SUPABASE_FN_BASE_URL}/create-jwt-token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        clientId: this.clientId,
-        secretKey: this.secretKey,
-      }),
-    });
-
-    const data = await response.json();
-    this.authToken = data.token;
-  }
-  return this.authToken;
-}
+// Authentication is handled by the core OMX client
+// The geotrigger client uses this.omx.request() for all operations
+// JWT tokens are automatically managed by the core client
 ```
 
 ## 📁 Module Structure
@@ -247,12 +254,12 @@ packages/geotrigger/
 
 ## 🔧 Dependencies
 
-### Zero Dependencies
+### Core Dependency
 
 ```typescript
-// No external dependencies - completely standalone
-const SUPABASE_FN_BASE_URL =
-  "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
+// Requires @omx-sdk/core for client functionality
+import { createOmxClient } from "@omx-sdk/core";
+import { geoTrigger } from "@omx-sdk/geotrigger";
 ```
 
 ### TypeScript Interfaces
@@ -463,6 +470,15 @@ FOR ALL USING (
 All methods throw descriptive errors:
 
 ```typescript
+import { createOmxClient } from "@omx-sdk/core";
+import { geoTrigger } from "@omx-sdk/geotrigger";
+
+const omx = createOmxClient({
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
+});
+const geotriggerClient = geoTrigger(omx);
+
 try {
   const geotrigger = await geotriggerClient.createGeotrigger(data);
 } catch (error) {
@@ -493,15 +509,15 @@ try {
 
 ## 🎯 Architecture Benefits
 
-- **✅ Zero dependencies**: Completely standalone package
-- **✅ High security**: All operations via authenticated Edge Functions
-- **✅ Easy to use**: Simple clientId/secretKey authentication
+- **✅ Consistent patterns**: Uses standard OMX SDK attachment pattern
+- **✅ High security**: All operations via authenticated requests through core client
+- **✅ Shared authentication**: Leverages core client's JWT token management
 - **✅ Type safety**: Full TypeScript support
 - **✅ Auto team isolation**: All operations automatically filtered by teamId
-- **✅ Pure Edge Function**: No direct database access from client
-- **✅ JWT token management**: Automatic authentication token handling
-- **✅ No version conflicts**: No dependency on other OMX SDK packages
+- **✅ No direct database access**: All operations through Edge Functions
+- **✅ Unified configuration**: Configuration managed by core client
 - **✅ Browser compatibility**: Real-time location monitoring support
+- **✅ Code reuse**: Shares authentication and request logic with other modules
 
 ## API Reference
 

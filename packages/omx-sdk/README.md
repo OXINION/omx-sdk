@@ -24,10 +24,10 @@ This will install the main SDK along with all sub-packages:
 ### Unified SDK Usage
 
 ```typescript
-import { omxClient } from "omx-sdk";
+import { createOmxClient } from "omx-sdk";
 
 // Create SDK instance with global configuration
-const sdk = new omxClient({
+const sdk = createOmxClient({
   clientId: "your-client-id",
   secretKey: "your-secret-key",
   baseUrl: "https://api.oxinion.com", // optional global base URL
@@ -50,7 +50,7 @@ const sdk = new omxClient({
 await sdk.initialize();
 
 // Use individual services
-const geotrigger = sdk.geotrigger;
+const geotrigger = sdk.geoTrigger;
 const email = sdk.email;
 const webhook = sdk.webhook;
 const beacon = sdk.beacon;
@@ -66,24 +66,28 @@ npm install @omx-sdk/email @omx-sdk/geotrigger @omx-sdk/notification
 ```
 
 ```typescript
-import { createEmailClient } from "@omx-sdk/email";
-import { createGeotriggerClient } from "@omx-sdk/geotrigger";
-import { createNotificationClient } from "@omx-sdk/notification";
+import { createOmxClient } from "@omx-sdk/core";
+import { email } from "@omx-sdk/email";
+import { geoTrigger } from "@omx-sdk/geotrigger";
+import { notification } from "@omx-sdk/notification";
 
-const emailClient = createEmailClient({ clientId: "id", secretKey: "key" });
-const notification = createNotificationClient(() => "your-jwt-token", {
-  baseUrl: "...",
-});
+// Create the core client
+const omx = createOmxClient({ clientId: "id", secretKey: "key" });
+
+// Attach individual services
+const emailClient = email(omx);
+const geotriggerClient = geoTrigger(omx);
+const notificationClient = notification(omx, { baseUrl: "..." });
 ```
 
 ## Complete Example
 
 ```typescript
-import { createOMXClient } from "omx-sdk";
+import { createOmxClient } from "omx-sdk";
 
 async function main() {
   // Initialize the SDK
-  const sdk = createOMXClient({
+  const sdk = createOmxClient({
     clientId: "your-client-id",
     secretKey: "your-secret-key",
     notification: {
@@ -96,7 +100,7 @@ async function main() {
   await sdk.initialize();
 
   // 1. Setup geofencing
-  const geotrigger = sdk.geotrigger;
+  const geotrigger = sdk.geoTrigger;
   // ... geofencing logic
 
   // 2. Setup notifications
@@ -185,7 +189,7 @@ await sdk.notification.sendIntent({
 MIT
 
 ```typescript
-const sdk = createOMXClient({
+const sdk = createOmxClient({
   clientId: "your-client-id",
   secretKey: "your-secret-key",
 
@@ -249,7 +253,7 @@ console.log("Service status:", health.services);
 const analytics = sdk.getAnalytics();
 
 console.log("Analytics:", {
-  geotrigger: analytics.geotrigger.isMonitoring,
+  geoTrigger: analytics.geoTrigger.isMonitoring,
   webhook: analytics.webhook.subscriptions,
   beacon: analytics.beacon?.totalBeacons,
   notification: analytics.notification,
@@ -264,14 +268,14 @@ Location-based triggers and geofencing.
 
 ```typescript
 // Add geofence region
-sdk.geotrigger.addRegion({
+sdk.geoTrigger.addRegion({
   id: "office",
   center: { latitude: 37.7749, longitude: -122.4194 },
   radius: 100,
 });
 
 // Start monitoring
-await sdk.geotrigger.startMonitoring((event) => {
+await sdk.geoTrigger.startMonitoring((event) => {
   console.log("Geofence event:", event.type, event.regionId);
 });
 ```
@@ -389,16 +393,16 @@ try {
 The SDK is built with TypeScript and provides full type definitions:
 
 ```typescript
-import { omxClient, OMXConfig, GeotriggerEvent } from "omx-sdk";
+import { createOmxClient, OMXConfig, GeotriggerEvent } from "omx-sdk";
 
 const config: OMXConfig = {
   clientId: "your-client-id",
   secretKey: "your-secret-key",
 };
 
-const sdk = new omxClient(config);
+const sdk = createOmxClient(config);
 
-sdk.geotrigger.startMonitoring((event: GeotriggerEvent) => {
+sdk.geoTrigger.startMonitoring((event: GeotriggerEvent) => {
   // Full type safety
   console.log(event.type, event.regionId);
 });

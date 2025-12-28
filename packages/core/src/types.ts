@@ -5,9 +5,18 @@
 export interface AuthConfig {
   clientId: string;
   secretKey: string;
+  baseUrl?: string;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
   tokenCacheTtl?: number; // Time to live in milliseconds (default: 55 minutes)
   maxRetries?: number; // Maximum retry attempts (default: 3)
   retryDelay?: number; // Delay between retries in milliseconds (default: 1000)
+}
+
+export interface OmxConfig extends AuthConfig {
+  // Service-specific configurations can be added here if needed,
+  // but preferably they are passed to the attacher functions or handled via the OmxClient.
+  [key: string]: any;
 }
 
 export interface JWTToken {
@@ -32,7 +41,7 @@ export interface AuthError {
 }
 
 export interface ApiRequestOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   headers?: Record<string, string>;
   body?: any;
   timeout?: number;

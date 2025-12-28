@@ -4,9 +4,15 @@
 export interface AuthConfig {
     clientId: string;
     secretKey: string;
+    baseUrl?: string;
+    supabaseUrl?: string;
+    supabaseAnonKey?: string;
     tokenCacheTtl?: number;
     maxRetries?: number;
     retryDelay?: number;
+}
+export interface OmxConfig extends AuthConfig {
+    [key: string]: any;
 }
 export interface JWTToken {
     access_token: string;
@@ -27,7 +33,7 @@ export interface AuthError {
     statusCode?: number;
 }
 export interface ApiRequestOptions {
-    method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+    method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
     headers?: Record<string, string>;
     body?: any;
     timeout?: number;

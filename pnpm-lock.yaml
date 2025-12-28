@@ -59,6 +59,10 @@ importers:
         version: 5.4.19(@types/node@24.0.12)
 
   packages/beacon:
+    dependencies:
+      '@omx-sdk/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@types/jest':
         specifier: ^29.0.0
@@ -74,6 +78,10 @@ importers:
         version: 5.8.3
 
   packages/campaign:
+    dependencies:
+      '@omx-sdk/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@types/jest':
         specifier: ^29.0.0
@@ -111,6 +119,10 @@ importers:
         version: 5.8.3
 
   packages/email:
+    dependencies:
+      '@omx-sdk/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@types/jest':
         specifier: ^29.0.0
@@ -126,6 +138,10 @@ importers:
         version: 5.8.3
 
   packages/geotrigger:
+    dependencies:
+      '@omx-sdk/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@types/jest':
         specifier: ^29.0.0
@@ -196,6 +212,10 @@ importers:
         version: 5.8.3
 
   packages/webhook:
+    dependencies:
+      '@omx-sdk/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@types/jest':
         specifier: ^29.0.0

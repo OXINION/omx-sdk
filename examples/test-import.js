@@ -1,7 +1,7 @@
 // Simple test to verify the import pattern works
-import omxClient from "omx-sdk";
+import { createOmxClient } from "omx-sdk";
 
-console.log("🚀 Testing omxClient import pattern...");
+console.log("🚀 Testing OMX SDK import pattern...");
 
 // Configuration for testing
 const config = {
@@ -17,14 +17,12 @@ const config = {
 };
 
 // Test the static initialize method
-omxClient
-  .initialize(config)
+createOmxClient(config)
   .then((sdk) => {
-    console.log("✅ omxClient initialized successfully!");
-    console.log(`📦 SDK Version: ${omxClient.VERSION}`);
-
+    console.log("✅ OMX SDK initialized successfully!");
+    console.log(`📦 SDK Version: ${sdk.VERSION}`);
     console.log("\n🔧 Available Services:");
-    console.log(`  📍 Geotrigger: ${sdk.geotrigger ? "✅" : "❌"}`);
+    console.log(`  📍 Geotrigger: ${sdk.geoTrigger ? "✅" : "❌"}`);
     console.log(`  📧 Email: ${sdk.email ? "✅" : "❌"}`);
     console.log(`  🪝 Webhook: ${sdk.webhook ? "✅" : "❌"}`);
     console.log(`  📡 Beacon: ${sdk.beacon ? "✅" : "❌"}`);
@@ -45,7 +43,7 @@ omxClient
 
     console.log("\n🎉 Import pattern test completed successfully!");
     console.log(
-      '💡 You can now use: import omxClient from "omx-sdk"; in your TypeScript/ES6 code'
+      '💡 You can now use: import { createOmxClient } from "omx-sdk"; in your TypeScript/ES6 code'
     );
   })
   .catch((error) => {

@@ -1,10 +1,9 @@
-export interface EmailConfig {
-  clientId: string;
-  secretKey: string;
-  baseUrl?: string;
-  timeout?: number;
-  defaultFrom?: string;
-}
+/**
+ * @omx-sdk/email
+ * Email sending functionality for omx-sdk
+ */
+
+import { createOmxClient } from "@omx-sdk/core";
 
 export interface EmailAttachment {
   filename: string;
@@ -45,10 +44,10 @@ export interface BulkEmailOptions {
 }
 
 export class EmailClient {
-  private config: EmailConfig;
+  private omx: ReturnType<typeof createOmxClient>;
 
-  constructor(config: EmailConfig) {
-    this.config = config;
+  constructor(omx: ReturnType<typeof createOmxClient>) {
+    this.omx = omx;
   }
 
   /**
@@ -56,14 +55,16 @@ export class EmailClient {
    */
   async send(message: EmailMessage): Promise<EmailResponse> {
     try {
-      // Validate required fields
       this.validateMessage(message);
 
-      // Prepare the email payload
       const payload = this.preparePayload(message);
 
-      // Simulate API call
-      await this.makeApiCall("/send", payload);
+      // Use OmxClient to make the authenticated request
+      // Assuming there's an email-sending edge function
+      await this.omx.request("email-service", {
+        method: "POST",
+        body: payload,
+      });
 
       return {
         success: true,
@@ -92,16 +93,12 @@ export class EmailClient {
 
     for (let i = 0; i < messages.length; i += batchSize) {
       const batch = messages.slice(i, i + batchSize);
-
-      // Process batch in parallel
       const batchPromises = batch.map((message) => this.send(message));
       const batchResults = await Promise.all(batchPromises);
-
       results.push(...batchResults);
 
-      // Add delay between batches (except for the last batch)
       if (i + batchSize < messages.length && delay > 0) {
-        await this.sleep(delay);
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
 
@@ -118,13 +115,11 @@ export class EmailClient {
   ): Promise<EmailResponse> {
     try {
       const mergedVariables = { ...template.variables, ...variables };
-
-      // Simulate template processing
       const processedContent = this.processTemplate(template, mergedVariables);
 
       const message: EmailMessage = {
         to: recipients,
-        from: this.config.defaultFrom,
+        from: this.omx.config.email?.defaultFrom,
         subject: processedContent.subject,
         body: processedContent.body,
         html: processedContent.html,
@@ -141,110 +136,45 @@ export class EmailClient {
     }
   }
 
-  /**
-   * Validate email address format
-   */
   validateEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
-  /**
-   * Get delivery status of an email
-   */
-  async getDeliveryStatus(messageId: string): Promise<{
-    messageId: string;
-    status: "pending" | "sent" | "delivered" | "failed" | "bounced";
-    timestamp?: Date;
-    error?: string;
-  }> {
-    try {
-      // Simulate API call to check status
-      await this.makeApiCall(`/status/${messageId}`);
-
-      return {
-        messageId,
-        status: "delivered",
-        timestamp: new Date(),
-      };
-    } catch (error) {
-      return {
-        messageId,
-        status: "failed",
-        error: error instanceof Error ? error.message : "Status check failed",
-      };
-    }
+  async getDeliveryStatus(messageId: string): Promise<any> {
+    return this.omx.request(`email-service/status/${messageId}`);
   }
 
-  /**
-   * Get email statistics
-   */
-  async getStats(
-    dateFrom?: Date,
-    dateTo?: Date
-  ): Promise<{
-    sent: number;
-    delivered: number;
-    failed: number;
-    bounced: number;
-    opened?: number;
-    clicked?: number;
-  }> {
-    try {
-      // Simulate API call
-      await this.makeApiCall("/stats", { dateFrom, dateTo });
-
-      return {
-        sent: 100,
-        delivered: 95,
-        failed: 3,
-        bounced: 2,
-        opened: 80,
-        clicked: 15,
-      };
-    } catch (error) {
-      throw new Error(
-        `Failed to get stats: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    }
+  async getStats(dateFrom?: Date, dateTo?: Date): Promise<any> {
+    return this.omx.request("email-service/stats", {
+      method: "POST",
+      body: { dateFrom, dateTo },
+    });
   }
 
-  /**
-   * Validate email message
-   */
   private validateMessage(message: EmailMessage): void {
     if (!message.to || (Array.isArray(message.to) && message.to.length === 0)) {
       throw new Error("Recipient email is required");
     }
-
     if (!message.subject || message.subject.trim() === "") {
       throw new Error("Email subject is required");
     }
-
     if (!message.body || message.body.trim() === "") {
       throw new Error("Email body is required");
     }
 
-    // Validate email addresses
     const recipients = Array.isArray(message.to) ? message.to : [message.to];
     for (const email of recipients) {
       if (!this.validateEmail(email)) {
         throw new Error(`Invalid email address: ${email}`);
       }
     }
-
-    if (message.from && !this.validateEmail(message.from)) {
-      throw new Error(`Invalid from email address: ${message.from}`);
-    }
   }
 
-  /**
-   * Prepare email payload for API
-   */
   private preparePayload(message: EmailMessage): Record<string, unknown> {
     return {
       to: message.to,
-      from: message.from || this.config.defaultFrom,
+      from: message.from || this.omx.config.email?.defaultFrom,
       subject: message.subject,
       body: message.body,
       html: message.html,
@@ -256,66 +186,25 @@ export class EmailClient {
     };
   }
 
-  /**
-   * Make API call (simulated)
-   */
-  private async makeApiCall(
-    endpoint: string,
-    data?: unknown
-  ): Promise<unknown> {
-    const url = `${this.config.baseUrl || "https://api.oxinion.com/email"}${endpoint}`;
-
-    // Simulate API call delay
-    await this.sleep(Math.random() * 500 + 100);
-
-    console.log(`API Call to ${url}`, data);
-
-    // Simulate occasional failures for testing
-    if (Math.random() < 0.05) {
-      throw new Error("API call failed");
-    }
-
-    return { success: true };
-  }
-
-  /**
-   * Process email template
-   */
   private processTemplate(
     template: EmailTemplate,
     variables: Record<string, unknown>
-  ): { subject: string; body: string; html?: string } {
-    // Simple template variable replacement
-    const subject = `Template: ${template.name}`;
-    const body = `Hello, this is a template email with variables: ${JSON.stringify(variables)}`;
-    const html = `<h1>Template: ${template.name}</h1><p>Variables: ${JSON.stringify(variables)}</p>`;
-
-    return { subject, body, html };
+  ) {
+    return {
+      subject: `Template: ${template.name}`,
+      body: `Hello, this is a template email with variables: ${JSON.stringify(variables)}`,
+      html: `<h1>Template: ${template.name}</h1><p>Variables: ${JSON.stringify(variables)}</p>`,
+    };
   }
 
-  /**
-   * Generate unique message ID
-   */
   private generateMessageId(): string {
     return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
-
-  /**
-   * Sleep utility
-   */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  /**
-   * Get client configuration
-   */
-  getConfig(): Readonly<EmailConfig> {
-    return { ...this.config };
-  }
 }
 
-// Export default instance creation helper
-export function createEmailClient(config: EmailConfig): EmailClient {
-  return new EmailClient(config);
+/**
+ * Attacher function: Attach Email module to an existing OmxClient
+ */
+export function email(omx: ReturnType<typeof createOmxClient>): EmailClient {
+  return new EmailClient(omx);
 }

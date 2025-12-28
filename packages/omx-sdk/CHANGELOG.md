@@ -1,5 +1,17 @@
 # omx-sdk
 
+## 1.0.4
+
+### Patch Changes
+
+- Fix package publishing issues:
+  - Fixed campaign package ES module directory import error
+  - Fixed notification package dependency configuration
+  - Updated omx-sdk version constant to match package.json
+- Updated dependencies
+  - @omx-sdk/campaign@1.0.13
+  - @omx-sdk/notification@1.0.3
+
 ## 1.0.3
 
 ### Patch Changes
