@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OMX SDK Notification Demo</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .section {
+        margin: 20px 0;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #f9f9f9;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover { background: #0056b3; }
+      button:disabled { background: #ccc; cursor: not-allowed; }
+      .success { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 10px 0; }
+      .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin: 10px 0; }
+      .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 4px; margin: 10px 0; }
+      pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+      .input-group { margin: 10px 0; }
+      .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+      .input-group input, .input-group textarea, .input-group select {
+        width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;
+      }
+      .input-group textarea { height: 80px; resize: vertical; }
+    </style>
+  </head>
+  <body>
+    <h1>🚀 OMX SDK Notification Demo</h1>
+    <p>This demo tests the notification functionality by calling the Edge Function directly.</p>
+
+    <div class="section">
+      <h2>Configuration</h2>
+      <div class="input-group">
+        <label for="clientId">Client ID:</label>
+        <input type="text" id="clientId" value="" placeholder="your_client_id">
+      </div>
+      <div class="input-group">
+        <label for="secretKey">Secret Key:</label>
+        <input type="password" id="secretKey" value="" placeholder="your_secret_key">
+      </div>
+      <div class="input-group">
+        <label for="baseUrl">Notification Service URL:</label>
+        <input type="text" id="baseUrl" value="https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1/notification-service" readonly>
+      </div>
+      <button onclick="initializeOMX()">Initialize OMX Client</button>
+      <button onclick="testHealth()" id="testHealthBtn" disabled>Test Health</button>
+      <div id="config-status"></div>
+      <div id="health-status"></div>
+    </div>
+
+    <div class="section">
+      <h2>Device Registration</h2>
+      <div class="input-group">
+        <label for="devicePlatform">Platform:</label>
+        <select id="devicePlatform">
+          <option value="web">Web</option>
+          <option value="ios">iOS</option>
+          <option value="android">Android</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="deviceToken">Device Token:</label>
+        <input type="text" id="deviceToken" value="" placeholder="FCM/APNs token (auto-generated for demo)">
+      </div>
+      <button onclick="registerDevice()" disabled>Register Device</button>
+      <div id="device-status"></div>
+    </div>
+
+    <div class="section">
+      <h2>Category Subscriptions</h2>
+      <div class="input-group">
+        <label for="categories">Categories (comma-separated):</label>
+        <input type="text" id="categories" value="news,promotions,alerts" placeholder="e.g., news,promotions,alerts">
+      </div>
+      <button onclick="subscribeCategories()" disabled>Subscribe</button>
+      <button onclick="unsubscribeCategories()" disabled>Unsubscribe</button>
+      <div id="subscription-status"></div>
+    </div>
+
+    <div class="section">
+      <h2>Send Notification Intent</h2>
+      <div class="input-group">
+        <label for="notificationTitle">Title:</label>
+        <input type="text" id="notificationTitle" value="Special Offer!" placeholder="Notification title">
+      </div>
+      <div class="input-group">
+        <label for="notificationBody">Body:</label>
+        <textarea id="notificationBody" placeholder="Notification message">Get 20% off your next purchase with code OMX20</textarea>
+      </div>
+      <div class="input-group">
+        <label for="notificationCategories">Target Categories:</label>
+        <input type="text" id="notificationCategories" value="promotions" placeholder="e.g., promotions,news">
+      </div>
+      <div class="input-group">
+        <label for="notificationData">Additional Data (JSON):</label>
+        <textarea id="notificationData" placeholder='{"key": "value"}'>{
+  "discountCode": "OMX20",
+  "expires": "2025-12-31"
+}</textarea>
+      </div>
+      <button onclick="sendNotificationIntent()" disabled>Send Intent</button>
+      <div id="notification-status"></div>
+    </div>
+
+    <div class="section">
+      <h2>Test Results</h2>
+      <button onclick="clearResults()">Clear Results</button>
+      <div id="test-results"></div>
+    </div>
+
+    <script>
+      const API_BASE = "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1/notification-service";
+      let results = [];
+      let omxClient = null;
+      let authToken = null;
+
+      function logResult(operation, success, data, error = null) {
+        const timestamp = new Date().toLocaleTimeString();
+        results.push({ timestamp, operation, success, data, error });
+        updateTestResults();
+      }
+
+      function updateTestResults() {
+        const resultsDiv = document.getElementById('test-results');
+        if (results.length === 0) {
+          resultsDiv.innerHTML = '<div class="info">No test results yet.</div>';
+          return;
+        }
+        const resultsHTML = results.map(result => {
+          const statusClass = result.success ? 'success' : 'error';
+          const icon = result.success ? '✅' : '❌';
+          return `
+            <div class="${statusClass}" style="margin: 5px 0;">
+              <strong>${icon} ${result.timestamp} - ${result.operation}</strong>
+              ${result.error ? `<div>Error: ${result.error}</div>` : ''}
+              ${result.data ? `<pre>${JSON.stringify(result.data, null, 2)}</pre>` : ''}
+            </div>
+          `;
+        }).join('');
+        resultsDiv.innerHTML = resultsHTML;
+      }
+
+      function generateDeviceToken() {
+        return 'demo-token-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+      }
+
+      document.getElementById('deviceToken').value = generateDeviceToken();
+
+      function enableActionButtons() {
+        document.querySelectorAll('button[onclick*="register"], button[onclick*="subscribe"], button[onclick*="send"]').forEach(btn => {
+          btn.disabled = false;
+        });
+      }
+
+      function checkAuthentication() {
+        if (!authToken) {
+          throw new Error('Please initialize OMX client first with your credentials');
+        }
+      }
+
+      async function initializeOMX() {
+        const status = document.getElementById('config-status');
+        try {
+          status.innerHTML = '<div class="info">🔄 Initializing OMX client...</div>';
+          
+          const clientId = document.getElementById('clientId').value;
+          const secretKey = document.getElementById('secretKey').value;
+          
+          if (!clientId || !secretKey) {
+            throw new Error('Please enter both Client ID and Secret Key');
+          }
+
+          // Get JWT token using the create-jwt-token Edge Function
+          const authResponse = await fetch(`${API_BASE.replace('/notification-service', '/create-jwt-token')}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ clientId, secretKey })
+          });
+
+          if (authResponse.ok) {
+            const authData = await authResponse.json();
+            authToken = authData.token;
+            console.log('Successfully authenticated with real JWT token');
+          } else {
+            const errorData = await authResponse.json();
+            throw new Error(errorData.error || `Authentication failed: ${authResponse.status}`);
+          }
+
+          status.innerHTML = '<div class="success">✅ OMX client initialized successfully!</div>';
+          document.getElementById('testHealthBtn').disabled = false;
+          enableActionButtons();
+          logResult('OMX Client Initialization', true, { clientId, hasToken: !!authToken });
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to initialize OMX client: ${error.message}</div>`;
+          logResult('OMX Client Initialization', false, null, error.message);
+        }
+      }
+
+      async function makeRequest(endpoint, method = 'GET', body = null) {
+        const options = { 
+          method, 
+          headers: { 
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` })
+          } 
+        };
+        if (body) options.body = JSON.stringify(body);
+        
+        const response = await fetch(`${API_BASE}/${endpoint}`, options);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || data.message || `HTTP ${response.status}`);
+        return data;
+      }
+
+      window.testHealth = async function() {
+        const status = document.getElementById('health-status');
+        try {
+          status.innerHTML = '<div class="info">🔄 Testing health...</div>';
+          const result = await makeRequest('health');
+          status.innerHTML = '<div class="success">✅ Service is healthy!</div>';
+          logResult('Health Check', true, result);
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Health check failed: ${error.message}</div>`;
+          logResult('Health Check', false, null, error.message);
+        }
+      };
+
+      window.registerDevice = async function() {
+        const status = document.getElementById('device-status');
+        try {
+          checkAuthentication();
+          status.innerHTML = '<div class="info">🔄 Registering device...</div>';
+          const platform = document.getElementById('devicePlatform').value;
+          let deviceToken = document.getElementById('deviceToken').value;
+          if (!deviceToken) {
+            deviceToken = generateDeviceToken();
+            document.getElementById('deviceToken').value = deviceToken;
+          }
+          const result = await makeRequest('register-device', 'POST', { platform, deviceToken });
+          status.innerHTML = '<div class="success">✅ Device registered successfully!</div>';
+          logResult('Device Registration', true, result);
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to register device: ${error.message}</div>`;
+          logResult('Device Registration', false, null, error.message);
+        }
+      };
+
+      window.subscribeCategories = async function() {
+        const status = document.getElementById('subscription-status');
+        try {
+          checkAuthentication();
+          status.innerHTML = '<div class="info">🔄 Subscribing to categories...</div>';
+          const categoriesInput = document.getElementById('categories').value;
+          const deviceToken = document.getElementById('deviceToken').value;
+          const categories = categoriesInput.split(',').map(c => c.trim()).filter(c => c);
+          if (categories.length === 0) throw new Error('Please enter at least one category');
+          if (!deviceToken) throw new Error('Please register a device first');
+          const result = await makeRequest('subscribe-categories', 'POST', { categories, deviceToken });
+          status.innerHTML = `<div class="success">✅ Subscribed to categories: ${categories.join(', ')}</div>`;
+          logResult('Category Subscription', true, result);
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to subscribe: ${error.message}</div>`;
+          logResult('Category Subscription', false, null, error.message);
+        }
+      };
+
+      window.unsubscribeCategories = async function() {
+        const status = document.getElementById('subscription-status');
+        try {
+          checkAuthentication();
+          status.innerHTML = '<div class="info">🔄 Unsubscribing from categories...</div>';
+          const categoriesInput = document.getElementById('categories').value;
+          const deviceToken = document.getElementById('deviceToken').value;
+          const categories = categoriesInput.split(',').map(c => c.trim()).filter(c => c);
+          if (categories.length === 0) throw new Error('Please enter at least one category');
+          if (!deviceToken) throw new Error('Please register a device first');
+          const result = await makeRequest('unsubscribe-categories', 'POST', { categories, deviceToken });
+          status.innerHTML = `<div class="success">✅ Unsubscribed from categories: ${categories.join(', ')}</div>`;
+          logResult('Category Unsubscription', true, result);
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to unsubscribe: ${error.message}</div>`;
+          logResult('Category Unsubscription', false, null, error.message);
+        }
+      };
+
+      window.sendNotificationIntent = async function() {
+        const status = document.getElementById('notification-status');
+        try {
+          checkAuthentication();
+          status.innerHTML = '<div class="info">🔄 Sending notification intent...</div>';
+          const title = document.getElementById('notificationTitle').value;
+          const body = document.getElementById('notificationBody').value;
+          const categoriesInput = document.getElementById('notificationCategories').value;
+          const dataInput = document.getElementById('notificationData').value;
+          if (!title || !body) throw new Error('Please enter both title and body');
+          const categories = categoriesInput.split(',').map(c => c.trim()).filter(c => c);
+          let data = null;
+          if (dataInput.trim()) {
+            try { data = JSON.parse(dataInput); } 
+            catch (e) { throw new Error('Invalid JSON in additional data field'); }
+          }
+          const intent = { title, body, categories, ...(data && { data }) };
+          const result = await makeRequest('send-intent', 'POST', intent);
+          status.innerHTML = '<div class="success">✅ Notification intent sent successfully!</div>';
+          logResult('Send Notification Intent', true, result);
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to send intent: ${error.message}</div>`;
+          logResult('Send Notification Intent', false, null, error.message);
+        }
+      };
+
+      window.clearResults = function() {
+        results = [];
+        updateTestResults();
+      };
+
+      updateTestResults();
+      setTimeout(testHealth, 500);
+    </script>
+  </body>
+</html>

@@ -2,12 +2,8 @@
 > omx-sdk-examples@1.0.0 build /Users/brandonha/Documents/GitHub/omx-sdk/examples
 > tsc && vite build
 
-auth-test.ts(1,17): error TS6059: File '/Users/brandonha/Documents/GitHub/omx-sdk/packages/omx-sdk/src/index.ts' is not under 'rootDir' '/Users/brandonha/Documents/GitHub/omx-sdk/examples'. 'rootDir' is expected to contain all source files.
-  The file is in the program because:
-    Imported via 'omx-sdk' from file '/Users/brandonha/Documents/GitHub/omx-sdk/examples/auth-test.ts'
-    Imported via "omx-sdk" from file '/Users/brandonha/Documents/GitHub/omx-sdk/examples/test-omx-integration.ts'
-auth-test.ts(1,17): error TS6307: File '/Users/brandonha/Documents/GitHub/omx-sdk/packages/omx-sdk/src/index.ts' is not listed within the file list of project '/Users/brandonha/Documents/GitHub/omx-sdk/examples/tsconfig.json'. Projects must list all files or use an 'include' pattern.
-  The file is in the program because:
-    Imported via 'omx-sdk' from file '/Users/brandonha/Documents/GitHub/omx-sdk/examples/auth-test.ts'
-    Imported via "omx-sdk" from file '/Users/brandonha/Documents/GitHub/omx-sdk/examples/test-omx-integration.ts'
- ELIFECYCLE  Command failed with exit code 2.
+[36mvite v5.4.19 [32mbuilding for production...[36m[39m
+[2K[1Gtransforming (1) [2mdemo.html[2K[1G[32m✓[39m 4 modules transformed.
+[2K[1Grendering chunks (1)...[2K[1G[2K[1Gcomputing gzip size (0)...[2K[1Gcomputing gzip size (1)...[2K[1Gcomputing gzip size (2)...[2K[1G[2mdist/[22m[32mdemo.html                [39m[1m[2m 3.45 kB[22m[1m[22m[2m │ gzip: 1.05 kB[22m
+[2mdist/[22m[2massets/[22m[36mdemo-tEQvqSv0.js  [39m[1m[2m11.76 kB[22m[1m[22m[2m │ gzip: 2.57 kB[22m
+[32m✓ built in 61ms[39m

@@ -3,7 +3,7 @@
  * Tests the unified SDK with real authentication and geotrigger functionality
  */
 
-import OMX from "omx-sdk";
+import omxClient from "omx-sdk";
 
 // Test configuration
 const config = {
@@ -24,7 +24,7 @@ async function testOMXInitialization() {
 
   try {
     // Initialize the SDK with authentication
-    const sdk = await OMX.initialize(config);
+    const sdk = await omxClient.initialize(config);
 
     console.log("✅ OMX SDK initialized successfully!");
     console.log("📦 Available services:", Object.keys(sdk));
@@ -235,10 +235,10 @@ async function main() {
     console.log("\n💡 Example Usage Pattern:");
     console.log("=".repeat(30));
     console.log(`
-import OMX from 'omx-sdk';
+import omxClient from 'omx-sdk';
 
 // Initialize with credentials
-const sdk = await OMX.initialize({
+const sdk = await omxClient.initialize({
   clientId: 'your-client-id',
   secretKey: 'your-secret-key'
 });

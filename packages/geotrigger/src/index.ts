@@ -139,7 +139,7 @@ export class GeotriggerClient {
 
   private async ensureDefaultWorkflow(): Promise<string> {
     const token = await this.getAuthToken();
-    
+
     // First, try to find existing default workflow for geotriggers
     const listUrl = `${SUPABASE_FN_BASE_URL}/database-access?table=workflows&schema=business`;
     const listResponse = await fetch(listUrl, {
@@ -149,9 +149,9 @@ export class GeotriggerClient {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        filters: { 
+        filters: {
           team_id: this.teamId,
-          name: "Default Geotrigger Workflow"
+          name: "Default Geotrigger Workflow",
         },
       }),
     });
@@ -187,12 +187,16 @@ export class GeotriggerClient {
     });
 
     if (!createResponse.ok) {
-      throw new Error(`Failed to create default workflow: ${createResponse.statusText}`);
+      throw new Error(
+        `Failed to create default workflow: ${createResponse.statusText}`
+      );
     }
 
     const createResult = await createResponse.json();
     if (!createResult.success) {
-      throw new Error(createResult.error || "Failed to create default workflow");
+      throw new Error(
+        createResult.error || "Failed to create default workflow"
+      );
     }
 
     const workflowId = createResult.data.id || createResult.data[0]?.id;
@@ -212,18 +216,19 @@ export class GeotriggerClient {
         url = `${SUPABASE_FN_BASE_URL}/database-access?table=workflow_nodes&schema=omx`;
         method = "POST";
         body = JSON.stringify({
-          filters: { 
+          filters: {
             type: "geotrigger",
-            ...data.filters 
+            ...data.filters,
           },
           // Note: team_id filtering will need to be handled via workflow join or config filter
         });
         break;
 
-      case "geotrigger-create":
+      case "geotrigger-create": {
         // Ensure we have a workflow_id
-        const workflowId = data.workflow_id || await this.ensureDefaultWorkflow();
-        
+        const workflowId =
+          data.workflow_id || (await this.ensureDefaultWorkflow());
+
         url = `${SUPABASE_FN_BASE_URL}/database-access?table=workflow_nodes&schema=omx`;
         method = "POST";
         body = JSON.stringify({
@@ -249,14 +254,15 @@ export class GeotriggerClient {
           },
         });
         break;
+      }
 
       case "geotrigger-get":
         url = `${SUPABASE_FN_BASE_URL}/database-access?table=workflow_nodes&schema=omx`;
         method = "POST";
         body = JSON.stringify({
-          filters: { 
-            id: data.id, 
-            type: "geotrigger"
+          filters: {
+            id: data.id,
+            type: "geotrigger",
           },
         });
         break;
@@ -266,9 +272,9 @@ export class GeotriggerClient {
         method = "POST";
         body = JSON.stringify({
           action: "update",
-          filters: { 
-            id: data.id, 
-            type: "geotrigger"
+          filters: {
+            id: data.id,
+            type: "geotrigger",
           },
           data: {
             config: {
@@ -285,21 +291,26 @@ export class GeotriggerClient {
         method = "POST";
         body = JSON.stringify({
           action: "delete",
-          filters: { 
-            id: data.id, 
-            type: "geotrigger"
+          filters: {
+            id: data.id,
+            type: "geotrigger",
           },
         });
         break;
 
-      case "geotrigger-stats":
+      case "geotrigger-stats": {
         const geotriggers = await this.listGeotriggers();
         return {
           totalGeotriggers: geotriggers.length,
-          activeGeotriggers: geotriggers.filter((g: any) => g.config?.status === "active").length,
-          inactiveGeotriggers: geotriggers.filter((g: any) => g.config?.status === "inactive").length,
+          activeGeotriggers: geotriggers.filter(
+            (g: any) => g.config?.status === "active"
+          ).length,
+          inactiveGeotriggers: geotriggers.filter(
+            (g: any) => g.config?.status === "inactive"
+          ).length,
           teamId: this.teamId,
         };
+      }
 
       default:
         url = `${SUPABASE_FN_BASE_URL}/database-access`;
@@ -339,7 +350,9 @@ export class GeotriggerClient {
     return this.makeRequest("geotrigger-create", data);
   }
 
-  async listGeotriggers(filters: GeotriggerFilters = {}): Promise<GeotriggerData[]> {
+  async listGeotriggers(
+    filters: GeotriggerFilters = {}
+  ): Promise<GeotriggerData[]> {
     return this.makeRequest("geotrigger-list", { filters });
   }
 
@@ -366,7 +379,10 @@ export class GeotriggerClient {
     await this.updateGeotrigger(id, { config: { status } });
   }
 
-  async duplicateGeotrigger(id: string, newName?: string): Promise<GeotriggerData> {
+  async duplicateGeotrigger(
+    id: string,
+    newName?: string
+  ): Promise<GeotriggerData> {
     const original = await this.getGeotrigger(id);
     const duplicateData = {
       team_id: this.teamId,
@@ -423,7 +439,7 @@ export class GeotriggerClient {
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported by this browser'));
+        reject(new Error("Geolocation is not supported by this browser"));
         return;
       }
 
@@ -449,7 +465,7 @@ export class GeotriggerClient {
           this.checkRegions(currentLocation, onTrigger);
         },
         (error) => {
-          console.error('Geolocation error:', error);
+          console.error("Geolocation error:", error);
           reject(error);
         },
         watchOptions
@@ -469,7 +485,7 @@ export class GeotriggerClient {
       this.watchId = null;
     }
     this.isWatching = false;
-    console.log('Stopped geofence monitoring');
+    console.log("Stopped geofence monitoring");
   }
 
   /**
@@ -478,7 +494,7 @@ export class GeotriggerClient {
   getCurrentLocation(options?: GeotriggerOptions): Promise<Location> {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported by this browser'));
+        reject(new Error("Geolocation is not supported by this browser"));
         return;
       }
 
@@ -538,7 +554,7 @@ export class GeotriggerClient {
       if (isInside) {
         const event: TriggerEvent = {
           regionId: region.id,
-          type: 'enter',
+          type: "enter",
           location: currentLocation,
           timestamp: new Date(),
         };

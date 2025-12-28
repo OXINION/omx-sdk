@@ -7,12 +7,13 @@ This directory contains examples demonstrating how to use the OMX SDK.
 The OMX SDK supports the preferred default import pattern:
 
 ```typescript
-import OMX from 'omx-sdk';
+import omxClient from "omx-sdk";
 
 // Initialize the SDK
-const sdk = await OMX.initialize({
-  apiKey: 'your-api-key',
-  baseUrl: 'https://api.oxinion.com',
+const sdk = await omxClient.initialize({
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
+  baseUrl: "https://api.oxinion.com",
   // Service-specific configurations...
 });
 
@@ -29,11 +30,11 @@ Alternative import patterns are also supported:
 
 ```typescript
 // Named imports
-import { OMXSDK, createOMXSDK } from 'omx-sdk';
+import { omxClient, createOMXClient } from "omx-sdk";
 
 // Individual packages
-import { EmailClient } from '@omx-sdk/email';
-import { Geotrigger } from '@omx-sdk/geotrigger';
+import { EmailClient } from "@omx-sdk/email";
+import { Geotrigger } from "@omx-sdk/geotrigger";
 ```
 
 ## Files
@@ -148,10 +149,11 @@ npm install omx-sdk
 ```
 
 ```typescript
-import { createOMXSDK } from 'omx-sdk';
+import { createOMXClient } from "omx-sdk";
 
-const sdk = createOMXSDK({
-  apiKey: 'your-api-key',
+const sdk = createOMXClient({
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
   // ... other configuration
 });
 

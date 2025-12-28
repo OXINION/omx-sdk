@@ -114,7 +114,7 @@ export class GeotriggerClient {
             body: JSON.stringify({
                 filters: {
                     team_id: this.teamId,
-                    name: "Default Geotrigger Workflow"
+                    name: "Default Geotrigger Workflow",
                 },
             }),
         });
@@ -169,14 +169,14 @@ export class GeotriggerClient {
                 body = JSON.stringify({
                     filters: {
                         type: "geotrigger",
-                        ...data.filters
+                        ...data.filters,
                     },
                     // Note: team_id filtering will need to be handled via workflow join or config filter
                 });
                 break;
-            case "geotrigger-create":
+            case "geotrigger-create": {
                 // Ensure we have a workflow_id
-                const workflowId = data.workflow_id || await this.ensureDefaultWorkflow();
+                const workflowId = data.workflow_id || (await this.ensureDefaultWorkflow());
                 url = `${SUPABASE_FN_BASE_URL}/database-access?table=workflow_nodes&schema=omx`;
                 method = "POST";
                 body = JSON.stringify({
@@ -202,13 +202,14 @@ export class GeotriggerClient {
                     },
                 });
                 break;
+            }
             case "geotrigger-get":
                 url = `${SUPABASE_FN_BASE_URL}/database-access?table=workflow_nodes&schema=omx`;
                 method = "POST";
                 body = JSON.stringify({
                     filters: {
                         id: data.id,
-                        type: "geotrigger"
+                        type: "geotrigger",
                     },
                 });
                 break;
@@ -219,7 +220,7 @@ export class GeotriggerClient {
                     action: "update",
                     filters: {
                         id: data.id,
-                        type: "geotrigger"
+                        type: "geotrigger",
                     },
                     data: {
                         config: {
@@ -237,11 +238,11 @@ export class GeotriggerClient {
                     action: "delete",
                     filters: {
                         id: data.id,
-                        type: "geotrigger"
+                        type: "geotrigger",
                     },
                 });
                 break;
-            case "geotrigger-stats":
+            case "geotrigger-stats": {
                 const geotriggers = await this.listGeotriggers();
                 return {
                     totalGeotriggers: geotriggers.length,
@@ -249,6 +250,7 @@ export class GeotriggerClient {
                     inactiveGeotriggers: geotriggers.filter((g) => g.config?.status === "inactive").length,
                     teamId: this.teamId,
                 };
+            }
             default:
                 url = `${SUPABASE_FN_BASE_URL}/database-access`;
                 method = "POST";
@@ -344,7 +346,7 @@ export class GeotriggerClient {
     startMonitoring(onTrigger, options) {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
-                reject(new Error('Geolocation is not supported by this browser'));
+                reject(new Error("Geolocation is not supported by this browser"));
                 return;
             }
             if (this.isWatching) {
@@ -364,7 +366,7 @@ export class GeotriggerClient {
                 };
                 this.checkRegions(currentLocation, onTrigger);
             }, (error) => {
-                console.error('Geolocation error:', error);
+                console.error("Geolocation error:", error);
                 reject(error);
             }, watchOptions);
             this.isWatching = true;
@@ -380,7 +382,7 @@ export class GeotriggerClient {
             this.watchId = null;
         }
         this.isWatching = false;
-        console.log('Stopped geofence monitoring');
+        console.log("Stopped geofence monitoring");
     }
     /**
      * Get current location
@@ -388,7 +390,7 @@ export class GeotriggerClient {
     getCurrentLocation(options) {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
-                reject(new Error('Geolocation is not supported by this browser'));
+                reject(new Error("Geolocation is not supported by this browser"));
                 return;
             }
             const locationOptions = {
@@ -433,7 +435,7 @@ export class GeotriggerClient {
             if (isInside) {
                 const event = {
                     regionId: region.id,
-                    type: 'enter',
+                    type: "enter",
                     location: currentLocation,
                     timestamp: new Date(),
                 };

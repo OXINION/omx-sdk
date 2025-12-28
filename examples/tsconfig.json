@@ -3,10 +3,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "baseUrl": ".",
-    "paths": {
-      "omx-sdk": ["../packages/omx-sdk/src"]
-    }
+    "baseUrl": "."
   },
   "include": ["*.ts", "*.js"],
   "exclude": ["node_modules", "dist"]

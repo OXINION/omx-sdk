@@ -16,20 +16,22 @@ This will install the main SDK along with all sub-packages:
 - `@omx-sdk/email` - Email sending capabilities
 - `@omx-sdk/webhook` - Webhook handling and management
 - `@omx-sdk/beacon` - Bluetooth beacon integration
-- `@omx-sdk/push-notification` - Web push notification support
+- `@omx-sdk/notification` - Premium cross-platform notification support
+- `@omx-sdk/campaign` - Management of marketing campaigns
 
 ## Quick Start
 
 ### Unified SDK Usage
 
 ```typescript
-import OMX from "omx-sdk";
+import { omxClient } from "omx-sdk";
 
 // Create SDK instance with global configuration
-const omx = OMX({
-  apiKey: "your-api-key",
+const sdk = new omxClient({
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
   baseUrl: "https://api.oxinion.com", // optional global base URL
-  timeout: 10000, // optional global timeout
+  timeout: 10000,
 
   // Service-specific overrides
   email: {
@@ -38,13 +40,13 @@ const omx = OMX({
   beacon: {
     scanInterval: 2000,
   },
-  pushNotification: {
-    vapidPublicKey: "your-vapid-public-key",
-    serviceWorkerPath: "/custom-sw.js",
+  notification: {
+    baseUrl:
+      "https://your-project.supabase.co/functions/v1/notification-service",
   },
 });
 
-// Initialize services that require setup
+// Initialize services that require setup (fetches JWT automatically)
 await sdk.initialize();
 
 // Use individual services
@@ -52,7 +54,7 @@ const geotrigger = sdk.geotrigger;
 const email = sdk.email;
 const webhook = sdk.webhook;
 const beacon = sdk.beacon;
-const pushNotification = sdk.pushNotification;
+const notification = sdk.notification;
 ```
 
 ### Individual Package Usage
@@ -60,94 +62,61 @@ const pushNotification = sdk.pushNotification;
 You can also install and use individual packages:
 
 ```bash
-npm install @omx-sdk/email @omx-sdk/geotrigger
+npm install @omx-sdk/email @omx-sdk/geotrigger @omx-sdk/notification
 ```
 
 ```typescript
 import { createEmailClient } from "@omx-sdk/email";
-import { createGeotrigger } from "@omx-sdk/geotrigger";
+import { createGeotriggerClient } from "@omx-sdk/geotrigger";
+import { createNotificationClient } from "@omx-sdk/notification";
 
-const emailClient = createEmailClient({ apiKey: "your-api-key" });
-const geotrigger = createGeotrigger({ apiKey: "your-api-key" });
+const emailClient = createEmailClient({ clientId: "id", secretKey: "key" });
+const notification = createNotificationClient(() => "your-jwt-token", {
+  baseUrl: "...",
+});
 ```
 
 ## Complete Example
 
 ```typescript
-import { createOMXSDK } from "omx-sdk";
+import { createOMXClient } from "omx-sdk";
 
 async function main() {
   // Initialize the SDK
-  const sdk = createOMXSDK({
-    apiKey: "your-api-key",
-    email: {
-      defaultFrom: "notifications@yourcompany.com",
-    },
-    pushNotification: {
-      vapidPublicKey: "your-vapid-public-key",
+  const sdk = createOMXClient({
+    clientId: "your-client-id",
+    secretKey: "your-secret-key",
+    notification: {
+      baseUrl:
+        "https://your-project.supabase.co/functions/v1/notification-service",
     },
   });
 
-  // Initialize services
+  // Initialize services (fetches JWT automatically)
   await sdk.initialize();
-
-  // Check health status
-  const health = await sdk.healthCheck();
-  console.log("SDK Health:", health);
 
   // 1. Setup geofencing
   const geotrigger = sdk.geotrigger;
-  geotrigger.addRegion({
-    id: "store",
-    center: { latitude: 37.7749, longitude: -122.4194 },
-    radius: 100,
-    name: "Store Location",
+  // ... geofencing logic
+
+  // 2. Setup notifications
+  const notification = sdk.notification;
+
+  // Register device
+  await notification.registerDevice({
+    platform: "web",
+    deviceToken: "device-token-from-browser",
   });
 
-  await geotrigger.startMonitoring((event) => {
-    console.log("Geofence event:", event);
+  // Subscribe to interests
+  await notification.subscribeCategories(["tech", "finance"]);
 
-    // Send email notification
-    sdk.email.send({
-      to: "customer@example.com",
-      subject: "Welcome!",
-      body: `You've ${event.type}ed our store location.`,
-    });
+  // Send notification intent
+  await notification.sendIntent({
+    title: "New Article!",
+    body: "Check out our latest post on TypeScript SDKs.",
+    categories: ["tech"],
   });
-
-  // 2. Setup push notifications
-  const pushManager = sdk.pushNotification;
-  const subscription = await pushManager.subscribe();
-
-  if (subscription.success) {
-    console.log("Push notifications subscribed");
-  }
-
-  // 3. Setup webhook handlers
-  const webhook = sdk.webhook;
-  await webhook.createSubscription("https://yourapp.com/webhook", [
-    "user.created",
-    "order.completed",
-  ]);
-
-  // 4. Test webhook
-  const testResult = await webhook.testWebhook("https://yourapp.com/test");
-  console.log("Webhook test:", testResult);
-
-  // 5. Setup beacon monitoring (if supported)
-  const beacon = sdk.beacon;
-  beacon.addRegion({
-    id: "entrance",
-    uuid: "B0702880-A295-A8AB-F734-031A98A512DE",
-    major: 1,
-    minor: 1,
-  });
-
-  beacon.addEventListener("enter", (event) => {
-    console.log("Beacon detected:", event);
-  });
-
-  await beacon.startScanning();
 
   // Get aggregated analytics
   const analytics = sdk.getAnalytics();
@@ -165,24 +134,60 @@ The main configuration object supports global settings and service-specific over
 
 ```typescript
 interface OMXConfig {
-  apiKey: string; // Required: Your OMX API key
-  baseUrl?: string; // Optional: Global base URL
-  timeout?: number; // Optional: Global timeout
+  clientId: string;
+  secretKey: string;
+  baseUrl?: string;
+  timeout?: number;
 
   // Service-specific configurations (all optional)
-  geotrigger?: Partial<GeotriggerConfig>;
+  geotrigger?: any;
   email?: Partial<EmailConfig>;
   webhook?: Partial<WebhookConfig>;
   beacon?: Partial<BeaconConfig>;
-  pushNotification?: Partial<PushConfig>;
+  notification?: Partial<NotificationOptions>;
 }
 ```
 
-### Service Configuration Examples
+## Available Services
+
+### 5. Notifications (`sdk.notification`)
+
+Premium cross-platform notification delivery via Supabase Edge Functions.
 
 ```typescript
-const sdk = createOMXSDK({
-  apiKey: "your-api-key",
+// Register device
+await sdk.notification.registerDevice({
+  platform: "ios",
+  deviceToken: "apns-token-here",
+});
+
+// Manage subscriptions
+await sdk.notification.subscribeCategories(["sports"]);
+
+// Send intent
+await sdk.notification.sendIntent({
+  title: "Goal!",
+  body: "Your team just scored.",
+  categories: ["sports"],
+});
+```
+
+## Browser Support
+
+- **Geotrigger**: All modern browsers with geolocation support
+- **Email**: All browsers (server-side operations)
+- **Webhook**: All browsers
+- **Beacon**: Chrome 56+, Edge 79+ (Web Bluetooth required)
+- **Notifications**: Chrome 42+, Firefox 44+, Safari 16+, iOS/Android via transport
+
+## License
+
+MIT
+
+```typescript
+const sdk = createOMXClient({
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
 
   // Geotrigger settings
   geotrigger: {
@@ -207,10 +212,10 @@ const sdk = createOMXSDK({
     scanInterval: 1000,
   },
 
-  // Push notification settings
-  pushNotification: {
-    vapidPublicKey: "BM...",
-    serviceWorkerPath: "/custom-sw.js",
+  // Notification settings
+  notification: {
+    baseUrl:
+      "https://your-project.supabase.co/functions/v1/notification-service",
   },
 });
 ```
@@ -247,7 +252,7 @@ console.log("Analytics:", {
   geotrigger: analytics.geotrigger.isMonitoring,
   webhook: analytics.webhook.subscriptions,
   beacon: analytics.beacon?.totalBeacons,
-  pushNotification: analytics.pushNotification?.totalSubscriptions,
+  notification: analytics.notification,
 });
 ```
 
@@ -384,13 +389,14 @@ try {
 The SDK is built with TypeScript and provides full type definitions:
 
 ```typescript
-import { OMXSDK, OMXConfig, GeotriggerEvent } from "omx-sdk";
+import { omxClient, OMXConfig, GeotriggerEvent } from "omx-sdk";
 
 const config: OMXConfig = {
-  apiKey: "your-api-key",
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
 };
 
-const sdk = new OMXSDK(config);
+const sdk = new omxClient(config);
 
 sdk.geotrigger.startMonitoring((event: GeotriggerEvent) => {
   // Full type safety

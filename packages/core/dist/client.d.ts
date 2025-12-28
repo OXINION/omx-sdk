@@ -2,11 +2,14 @@
  * @omx-sdk/core
  * Core client module for OMX SDK with Supabase integration
  */
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 /**
  * Initialize Supabase client with JWT token
  */
-export declare function initClient(jwt: string): void;
+export declare function initClient(jwt: string, options?: {
+    supabaseUrl?: string;
+    anonKey?: string;
+}): void;
 /**
  * Proxy to ensure client is initialized before use
  */

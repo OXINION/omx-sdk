@@ -33,7 +33,7 @@ omx-sdk/
 │   ├── email/             # Email service integration
 │   ├── webhook/           # Webhook management
 │   ├── beacon/            # Bluetooth beacon detection
-│   ├── push-notification/ # Push notification service
+│   ├── notification/      # Premium notification service
 │   └── omx-sdk/           # Meta-package aggregator
 ├── examples/              # Demo and usage examples
 ├── .eslintrc.json         # ESLint configuration
@@ -58,7 +58,7 @@ omx-sdk/
 - **Email**: Template-based email sending and tracking
 - **Webhook**: Webhook registration, validation, and event handling
 - **Beacon**: Bluetooth beacon scanning and proximity detection
-- **Push Notification**: Cross-platform push notification delivery
+- **Notification**: Cross-platform notification delivery via Edge Functions
 - **OMX SDK**: Unified SDK interface aggregating all services
 
 ### **Example Code** ✅ Available

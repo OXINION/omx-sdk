@@ -4,8 +4,8 @@
 
 ### ✅ **Updated SDK Architecture**
 
-- **Added static `initialize()` method** to the `OMXSDK` class
-- **Maintained default export** as `OMXSDK` class for `import OMX from 'omx-sdk'` pattern
+- **Added static `initialize()` method** to the `OMXClient` class
+- **Maintained default export** as `OMXClient` class for `import OMX from 'omx-sdk'` pattern
 - **Fixed configuration merging** to properly pass base config to all services
 - **Preserved backward compatibility** with existing patterns
 
@@ -33,13 +33,14 @@
 ## 🚀 **Now You Can Use:**
 
 ```typescript
-import OMX from 'omx-sdk';
+import omxClient from "omx-sdk";
 
-const sdk = await OMX.initialize({
-  apiKey: 'your-api-key',
-  baseUrl: 'https://api.oxinion.com',
+const sdk = await omxClient.initialize({
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
+  baseUrl: "https://api.oxinion.com",
   email: {
-    defaultFrom: 'notifications@yourcompany.com',
+    defaultFrom: "notifications@yourcompany.com",
   },
   geotrigger: {
     timeout: 15000,
@@ -60,8 +61,8 @@ await sdk.webhook.createSubscription(/* ... */);
 
 ## 📊 **Current Status**
 
-- ✅ **Import Pattern**: `import OMX from 'omx-sdk';` works perfectly
-- ✅ **Static Initialize**: `OMX.initialize(config)` returns initialized SDK instance
+- ✅ **Import Pattern**: `import { omxClient } from 'omx-sdk';` or `import omxClient from 'omx-sdk';` works perfectly
+- ✅ **Static Initialize**: `omxClient.initialize(config)` returns initialized SDK instance
 - ✅ **All Services**: Geotrigger, Email, Webhook, Beacon, Push Notification available
 - ✅ **Workspace Setup**: Examples can properly import and use the SDK
 - ✅ **Build Pipeline**: All packages compile and link correctly
@@ -71,8 +72,8 @@ await sdk.webhook.createSubscription(/* ... */);
 
 Your OMX SDK now supports the exact import pattern you requested:
 
-- **Simple and clean**: `import OMX from 'omx-sdk';`
-- **Async initialization**: `await OMX.initialize(config)`
+- **Simple and clean**: `import { omxClient } from 'omx-sdk';`
+- **Async initialization**: `await omxClient.initialize(config)`
 - **All services accessible**: `sdk.email`, `sdk.geotrigger`, etc.
 - **Type-safe**: Full TypeScript support with proper type inference
 - **Well-documented**: Examples and usage patterns clearly explained

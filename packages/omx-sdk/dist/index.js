@@ -1,18 +1,20 @@
 // Re-export all individual packages
-export * from '@omx-sdk/beacon';
-export * from '@omx-sdk/email';
-export * from '@omx-sdk/geotrigger';
-export * from '@omx-sdk/push-notification';
-export * from '@omx-sdk/webhook';
+export * from "@omx-sdk/beacon";
+export * from "@omx-sdk/campaign";
+export * from "@omx-sdk/email";
+export * from "@omx-sdk/geotrigger";
+export * from "@omx-sdk/notification";
+export * from "@omx-sdk/webhook";
 // Import types and classes for the unified SDK
-import { createBeaconManager, } from '@omx-sdk/beacon';
-import { initClient } from '@omx-sdk/core';
-import { createEmailClient } from '@omx-sdk/email';
-import { createGeotrigger, } from '@omx-sdk/geotrigger';
-import { PushNotificationManager, createPushNotificationManager, } from '@omx-sdk/push-notification';
-import { createWebhookClient, } from '@omx-sdk/webhook';
+import { createBeaconManager, } from "@omx-sdk/beacon";
+import { createCampaignClient } from "@omx-sdk/campaign";
+import { initClient } from "@omx-sdk/core";
+import { createEmailClient } from "@omx-sdk/email";
+import { createGeotrigger } from "@omx-sdk/geotrigger";
+import { createNotificationClient, } from "@omx-sdk/notification";
+import { createWebhookClient, } from "@omx-sdk/webhook";
 // Unified SDK class
-export class OMXSDK {
+export class OMXClient {
     constructor(config) {
         this.config = config;
     }
@@ -20,7 +22,7 @@ export class OMXSDK {
      * Static method to initialize the SDK
      */
     static async initialize(config) {
-        const sdk = new OMXSDK(config);
+        const sdk = new OMXClient(config);
         await sdk.init();
         return sdk;
     }
@@ -28,17 +30,27 @@ export class OMXSDK {
      * Fetch JWT token from Edge Function
      */
     async _fetchJwtToken() {
-        const edgeUrl = this.config.baseUrl?.replace(/\/$/, '') ||
-            'https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1/create-jwt-token';
-        const url = edgeUrl.includes('/create-jwt-token')
-            ? edgeUrl
-            : edgeUrl + '/functions/v1/create-jwt-token';
-        const res = await fetch(url, {
-            method: 'POST',
+        const defaultSupabaseUrl = "https://blhilidnsybhfdmwqsrx.supabase.co";
+        const defaultAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c";
+        const sUrl = this.config.supabaseUrl || defaultSupabaseUrl;
+        const sAnonKey = this.config.supabaseAnonKey || defaultAnonKey;
+        const base = this.config.baseUrl?.replace(/\/$/, "") || sUrl.replace(/\/$/, "");
+        // Construct the edge function URL
+        // If baseUrl is provided and looks like a Supabase project URL, use it
+        let edgeUrl;
+        if (base.includes(".supabase.co")) {
+            edgeUrl = `${base}/functions/v1/create-jwt-token`;
+        }
+        else {
+            // If it's a custom domain, assume the standard path
+            edgeUrl = `${base}/create-jwt-token`;
+        }
+        const res = await fetch(edgeUrl, {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c',
-                apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c',
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${sAnonKey}`,
+                apikey: sAnonKey,
             },
             body: JSON.stringify({
                 clientId: this.config.clientId,
@@ -50,22 +62,25 @@ export class OMXSDK {
             this._jwtToken = data.token;
         }
         else {
-            throw new Error(data.error || 'Failed to fetch JWT token from Edge Function.');
+            throw new Error(data.error || `Failed to fetch JWT token from ${edgeUrl}`);
         }
     }
     /**
      * Initialize all services
      */
     async init() {
-        console.log('Initializing OMX SDK...');
-        await this._fetchJwtToken(); // <-- Fetch JWT first
+        console.log("Initializing OMX SDK...");
+        await this._fetchJwtToken();
         // Initialize Supabase client with JWT token
         if (this._jwtToken) {
-            initClient(this._jwtToken);
-            console.log('✅ OMX client initialized with JWT token');
+            initClient(this._jwtToken, {
+                supabaseUrl: this.config.supabaseUrl,
+                anonKey: this.config.supabaseAnonKey,
+            });
+            console.log("✅ OMX client initialized with JWT token");
         }
         else {
-            throw new Error('JWT token is required for initialization');
+            throw new Error("JWT token is required for initialization");
         }
         // Base configuration with defaults from main config
         const baseConfig = {
@@ -73,7 +88,7 @@ export class OMXSDK {
             secretKey: this.config.secretKey,
             baseUrl: this.config.baseUrl,
             timeout: this.config.timeout,
-            jwtToken: this._jwtToken, // <-- Pass JWT to services
+            jwtToken: this._jwtToken,
         };
         // Initialize services with merged configurations
         this._geotrigger = createGeotrigger({
@@ -92,18 +107,29 @@ export class OMXSDK {
             ...baseConfig,
             ...this.config.beacon,
         });
-        this._pushNotification = createPushNotificationManager({
-            ...baseConfig,
-            ...this.config.pushNotification,
+        this._notification = createNotificationClient(() => this._jwtToken || "", {
+            baseUrl: this.config.baseUrl ||
+                (this.config.supabaseUrl
+                    ? `${this.config.supabaseUrl}/functions/v1/notification-service`
+                    : "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1/notification-service"),
+            ...this.config.notification,
         });
-        console.log('OMX SDK initialized successfully');
+        this._campaign = createCampaignClient({
+            clientId: this.config.clientId,
+            secretKey: this.config.secretKey,
+            ...this.config.campaign,
+            baseUrl: this.config.campaign?.baseUrl ||
+                this.config.baseUrl ||
+                this.config.supabaseUrl,
+        });
+        console.log("OMX SDK initialized successfully");
     }
     /**
      * Get geotrigger client instance
      */
     get geotrigger() {
         if (!this._geotrigger) {
-            throw new Error('Geotrigger service not initialized. Call OMX.initialize() first.');
+            throw new Error("Geotrigger service not initialized. Call OMX.initialize() first.");
         }
         return this._geotrigger;
     }
@@ -112,7 +138,7 @@ export class OMXSDK {
      */
     get email() {
         if (!this._email) {
-            throw new Error('Email service not initialized. Call OMX.initialize() first.');
+            throw new Error("Email service not initialized. Call OMX.initialize() first.");
         }
         return this._email;
     }
@@ -121,7 +147,7 @@ export class OMXSDK {
      */
     get webhook() {
         if (!this._webhook) {
-            throw new Error('Webhook service not initialized. Call OMX.initialize() first.');
+            throw new Error("Webhook service not initialized. Call OMX.initialize() first.");
         }
         return this._webhook;
     }
@@ -130,18 +156,27 @@ export class OMXSDK {
      */
     get beacon() {
         if (!this._beacon) {
-            throw new Error('Beacon service not initialized. Call OMX.initialize() first.');
+            throw new Error("Beacon service not initialized. Call OMX.initialize() first.");
         }
         return this._beacon;
     }
     /**
-     * Get push notification manager instance
+     * Get notification client instance
      */
-    get pushNotification() {
-        if (!this._pushNotification) {
-            throw new Error('Push notification service not initialized. Call OMX.initialize() first.');
+    get notification() {
+        if (!this._notification) {
+            throw new Error("Notification service not initialized. Call OMX.initialize() first.");
         }
-        return this._pushNotification;
+        return this._notification;
+    }
+    /**
+     * Get campaign client instance
+     */
+    get campaign() {
+        if (!this._campaign) {
+            throw new Error("Campaign service not initialized. Call OMX.initialize() first.");
+        }
+        return this._campaign;
     }
     /**
      * Initialize all services that require initialization
@@ -151,9 +186,6 @@ export class OMXSDK {
         // Initialize services that require async initialization
         if (this._beacon) {
             promises.push(this.beacon.initialize());
-        }
-        if (this._pushNotification) {
-            promises.push(this.pushNotification.initialize());
         }
         // Wait for all initializations to complete
         await Promise.all(promises);
@@ -174,18 +206,19 @@ export class OMXSDK {
         this._email = undefined;
         this._webhook = undefined;
         this._beacon = undefined;
-        this._pushNotification = undefined;
+        this._notification = undefined;
     }
     /**
      * Check health status of all services
      */
     async healthCheck() {
         const results = {
-            geotrigger: 'healthy',
-            email: 'healthy',
-            webhook: 'healthy',
-            beacon: 'healthy',
-            pushNotification: 'healthy',
+            geotrigger: "healthy",
+            email: "healthy",
+            webhook: "healthy",
+            beacon: "healthy",
+            notification: "healthy",
+            campaign: "healthy",
         };
         // Simple health checks
         try {
@@ -194,26 +227,23 @@ export class OMXSDK {
             this.email;
             this.webhook;
             this.beacon;
-            this.pushNotification;
-            // Check browser compatibility
-            if (!PushNotificationManager.isSupported()) {
-                results.pushNotification = 'unhealthy';
-            }
+            this.notification;
+            this.campaign;
             // Check geolocation support
             if (!navigator.geolocation) {
-                results.geotrigger = 'unhealthy';
+                results.geotrigger = "unhealthy";
             }
         }
         catch (error) {
-            console.error('Health check failed:', error);
+            console.error("Health check failed:", error);
             // Mark relevant services as unhealthy based on error
         }
-        const unhealthyCount = Object.values(results).filter((status) => status === 'unhealthy').length;
+        const unhealthyCount = Object.values(results).filter((status) => status === "unhealthy").length;
         const overall = unhealthyCount === 0
-            ? 'healthy'
+            ? "healthy"
             : unhealthyCount <= 2
-                ? 'degraded'
-                : 'unhealthy';
+                ? "degraded"
+                : "unhealthy";
         return {
             overall,
             services: results,
@@ -232,7 +262,8 @@ export class OMXSDK {
                 subscriptions: this._webhook?.getSubscriptions().length || 0,
             },
             beacon: this._beacon?.getAnalytics() || null,
-            pushNotification: this._pushNotification?.getAnalytics() || null,
+            notification: null, // Notification stats require API call
+            campaign: null, // Campaign stats require API call
         };
     }
     /**
@@ -251,7 +282,8 @@ export class OMXSDK {
         this._email = undefined;
         this._webhook = undefined;
         this._beacon = undefined;
-        this._pushNotification = undefined;
+        this._notification = undefined;
+        this._campaign = undefined;
     }
     /**
      * Get the current JWT token (for debugging/testing)
@@ -261,11 +293,13 @@ export class OMXSDK {
     }
 }
 // Export convenience function to create SDK instance
-export function createOMXSDK(config) {
-    return new OMXSDK(config);
+export function createOMXClient(config) {
+    return new OMXClient(config);
 }
+// Alias for OMXClient
+export { OMXClient as omxClient };
 // Export version information
-export const VERSION = '1.0.0';
+export const VERSION = "1.0.2";
 // Export default as the main SDK class
-export default OMXSDK;
+export default OMXClient;
 //# sourceMappingURL=index.js.map

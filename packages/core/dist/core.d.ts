@@ -1,4 +1,4 @@
-import { ApiRequestOptions, ApiResponse, AuthConfig } from './types.js';
+import { ApiRequestOptions, ApiResponse, AuthConfig } from "./types.js";
 /**
  * Core authentication manager for OMX SDK
  * Handles JWT token fetching, caching, and automatic refresh with Supabase Edge Function

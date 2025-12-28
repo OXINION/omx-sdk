@@ -5,10 +5,6 @@ import type {
   CampaignUpdateData,
 } from "./types.js";
 
-// Supabase Edge Function base URL
-const SUPABASE_FN_BASE_URL =
-  "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
-
 // UUID v4 generation function
 function generateUUID(): string {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -22,28 +18,36 @@ export class CampaignClient {
   private clientId: string;
   private secretKey: string;
   private teamId: string;
+  private baseUrl: string;
   private authToken: string | null = null;
 
   constructor(config: {
     clientId: string;
     secretKey: string;
     teamId?: string;
+    baseUrl?: string;
   }) {
     this.clientId = config.clientId;
     this.secretKey = config.secretKey;
-    this.teamId = config.teamId || generateUUID(); // Generate in UUID format
+    this.teamId = config.teamId || generateUUID();
+    this.baseUrl = (
+      config.baseUrl || "https://blhilidnsybhfdmwqsrx.supabase.co"
+    ).replace(/\/$/, "");
   }
 
   private async getAuthToken(): Promise<string> {
     if (!this.authToken) {
-      const response = await fetch(`${SUPABASE_FN_BASE_URL}/create-jwt-token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clientId: this.clientId,
-          secretKey: this.secretKey,
-        }),
-      });
+      const response = await fetch(
+        `${this.baseUrl}/functions/v1/create-jwt-token`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId: this.clientId,
+            secretKey: this.secretKey,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Authentication failed: ${response.statusText}`);
@@ -83,7 +87,7 @@ export class CampaignClient {
     try {
       console.log(`🔍 Looking up team_id for client_id: ${this.clientId}`);
 
-      const url = `${SUPABASE_FN_BASE_URL}/database-access?table=api_keys&schema=business`;
+      const url = `${this.baseUrl}/functions/v1/database-access?table=api_keys&schema=business`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -132,7 +136,7 @@ export class CampaignClient {
 
     switch (endpoint) {
       case "campaign-list":
-        url = `${SUPABASE_FN_BASE_URL}/database-access?table=campaigns&schema=business`;
+        url = `${this.baseUrl}/functions/v1/database-access?table=campaigns&schema=business`;
         method = "POST";
         body = JSON.stringify({
           filters: { team_id: this.teamId, ...data.filters },
@@ -140,7 +144,7 @@ export class CampaignClient {
         break;
 
       case "campaign-create":
-        url = `${SUPABASE_FN_BASE_URL}/database-access?table=campaigns&schema=business`;
+        url = `${this.baseUrl}/functions/v1/database-access?table=campaigns&schema=business`;
         method = "POST";
         body = JSON.stringify({
           action: "create",
@@ -153,7 +157,7 @@ export class CampaignClient {
         break;
 
       case "campaign-get":
-        url = `${SUPABASE_FN_BASE_URL}/database-access?table=campaigns&schema=business`;
+        url = `${this.baseUrl}/functions/v1/database-access?table=campaigns&schema=business`;
         method = "POST";
         body = JSON.stringify({
           filters: { id: data.id, team_id: this.teamId },
@@ -161,7 +165,7 @@ export class CampaignClient {
         break;
 
       case "campaign-update":
-        url = `${SUPABASE_FN_BASE_URL}/database-access?table=campaigns&schema=business`;
+        url = `${this.baseUrl}/functions/v1/database-access?table=campaigns&schema=business`;
         method = "POST";
         body = JSON.stringify({
           action: "update",
@@ -174,7 +178,7 @@ export class CampaignClient {
         break;
 
       case "campaign-delete":
-        url = `${SUPABASE_FN_BASE_URL}/database-access?table=campaigns&schema=business`;
+        url = `${this.baseUrl}/functions/v1/database-access?table=campaigns&schema=business`;
         method = "POST";
         body = JSON.stringify({
           action: "delete",
@@ -183,7 +187,7 @@ export class CampaignClient {
         break;
 
       // 🎯 Handle campaign-stats directly (without calling database-access)
-      case "campaign-stats":
+      case "campaign-stats": {
         const campaigns = await this.listCampaigns();
         return {
           totalCampaigns: campaigns.length,
@@ -198,10 +202,11 @@ export class CampaignClient {
           ).length,
           teamId: this.teamId,
         };
+      }
 
       default:
         // Fallback to database-access for any other endpoint
-        url = `${SUPABASE_FN_BASE_URL}/database-access`;
+        url = `${this.baseUrl}/functions/v1/database-access`;
         method = "POST";
         body = JSON.stringify({ ...data, teamId: this.teamId });
     }
@@ -304,6 +309,7 @@ export function createCampaignClient(config: {
   clientId: string;
   secretKey: string;
   teamId?: string;
+  baseUrl?: string;
 }) {
   return new CampaignClient(config);
 }
@@ -313,6 +319,7 @@ export function createCampaignModule(config: {
   clientId: string;
   secretKey: string;
   teamId?: string;
+  baseUrl?: string;
 }) {
   return new CampaignClient(config);
 }

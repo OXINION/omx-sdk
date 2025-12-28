@@ -1,6 +1,7 @@
 {
-  "name": "omx-sdk",
+  "name": "omx-sdk-monorepo",
   "version": "1.0.0",
+  "private": true,
   "description": "Modular SDK for Oxinion Marketing Exchange",
   "main": "index.js",
   "workspaces": [
@@ -28,7 +29,7 @@
     "email",
     "webhook",
     "beacon",
-    "push-notification"
+    "notification"
   ],
   "author": "Oxinion",
   "license": "MIT",

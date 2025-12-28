@@ -40,7 +40,7 @@ npm install @omx-sdk/email @omx-sdk/geotrigger @omx-sdk/webhook
 ### Basic Usage
 
 ```typescript
-import { omxClient } from "omx-sdk";
+import { omxClient } from "@omx-sdk/core";
 
 const omx = new omxClient({
   clientId: "your-client-id",
@@ -85,14 +85,14 @@ const geotrigger = new GeotriggerClient({
 
 ## Available Packages
 
-| Package                      | Description                                  | Status            |
-| ---------------------------- | -------------------------------------------- | ----------------- |
-| `@omx-sdk/core`              | Authentication, config, and shared utilities | ✅ Core           |
-| `@omx-sdk/email`             | Email sending functionality                  | 🚧 In Development |
-| `@omx-sdk/geotrigger`        | Location-based triggers and geofencing       | 🚧 In Development |
-| `@omx-sdk/webhook`           | Webhook management and handling              | 📋 Planned        |
-| `@omx-sdk/beacon`            | Beacon detection and proximity services      | 📋 Planned        |
-| `@omx-sdk/push-notification` | Push notification delivery                   | 📋 Planned        |
+| Package                 | Description                                  | Status            |
+| ----------------------- | -------------------------------------------- | ----------------- |
+| `@omx-sdk/core`         | Authentication, config, and shared utilities | ✅ Core           |
+| `@omx-sdk/email`        | Email sending functionality                  | 🚧 In Development |
+| `@omx-sdk/geotrigger`   | Location-based triggers and geofencing       | 🚧 In Development |
+| `@omx-sdk/webhook`      | Webhook management and handling              | 📋 Planned        |
+| `@omx-sdk/beacon`       | Beacon detection and proximity services      | 📋 Planned        |
+| `@omx-sdk/notification` | Premium notification transport               | ✅ Production     |
 
 ## SDK Architecture
 
@@ -105,7 +105,7 @@ omx-sdk/
 │   ├── geotrigger/                 # 📍 @omx-sdk/geotrigger
 │   ├── webhook/                    # 🔗 @omx-sdk/webhook
 │   ├── beacon/                     # 📡 @omx-sdk/beacon
-│   └── push-notification/          # 🔔 @omx-sdk/push-notification
+│   └── notification/               # 🔔 @omx-sdk/notification
 ├── examples/                       # 📚 Usage examples
 ├── docs/                          # 📖 Documentation
 └── tools/                         # 🛠️ Build and dev tools

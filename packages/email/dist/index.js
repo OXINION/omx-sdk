@@ -12,7 +12,7 @@ export class EmailClient {
             // Prepare the email payload
             const payload = this.preparePayload(message);
             // Simulate API call
-            await this.makeApiCall('/send', payload);
+            await this.makeApiCall("/send", payload);
             return {
                 success: true,
                 messageId: this.generateMessageId(),
@@ -22,7 +22,7 @@ export class EmailClient {
         catch (error) {
             return {
                 success: false,
-                error: error instanceof Error ? error.message : 'Unknown error',
+                error: error instanceof Error ? error.message : "Unknown error",
                 statusCode: 500,
             };
         }
@@ -67,7 +67,7 @@ export class EmailClient {
         catch (error) {
             return {
                 success: false,
-                error: error instanceof Error ? error.message : 'Template processing failed',
+                error: error instanceof Error ? error.message : "Template processing failed",
                 statusCode: 500,
             };
         }
@@ -88,15 +88,15 @@ export class EmailClient {
             await this.makeApiCall(`/status/${messageId}`);
             return {
                 messageId,
-                status: 'delivered',
+                status: "delivered",
                 timestamp: new Date(),
             };
         }
         catch (error) {
             return {
                 messageId,
-                status: 'failed',
-                error: error instanceof Error ? error.message : 'Status check failed',
+                status: "failed",
+                error: error instanceof Error ? error.message : "Status check failed",
             };
         }
     }
@@ -106,7 +106,7 @@ export class EmailClient {
     async getStats(dateFrom, dateTo) {
         try {
             // Simulate API call
-            await this.makeApiCall('/stats', { dateFrom, dateTo });
+            await this.makeApiCall("/stats", { dateFrom, dateTo });
             return {
                 sent: 100,
                 delivered: 95,
@@ -117,7 +117,7 @@ export class EmailClient {
             };
         }
         catch (error) {
-            throw new Error(`Failed to get stats: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw new Error(`Failed to get stats: ${error instanceof Error ? error.message : "Unknown error"}`);
         }
     }
     /**
@@ -125,13 +125,13 @@ export class EmailClient {
      */
     validateMessage(message) {
         if (!message.to || (Array.isArray(message.to) && message.to.length === 0)) {
-            throw new Error('Recipient email is required');
+            throw new Error("Recipient email is required");
         }
-        if (!message.subject || message.subject.trim() === '') {
-            throw new Error('Email subject is required');
+        if (!message.subject || message.subject.trim() === "") {
+            throw new Error("Email subject is required");
         }
-        if (!message.body || message.body.trim() === '') {
-            throw new Error('Email body is required');
+        if (!message.body || message.body.trim() === "") {
+            throw new Error("Email body is required");
         }
         // Validate email addresses
         const recipients = Array.isArray(message.to) ? message.to : [message.to];
@@ -158,20 +158,20 @@ export class EmailClient {
             bcc: message.bcc,
             attachments: message.attachments,
             replyTo: message.replyTo,
-            priority: message.priority || 'normal',
+            priority: message.priority || "normal",
         };
     }
     /**
      * Make API call (simulated)
      */
     async makeApiCall(endpoint, data) {
-        const url = `${this.config.baseUrl || 'https://api.oxinion.com/email'}${endpoint}`;
+        const url = `${this.config.baseUrl || "https://api.oxinion.com/email"}${endpoint}`;
         // Simulate API call delay
         await this.sleep(Math.random() * 500 + 100);
         console.log(`API Call to ${url}`, data);
         // Simulate occasional failures for testing
         if (Math.random() < 0.05) {
-            throw new Error('API call failed');
+            throw new Error("API call failed");
         }
         return { success: true };
     }
@@ -180,9 +180,9 @@ export class EmailClient {
      */
     processTemplate(template, variables) {
         // Simple template variable replacement
-        let subject = `Template: ${template.name}`;
-        let body = `Hello, this is a template email with variables: ${JSON.stringify(variables)}`;
-        let html = `<h1>Template: ${template.name}</h1><p>Variables: ${JSON.stringify(variables)}</p>`;
+        const subject = `Template: ${template.name}`;
+        const body = `Hello, this is a template email with variables: ${JSON.stringify(variables)}`;
+        const html = `<h1>Template: ${template.name}</h1><p>Variables: ${JSON.stringify(variables)}</p>`;
         return { subject, body, html };
     }
     /**

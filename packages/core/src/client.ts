@@ -3,17 +3,22 @@
  * Core client module for OMX SDK with Supabase integration
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 let supabase: ReturnType<typeof createClient>;
 
 /**
  * Initialize Supabase client with JWT token
  */
-export function initClient(jwt: string) {
-  const supabaseUrl = 'https://blhilidnsybhfdmwqsrx.supabase.co';
+export function initClient(
+  jwt: string,
+  options?: { supabaseUrl?: string; anonKey?: string }
+) {
+  const supabaseUrl =
+    options?.supabaseUrl || "https://blhilidnsybhfdmwqsrx.supabase.co";
   const anonKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c';
+    options?.anonKey ||
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c";
 
   supabase = createClient(supabaseUrl, anonKey, {
     global: {
@@ -23,7 +28,7 @@ export function initClient(jwt: string) {
     },
   });
 
-  console.log('✅ Supabase client initialized with JWT token');
+  console.log("✅ Supabase client initialized with JWT token");
 }
 
 /**
@@ -35,7 +40,7 @@ export const omxClient = new Proxy(
     get(_, key) {
       if (!supabase) {
         throw new Error(
-          'OMX client not initialized. Call OMX.initialize() first.'
+          "OMX client not initialized. Call OMX.initialize() first."
         );
       }
       return (supabase as any)[key];

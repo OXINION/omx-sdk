@@ -9,7 +9,7 @@ export interface EmailAttachment {
     filename: string;
     content: string | Uint8Array;
     contentType?: string;
-    encoding?: 'base64' | 'binary';
+    encoding?: "base64" | "binary";
 }
 export interface EmailMessage {
     to: string | string[];
@@ -21,7 +21,7 @@ export interface EmailMessage {
     bcc?: string | string[];
     attachments?: EmailAttachment[];
     replyTo?: string;
-    priority?: 'high' | 'normal' | 'low';
+    priority?: "high" | "normal" | "low";
 }
 export interface EmailResponse {
     success: boolean;
@@ -62,7 +62,7 @@ export declare class EmailClient {
      */
     getDeliveryStatus(messageId: string): Promise<{
         messageId: string;
-        status: 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced';
+        status: "pending" | "sent" | "delivered" | "failed" | "bounced";
         timestamp?: Date;
         error?: string;
     }>;

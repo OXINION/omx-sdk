@@ -66,7 +66,7 @@ The SDK consists of the following publishable packages:
 - `@omx-sdk/geotrigger` - Geolocation triggers
 - `@omx-sdk/webhook` - Webhook handling
 - `@omx-sdk/beacon` - Beacon integration
-- `@omx-sdk/push-notification` - Push notifications
+- `@omx-sdk/notification` - Notifications
 
 ## Version Management
 

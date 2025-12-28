@@ -10,7 +10,7 @@ export interface EmailAttachment {
   filename: string;
   content: string | Uint8Array;
   contentType?: string;
-  encoding?: 'base64' | 'binary';
+  encoding?: "base64" | "binary";
 }
 
 export interface EmailMessage {
@@ -23,7 +23,7 @@ export interface EmailMessage {
   bcc?: string | string[];
   attachments?: EmailAttachment[];
   replyTo?: string;
-  priority?: 'high' | 'normal' | 'low';
+  priority?: "high" | "normal" | "low";
 }
 
 export interface EmailResponse {
@@ -63,7 +63,7 @@ export class EmailClient {
       const payload = this.preparePayload(message);
 
       // Simulate API call
-      await this.makeApiCall('/send', payload);
+      await this.makeApiCall("/send", payload);
 
       return {
         success: true,
@@ -73,7 +73,7 @@ export class EmailClient {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         statusCode: 500,
       };
     }
@@ -135,7 +135,7 @@ export class EmailClient {
       return {
         success: false,
         error:
-          error instanceof Error ? error.message : 'Template processing failed',
+          error instanceof Error ? error.message : "Template processing failed",
         statusCode: 500,
       };
     }
@@ -154,7 +154,7 @@ export class EmailClient {
    */
   async getDeliveryStatus(messageId: string): Promise<{
     messageId: string;
-    status: 'pending' | 'sent' | 'delivered' | 'failed' | 'bounced';
+    status: "pending" | "sent" | "delivered" | "failed" | "bounced";
     timestamp?: Date;
     error?: string;
   }> {
@@ -164,14 +164,14 @@ export class EmailClient {
 
       return {
         messageId,
-        status: 'delivered',
+        status: "delivered",
         timestamp: new Date(),
       };
     } catch (error) {
       return {
         messageId,
-        status: 'failed',
-        error: error instanceof Error ? error.message : 'Status check failed',
+        status: "failed",
+        error: error instanceof Error ? error.message : "Status check failed",
       };
     }
   }
@@ -192,7 +192,7 @@ export class EmailClient {
   }> {
     try {
       // Simulate API call
-      await this.makeApiCall('/stats', { dateFrom, dateTo });
+      await this.makeApiCall("/stats", { dateFrom, dateTo });
 
       return {
         sent: 100,
@@ -204,7 +204,7 @@ export class EmailClient {
       };
     } catch (error) {
       throw new Error(
-        `Failed to get stats: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to get stats: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     }
   }
@@ -214,15 +214,15 @@ export class EmailClient {
    */
   private validateMessage(message: EmailMessage): void {
     if (!message.to || (Array.isArray(message.to) && message.to.length === 0)) {
-      throw new Error('Recipient email is required');
+      throw new Error("Recipient email is required");
     }
 
-    if (!message.subject || message.subject.trim() === '') {
-      throw new Error('Email subject is required');
+    if (!message.subject || message.subject.trim() === "") {
+      throw new Error("Email subject is required");
     }
 
-    if (!message.body || message.body.trim() === '') {
-      throw new Error('Email body is required');
+    if (!message.body || message.body.trim() === "") {
+      throw new Error("Email body is required");
     }
 
     // Validate email addresses
@@ -252,7 +252,7 @@ export class EmailClient {
       bcc: message.bcc,
       attachments: message.attachments,
       replyTo: message.replyTo,
-      priority: message.priority || 'normal',
+      priority: message.priority || "normal",
     };
   }
 
@@ -263,7 +263,7 @@ export class EmailClient {
     endpoint: string,
     data?: unknown
   ): Promise<unknown> {
-    const url = `${this.config.baseUrl || 'https://api.oxinion.com/email'}${endpoint}`;
+    const url = `${this.config.baseUrl || "https://api.oxinion.com/email"}${endpoint}`;
 
     // Simulate API call delay
     await this.sleep(Math.random() * 500 + 100);
@@ -272,7 +272,7 @@ export class EmailClient {
 
     // Simulate occasional failures for testing
     if (Math.random() < 0.05) {
-      throw new Error('API call failed');
+      throw new Error("API call failed");
     }
 
     return { success: true };
@@ -286,9 +286,9 @@ export class EmailClient {
     variables: Record<string, unknown>
   ): { subject: string; body: string; html?: string } {
     // Simple template variable replacement
-    let subject = `Template: ${template.name}`;
-    let body = `Hello, this is a template email with variables: ${JSON.stringify(variables)}`;
-    let html = `<h1>Template: ${template.name}</h1><p>Variables: ${JSON.stringify(variables)}</p>`;
+    const subject = `Template: ${template.name}`;
+    const body = `Hello, this is a template email with variables: ${JSON.stringify(variables)}`;
+    const html = `<h1>Template: ${template.name}</h1><p>Variables: ${JSON.stringify(variables)}</p>`;
 
     return { subject, body, html };
   }

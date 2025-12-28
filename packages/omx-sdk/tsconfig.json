@@ -5,5 +5,13 @@
     "rootDir": "./src"
   },
   "include": ["src/**/*"],
-  "exclude": ["**/*.test.ts", "**/*.spec.ts"]
+  "exclude": ["**/*.test.ts", "**/*.spec.ts"],
+  "references": [
+    { "path": "../core" },
+    { "path": "../geotrigger" },
+    { "path": "../email" },
+    { "path": "../webhook" },
+    { "path": "../beacon" },
+    { "path": "../notification" }
+  ]
 }

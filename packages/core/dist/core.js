@@ -1,9 +1,9 @@
-import { AuthenticationError, ConfigurationError, InvalidCredentialsError, NetworkError, RateLimitError, TokenExpiredError, } from './errors.js';
+import { AuthenticationError, ConfigurationError, InvalidCredentialsError, NetworkError, RateLimitError, TokenExpiredError, } from "./errors.js";
 /**
  * Core authentication manager for OMX SDK
  * Handles JWT token fetching, caching, and automatic refresh with Supabase Edge Function
  */
-export const SUPABASE_FN_BASE_URL = 'https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1';
+export const SUPABASE_FN_BASE_URL = "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
 export class CoreAuth {
     constructor(config) {
         this.supabaseFnUrl = `${SUPABASE_FN_BASE_URL}/create-jwt-token`;
@@ -21,11 +21,11 @@ export class CoreAuth {
      * Validate the authentication configuration
      */
     validateConfig(config) {
-        if (!config.clientId || typeof config.clientId !== 'string') {
-            throw new ConfigurationError('clientId is required and must be a string');
+        if (!config.clientId || typeof config.clientId !== "string") {
+            throw new ConfigurationError("clientId is required and must be a string");
         }
-        if (!config.secretKey || typeof config.secretKey !== 'string') {
-            throw new ConfigurationError('secretKey is required and must be a string');
+        if (!config.secretKey || typeof config.secretKey !== "string") {
+            throw new ConfigurationError("secretKey is required and must be a string");
         }
     }
     /**
@@ -70,9 +70,9 @@ export class CoreAuth {
     async fetchNewToken() {
         try {
             const response = await fetch(this.supabaseFnUrl, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     clientId: this.config.clientId,
@@ -89,11 +89,11 @@ export class CoreAuth {
             // Handle both 'token' and 'access_token' field names
             const accessToken = data.token || data.access_token;
             if (!accessToken) {
-                throw new AuthenticationError('NO_TOKEN_RESPONSE', 'No token received from authentication server');
+                throw new AuthenticationError("NO_TOKEN_RESPONSE", "No token received from authentication server");
             }
             const token = this.createJWTToken({
                 access_token: accessToken,
-                token_type: data.token_type || 'Bearer',
+                token_type: data.token_type || "Bearer",
                 expires_in: data.expires_in || 3600, // Default to 1 hour
             });
             this.cacheToken(token);
@@ -104,7 +104,7 @@ export class CoreAuth {
                 throw error;
             }
             // Handle network or other errors
-            throw new NetworkError(`Failed to fetch JWT token: ${error instanceof Error ? error.message : 'Unknown error'}`, error);
+            throw new NetworkError(`Failed to fetch JWT token: ${error instanceof Error ? error.message : "Unknown error"}`, error);
         }
     }
     /**
@@ -136,22 +136,22 @@ export class CoreAuth {
      * Handle Supabase Edge Function errors
      */
     handleSupabaseError(error) {
-        const errorMessage = error.error || 'Authentication failed';
+        const errorMessage = error.error || "Authentication failed";
         // Map common error patterns to our error types
-        if (errorMessage.toLowerCase().includes('invalid') &&
-            errorMessage.toLowerCase().includes('credential')) {
+        if (errorMessage.toLowerCase().includes("invalid") &&
+            errorMessage.toLowerCase().includes("credential")) {
             throw new InvalidCredentialsError(errorMessage);
         }
-        if (errorMessage.toLowerCase().includes('not found')) {
-            throw new AuthenticationError('FUNCTION_NOT_FOUND', 'Authentication function not found. Please ensure the Edge Function is deployed.', 404);
+        if (errorMessage.toLowerCase().includes("not found")) {
+            throw new AuthenticationError("FUNCTION_NOT_FOUND", "Authentication function not found. Please ensure the Edge Function is deployed.", 404);
         }
-        throw new AuthenticationError('EDGE_FUNCTION_ERROR', errorMessage, undefined, error);
+        throw new AuthenticationError("EDGE_FUNCTION_ERROR", errorMessage, undefined, error);
     }
     /**
      * Make an authenticated API request with automatic token refresh
      */
     async makeAuthenticatedRequest(url, options = {}) {
-        const { method = 'GET', headers = {}, body, timeout = 30000, retries = this.config.maxRetries, } = options;
+        const { method = "GET", headers = {}, body, timeout = 30000, retries = this.config.maxRetries, } = options;
         let lastError = null;
         for (let attempt = 0; attempt <= retries; attempt++) {
             try {
@@ -159,7 +159,7 @@ export class CoreAuth {
                 const token = await this.getToken(attempt > 0);
                 // Prepare request headers
                 const requestHeaders = {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                     ...headers,
                 };
@@ -170,9 +170,9 @@ export class CoreAuth {
                     signal: AbortSignal.timeout(timeout),
                 };
                 // Add body for non-GET requests
-                if (body && method !== 'GET') {
+                if (body && method !== "GET") {
                     requestOptions.body =
-                        typeof body === 'string' ? body : JSON.stringify(body);
+                        typeof body === "string" ? body : JSON.stringify(body);
                 }
                 // Make the request
                 const response = await fetch(url, requestOptions);
@@ -185,7 +185,7 @@ export class CoreAuth {
                 if (error instanceof InvalidCredentialsError ||
                     error instanceof ConfigurationError ||
                     (error instanceof AuthenticationError &&
-                        error.code === 'RPC_NOT_FOUND')) {
+                        error.code === "RPC_NOT_FOUND")) {
                     break;
                 }
                 // Handle rate limiting with exponential backoff
@@ -213,7 +213,7 @@ export class CoreAuth {
             }
         }
         // All retries failed, throw the last error
-        throw lastError || new NetworkError('All retry attempts failed');
+        throw lastError || new NetworkError("All retry attempts failed");
     }
     /**
      * Handle HTTP response and convert to ApiResponse
@@ -225,11 +225,11 @@ export class CoreAuth {
             if (status === 401) {
                 // Clear cached token on 401
                 this.cachedToken = null;
-                throw new TokenExpiredError('Authentication token expired or invalid');
+                throw new TokenExpiredError("Authentication token expired or invalid");
             }
             if (status === 429) {
-                const retryAfter = parseInt(response.headers.get('Retry-After') || '60', 10) * 1000;
-                throw new RateLimitError('Rate limit exceeded', retryAfter);
+                const retryAfter = parseInt(response.headers.get("Retry-After") || "60", 10) * 1000;
+                throw new RateLimitError("Rate limit exceeded", retryAfter);
             }
             if (status >= 400) {
                 const errorText = await response.text();
@@ -243,9 +243,9 @@ export class CoreAuth {
                 throw new AuthenticationError(`HTTP_${status}`, errorData.message || `HTTP ${status} error`, status, errorData);
             }
             // Parse successful response
-            const contentType = response.headers.get('content-type');
+            const contentType = response.headers.get("content-type");
             let data;
-            if (contentType && contentType.includes('application/json')) {
+            if (contentType && contentType.includes("application/json")) {
                 data = await response.json();
             }
             else {
@@ -267,7 +267,7 @@ export class CoreAuth {
                     headers,
                 };
             }
-            throw new NetworkError(`Failed to process response: ${error instanceof Error ? error.message : 'Unknown error'}`, error);
+            throw new NetworkError(`Failed to process response: ${error instanceof Error ? error.message : "Unknown error"}`, error);
         }
     }
     /**

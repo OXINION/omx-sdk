@@ -37,15 +37,15 @@
 
 ## 📦 Packages Ready for Publishing
 
-| Package            | Name                         | Description           | Status   |
-| ------------------ | ---------------------------- | --------------------- | -------- |
-| Main SDK           | `omx-sdk`                    | Unified SDK package   | ✅ Ready |
-| Core Auth          | `@omx-sdk/core`              | Authentication module | ✅ Ready |
-| Email              | `@omx-sdk/email`             | Email functionality   | ✅ Ready |
-| Geotrigger         | `@omx-sdk/geotrigger`        | Location triggers     | ✅ Ready |
-| Webhook            | `@omx-sdk/webhook`           | Webhook handling      | ✅ Ready |
-| Beacon             | `@omx-sdk/beacon`            | Beacon integration    | ✅ Ready |
-| Push Notifications | `@omx-sdk/push-notification` | Push notifications    | ✅ Ready |
+| Package       | Name                    | Description           | Status   |
+| ------------- | ----------------------- | --------------------- | -------- |
+| Main SDK      | `omx-sdk`               | Unified SDK package   | ✅ Ready |
+| Core Auth     | `@omx-sdk/core`         | Authentication module | ✅ Ready |
+| Email         | `@omx-sdk/email`        | Email functionality   | ✅ Ready |
+| Geotrigger    | `@omx-sdk/geotrigger`   | Location triggers     | ✅ Ready |
+| Webhook       | `@omx-sdk/webhook`      | Webhook handling      | ✅ Ready |
+| Beacon        | `@omx-sdk/beacon`       | Beacon integration    | ✅ Ready |
+| Notifications | `@omx-sdk/notification` | Notifications         | ✅ Ready |
 
 ## 🚀 Next Steps to Publish
 

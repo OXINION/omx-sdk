@@ -48,7 +48,7 @@ export interface OMXConfig {
   email?: Partial<EmailConfig>;
   webhook?: Partial<WebhookConfig>;
   beacon?: Partial<BeaconConfig>;
-  pushNotification?: Partial<PushConfig>;
+  notification?: Partial<NotificationOptions>;
 }
 ```
 

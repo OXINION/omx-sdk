@@ -7,7 +7,7 @@
     <style>
       body {
         font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         max-width: 800px;
         margin: 0 auto;
         padding: 20px;
@@ -104,11 +104,11 @@
     </div>
 
     <div class="section">
-      <h2>Push Notifications</h2>
-      <button onclick="initializePush()">Initialize Push</button>
-      <button onclick="subscribePush()">Subscribe</button>
-      <button onclick="showLocalNotification()">Show Local Notification</button>
-      <div id="push-status"></div>
+      <h2>Notifications</h2>
+      <button onclick="registerDevice()">Register Device</button>
+      <button onclick="subscribeCategories()">Subscribe Categories</button>
+      <button onclick="sendNotificationIntent()">Send Intent</button>
+      <div id="notification-status"></div>
     </div>
 
     <div class="section">
@@ -132,27 +132,26 @@
 
         async healthCheck() {
           return {
-            overall: 'healthy',
+            overall: "healthy",
             services: {
-              geotrigger: 'healthy',
-              email: 'healthy',
-              webhook: 'healthy',
-              beacon: navigator.bluetooth ? 'healthy' : 'unhealthy',
-              pushNotification:
-                'Notification' in window ? 'healthy' : 'unhealthy',
+              geotrigger: "healthy",
+              email: "healthy",
+              webhook: "healthy",
+              beacon: navigator.bluetooth ? "healthy" : "unhealthy",
+              notification: "healthy",
             },
           };
         },
 
         geotrigger: {
           addRegion(region) {
-            console.log('Added region:', region);
+            console.log("Added region:", region);
             return true;
           },
           async getCurrentLocation() {
             return new Promise((resolve, reject) => {
               if (!navigator.geolocation) {
-                reject(new Error('Geolocation not supported'));
+                reject(new Error("Geolocation not supported"));
                 return;
               }
               navigator.geolocation.getCurrentPosition(
@@ -167,12 +166,12 @@
             });
           },
           async startMonitoring(callback) {
-            console.log('Started geofence monitoring');
+            console.log("Started geofence monitoring");
             // Simulate a geofence event after 3 seconds
             setTimeout(() => {
               callback({
-                type: 'enter',
-                regionId: 'demo-region',
+                type: "enter",
+                regionId: "demo-region",
                 location: { latitude: 37.7749, longitude: -122.4194 },
                 timestamp: new Date(),
               });
@@ -180,7 +179,7 @@
             return true;
           },
           stopMonitoring() {
-            console.log('Stopped geofence monitoring');
+            console.log("Stopped geofence monitoring");
             return true;
           },
           isMonitoring() {
@@ -193,7 +192,7 @@
             await new Promise((resolve) => setTimeout(resolve, 300));
             return {
               success: true,
-              messageId: 'msg_' + Date.now(),
+              messageId: "msg_" + Date.now(),
               statusCode: 200,
             };
           },
@@ -215,7 +214,7 @@
           async createSubscription(url, events) {
             await new Promise((resolve) => setTimeout(resolve, 200));
             return {
-              id: 'sub_' + Date.now(),
+              id: "sub_" + Date.now(),
               url,
               events,
               active: true,
@@ -227,20 +226,20 @@
         beacon: {
           async initialize() {
             if (!navigator.bluetooth) {
-              throw new Error('Web Bluetooth not supported');
+              throw new Error("Web Bluetooth not supported");
             }
             await new Promise((resolve) => setTimeout(resolve, 500));
             return true;
           },
           addRegion(region) {
-            console.log('Added beacon region:', region);
+            console.log("Added beacon region:", region);
           },
           async startScanning() {
-            console.log('Started beacon scanning');
+            console.log("Started beacon scanning");
             return true;
           },
           stopScanning() {
-            console.log('Stopped beacon scanning');
+            console.log("Stopped beacon scanning");
             return true;
           },
           getAnalytics() {
@@ -252,37 +251,26 @@
           },
         },
 
-        pushNotification: {
-          async initialize() {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-              throw new Error('Push notifications not supported');
-            }
+        notification: {
+          async registerDevice(params) {
+            console.log("Registering device:", params);
             await new Promise((resolve) => setTimeout(resolve, 300));
             return true;
           },
-          async subscribe() {
-            if (Notification.permission !== 'granted') {
-              const permission = await Notification.requestPermission();
-              if (permission !== 'granted') {
-                return { success: false, error: 'Permission denied' };
-              }
-            }
-            return { success: true, subscriptionId: 'sub_' + Date.now() };
+          async subscribeCategories(categories) {
+            console.log("Subscribing to categories:", categories);
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            return true;
           },
-          async showLocalNotification(payload) {
-            if (Notification.permission === 'granted') {
-              new Notification(payload.title, {
-                body: payload.body,
-                icon: payload.icon,
-              });
-            }
+          async unsubscribeCategories(categories) {
+            console.log("Unsubscribing from categories:", categories);
+            await new Promise((resolve) => setTimeout(resolve, 300));
+            return true;
           },
-          getAnalytics() {
-            return {
-              totalSubscriptions: 1,
-              totalNotificationsSent: 0,
-              clickThroughRate: 0,
-            };
+          async sendIntent(intent) {
+            console.log("Sending notification intent:", intent);
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            return true;
           },
         },
 
@@ -292,14 +280,14 @@
             email: null,
             webhook: { subscriptions: 0 },
             beacon: this.beacon.getAnalytics(),
-            pushNotification: this.pushNotification.getAnalytics(),
+            notification: null,
           };
         },
       };
 
       // Global functions for the demo
       window.initializeSDK = async function () {
-        const status = document.getElementById('init-status');
+        const status = document.getElementById("init-status");
         try {
           status.innerHTML = '<div class="info">Initializing SDK...</div>';
 
@@ -315,7 +303,7 @@
       };
 
       window.checkHealth = async function () {
-        const status = document.getElementById('init-status');
+        const status = document.getElementById("init-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -336,7 +324,7 @@
       };
 
       window.setupGeotrigger = function () {
-        const status = document.getElementById('geo-status');
+        const status = document.getElementById("geo-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -345,10 +333,10 @@
 
         try {
           sdk.geotrigger.addRegion({
-            id: 'demo-region',
+            id: "demo-region",
             center: { latitude: 37.7749, longitude: -122.4194 },
             radius: 100,
-            name: 'Demo Location',
+            name: "Demo Location",
           });
           status.innerHTML =
             '<div class="success">✅ Geofence region added successfully!</div>';
@@ -358,7 +346,7 @@
       };
 
       window.getCurrentLocation = async function () {
-        const status = document.getElementById('geo-status');
+        const status = document.getElementById("geo-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -381,7 +369,7 @@
       };
 
       window.startMonitoring = async function () {
-        const status = document.getElementById('geo-status');
+        const status = document.getElementById("geo-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -407,7 +395,7 @@
       };
 
       window.stopMonitoring = function () {
-        const status = document.getElementById('geo-status');
+        const status = document.getElementById("geo-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -420,7 +408,7 @@
       };
 
       window.sendTestEmail = async function () {
-        const status = document.getElementById('email-status');
+        const status = document.getElementById("email-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -430,10 +418,10 @@
         try {
           status.innerHTML = '<div class="info">Sending test email...</div>';
           const result = await sdk.email.send({
-            to: 'test@example.com',
-            subject: 'Test Email from OMX SDK',
-            body: 'This is a test email sent using the OMX SDK.',
-            html: '<h1>Test Email</h1><p>This is a test email sent using the <strong>OMX SDK</strong>.</p>',
+            to: "test@example.com",
+            subject: "Test Email from OMX SDK",
+            body: "This is a test email sent using the OMX SDK.",
+            html: "<h1>Test Email</h1><p>This is a test email sent using the <strong>OMX SDK</strong>.</p>",
           });
           status.innerHTML = `
                     <div class="success">
@@ -447,7 +435,7 @@
       };
 
       window.validateEmail = function () {
-        const status = document.getElementById('email-status');
+        const status = document.getElementById("email-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -455,9 +443,9 @@
         }
 
         const testEmails = [
-          'valid@example.com',
-          'invalid-email',
-          'test@test.co.uk',
+          "valid@example.com",
+          "invalid-email",
+          "test@test.co.uk",
         ];
         const results = testEmails.map((email) => ({
           email,
@@ -473,7 +461,7 @@
       };
 
       window.testWebhook = async function () {
-        const status = document.getElementById('webhook-status');
+        const status = document.getElementById("webhook-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -483,7 +471,7 @@
         try {
           status.innerHTML = '<div class="info">Testing webhook...</div>';
           const result = await sdk.webhook.testWebhook(
-            'https://httpbin.org/post'
+            "https://httpbin.org/post"
           );
           status.innerHTML = `
                     <div class="success">
@@ -497,7 +485,7 @@
       };
 
       window.createSubscription = async function () {
-        const status = document.getElementById('webhook-status');
+        const status = document.getElementById("webhook-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -508,8 +496,8 @@
           status.innerHTML =
             '<div class="info">Creating webhook subscription...</div>';
           const result = await sdk.webhook.createSubscription(
-            'https://your-app.com/webhook',
-            ['user.created', 'order.completed']
+            "https://your-app.com/webhook",
+            ["user.created", "order.completed"]
           );
           status.innerHTML = `
                     <div class="success">
@@ -523,7 +511,7 @@
       };
 
       window.initializeBeacon = async function () {
-        const status = document.getElementById('beacon-status');
+        const status = document.getElementById("beacon-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -536,11 +524,11 @@
           await sdk.beacon.initialize();
 
           sdk.beacon.addRegion({
-            id: 'demo-beacon',
-            uuid: 'B0702880-A295-A8AB-F734-031A98A512DE',
+            id: "demo-beacon",
+            uuid: "B0702880-A295-A8AB-F734-031A98A512DE",
             major: 1,
             minor: 1,
-            name: 'Demo Beacon',
+            name: "Demo Beacon",
           });
 
           status.innerHTML =
@@ -551,7 +539,7 @@
       };
 
       window.startBeaconScanning = async function () {
-        const status = document.getElementById('beacon-status');
+        const status = document.getElementById("beacon-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -570,7 +558,7 @@
       };
 
       window.stopBeaconScanning = function () {
-        const status = document.getElementById('beacon-status');
+        const status = document.getElementById("beacon-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -582,8 +570,8 @@
           '<div class="success">✅ Beacon scanning stopped</div>';
       };
 
-      window.initializePush = async function () {
-        const status = document.getElementById('push-status');
+      window.registerDevice = async function () {
+        const status = document.getElementById("notification-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
@@ -591,62 +579,62 @@
         }
 
         try {
-          status.innerHTML =
-            '<div class="info">Initializing push notifications...</div>';
-          await sdk.pushNotification.initialize();
-          status.innerHTML =
-            '<div class="success">✅ Push notification manager initialized!</div>';
-        } catch (error) {
-          status.innerHTML = `<div class="error">❌ Push initialization failed: ${error.message}</div>`;
-        }
-      };
-
-      window.subscribePush = async function () {
-        const status = document.getElementById('push-status');
-        if (!sdk) {
-          status.innerHTML =
-            '<div class="error">Please initialize SDK first</div>';
-          return;
-        }
-
-        try {
-          status.innerHTML =
-            '<div class="info">Subscribing to push notifications...</div>';
-          const result = await sdk.pushNotification.subscribe();
-          status.innerHTML = `
-                    <div class="success">
-                        <strong>Push Subscription Result:</strong>
-                        <pre>${JSON.stringify(result, null, 2)}</pre>
-                    </div>
-                `;
-        } catch (error) {
-          status.innerHTML = `<div class="error">❌ Push subscription failed: ${error.message}</div>`;
-        }
-      };
-
-      window.showLocalNotification = async function () {
-        const status = document.getElementById('push-status');
-        if (!sdk) {
-          status.innerHTML =
-            '<div class="error">Please initialize SDK first</div>';
-          return;
-        }
-
-        try {
-          await sdk.pushNotification.showLocalNotification({
-            title: 'OMX SDK Demo',
-            body: 'This is a local notification from the OMX SDK demo!',
-            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23007bff"/></svg>',
+          status.innerHTML = '<div class="info">Registering device...</div>';
+          await sdk.notification.registerDevice({
+            platform: "web",
+            deviceToken: "demo-token-" + Date.now(),
           });
           status.innerHTML =
-            '<div class="success">✅ Local notification sent!</div>';
+            '<div class="success">✅ Device registered successfully!</div>';
         } catch (error) {
-          status.innerHTML = `<div class="error">❌ Failed to show notification: ${error.message}</div>`;
+          status.innerHTML = `<div class="error">❌ Failed to register device: ${error.message}</div>`;
+        }
+      };
+
+      window.subscribeCategories = async function () {
+        const status = document.getElementById("notification-status");
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          status.innerHTML =
+            '<div class="info">Subscribing to categories...</div>';
+          await sdk.notification.subscribeCategories(["tech", "news"]);
+          status.innerHTML =
+            '<div class="success">✅ Subscribed to tech and news categories!</div>';
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to subscribe: ${error.message}</div>`;
+        }
+      };
+
+      window.sendNotificationIntent = async function () {
+        const status = document.getElementById("notification-status");
+        if (!sdk) {
+          status.innerHTML =
+            '<div class="error">Please initialize SDK first</div>';
+          return;
+        }
+
+        try {
+          status.innerHTML =
+            '<div class="info">Sending notification intent...</div>';
+          await sdk.notification.sendIntent({
+            title: "New Update!",
+            body: "A new version of OMX SDK is available.",
+            categories: ["tech"],
+          });
+          status.innerHTML =
+            '<div class="success">✅ Notification intent sent successfully!</div>';
+        } catch (error) {
+          status.innerHTML = `<div class="error">❌ Failed to send intent: ${error.message}</div>`;
         }
       };
 
       window.getAnalytics = function () {
-        const status = document.getElementById('analytics-status');
+        const status = document.getElementById("analytics-status");
         if (!sdk) {
           status.innerHTML =
             '<div class="error">Please initialize SDK first</div>';
