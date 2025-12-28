@@ -96,7 +96,7 @@ const geotrigger = new GeotriggerClient({
 
 ## SDK Architecture
 
-```
+```bash
 omx-sdk/
 ├── packages/
 │   ├── omx-sdk/                    # 📦 Unified SDK (exports OmxClient)
