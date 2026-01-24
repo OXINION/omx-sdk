@@ -1,0 +1,59 @@
+{
+  "name": "omx-sdk",
+  "version": "1.0.0",
+  "description": "Complete SDK for Oxinion Marketing Exchange",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts", 
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./core": {
+      "import": "./dist/core.js",
+      "types": "./dist/core.d.ts"
+    },
+    "./geotrigger": {
+      "import": "./dist/geotrigger.js",
+      "types": "./dist/geotrigger.d.ts"
+    },
+    "./email": {
+      "import": "./dist/email.js", 
+      "types": "./dist/email.d.ts"
+    },
+    "./webhook": {
+      "import": "./dist/webhook.js",
+      "types": "./dist/webhook.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist .tsbuildinfo",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "dev": "vitest"
+  },
+  "dependencies": {
+    "@omx-sdk/core": "workspace:*",
+    "@omx-sdk/geotrigger": "workspace:*", 
+    "@omx-sdk/email": "workspace:*",
+    "@omx-sdk/webhook": "workspace:*",
+    "@omx-sdk/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oxinion/omx-sdk.git",
+    "directory": "js/packages/meta/omx-sdk"
+  }
+}

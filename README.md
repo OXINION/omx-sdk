@@ -1,331 +1,151 @@
-# omx-sdk
+# OMX SDK Monorepo
 
-A **modular TypeScript SDK** providing a unified interface to Oxinion's services across platforms.
+A unified SDK for the Oxinion Marketing Exchange, providing both JavaScript and Python implementations with a shared OpenAPI specification.
 
-## Why SDK?
+## 🏗️ Structure
 
-To **minimize integration effort** for partners and developers by offering a consistent, modular interface to Oxinion's services across platforms:
-
-**Target platforms**: Android, iOS, Web (Next.js/React), Beacon
-
-## Features
-
-- ✅ **Individual installable packages** (e.g., `@omx-sdk/geotrigger`, `@omx-sdk/email`)
-- ✅ **Unified meta package** (`omx-sdk`) that wraps all sub-packages
-- ✅ **Strict TypeScript typing** with full IntelliSense support
-- ✅ **Core package** (`@omx-sdk/core`) handling authentication and shared logic
-- ✅ **Tree-shakable** - only import what you need
-- ✅ Built with **pnpm workspaces** and **Turborepo** for optimal performance
-
-## Quick Start
-
-### Installation
-
-Install the unified SDK:
-
-```bash
-npm install omx-sdk
-# or
-pnpm add omx-sdk
-# or
-yarn add omx-sdk
 ```
-
-Or install individual packages:
-
-```bash
-npm install @omx-sdk/email @omx-sdk/geotrigger @omx-sdk/webhook
-```
-
-### Basic Usage
-
-```typescript
-import { createOmxClient } from "@omx-sdk/core";
-
-const omx = await createOmxClient.initialize({
-  clientId: "your-client-id",
-  secretKey: "your-secret-key",
-});
-
-// Send email
-await omx.email.send({
-  to: "user@example.com",
-  subject: "Welcome!",
-  body: "Hello from OMX SDK!",
-});
-
-// Set up geotrigger
-omx.geotrigger.addRegion({
-  id: "office",
-  center: { latitude: 37.7749, longitude: -122.4194 },
-  radius: 100,
-});
-
-await omx.geotrigger.startMonitoring((event) => {
-  console.log("Geofence event:", event);
-});
-```
-
-### Using Individual Packages
-
-```typescript
-import { EmailClient } from "@omx-sdk/email";
-import { GeotriggerClient } from "@omx-sdk/geotrigger";
-
-const emailClient = new EmailClient({
-  clientId: "your-client-id",
-  secretKey: "your-secret-key",
-});
-
-const geotrigger = new GeotriggerClient({
-  clientId: "your-client-id",
-  secretKey: "your-secret-key",
-});
-```
-
-## Available Packages
-
-| Package                 | Description                                  | Status            |
-| ----------------------- | -------------------------------------------- | ----------------- |
-| `@omx-sdk/core`         | Authentication, config, and shared utilities | ✅ Core           |
-| `@omx-sdk/email`        | Email sending functionality                  | 🚧 In Development |
-| `@omx-sdk/geotrigger`   | Location-based triggers and geofencing       | 🚧 In Development |
-| `@omx-sdk/webhook`      | Webhook management and handling              | 📋 Planned        |
-| `@omx-sdk/beacon`       | Beacon detection and proximity services      | 📋 Planned        |
-| `@omx-sdk/notification` | Premium notification transport               | ✅ Production     |
-
-## SDK Architecture
-
-```bash
 omx-sdk/
-├── packages/
-│   ├── omx-sdk/                    # 📦 Unified SDK
-│   ├── core/                       # 🔧 Auth, Config, HttpClient
-│   ├── email/                      # 📧 @omx-sdk/email
-│   ├── geotrigger/                 # 📍 @omx-sdk/geotrigger
-│   ├── webhook/                    # 🔗 @omx-sdk/webhook
-│   ├── beacon/                     # 📡 @omx-sdk/beacon
-│   └── notification/               # 🔔 @omx-sdk/notification
-├── examples/                       # 📚 Usage examples
-├── docs/                          # 📖 Documentation
-└── tools/                         # 🛠️ Build and dev tools
+├─ spec/                     # Single OpenAPI specification
+│   └─ openapi.yaml         # Source of truth for all SDKs
+├─ js/                      # JavaScript SDK
+│   ├─ packages/
+│   │   ├─ core/           # @omx-sdk/core
+│   │   ├─ geotrigger/     # @omx-sdk/geotrigger  
+│   │   ├─ email/          # @omx-sdk/email
+│   │   ├─ webhook/        # @omx-sdk/webhook
+│   │   ├─ shared/         # @omx-sdk/shared
+│   │   └─ meta/omx-sdk/   # omx-sdk (meta package)
+│   └─ examples/
+├─ py/                      # Python SDK
+│   ├─ omx_sdk/
+│   │   ├─ core/           # Core authentication
+│   │   ├─ geo_trigger/    # Geotrigger functionality
+│   │   ├─ email/          # Email functionality  
+│   │   ├─ webhook/        # Webhook functionality
+│   │   └─ shared/         # Shared utilities
+│   └─ examples/
+└─ docs/                   # Documentation
 ```
 
-## Examples
+## 🚀 Quick Start
 
-The [`examples/`](./examples/) directory contains comprehensive test files and demos:
+### JavaScript
 
-### 🚀 Quick Start Testing
+```javascript
+// Install meta package (recommended)
+npm install omx-sdk
 
-```bash
-cd examples
-pnpm test  # Run main SDK test
+// Usage
+import { OMXClient } from 'omx-sdk'
+
+const client = new OMXClient({
+  apiKey: 'your-api-key',
+  secretKey: 'your-secret-key'
+})
+
+await client.authenticate()
+const geotrigger = await client.geotriggers.create({
+  name: 'Coffee Shop',
+  latitude: 40.7128,
+  longitude: -74.0060,
+  radius: 100
+})
 ```
 
-### 📂 Available Examples
-
-| File                      | Description                               | How to Run                                                |
-| ------------------------- | ----------------------------------------- | --------------------------------------------------------- |
-| `example.ts`              | Main authentication and feature test      | `pnpm test` or `npx tsx example.ts`                       |
-| `test-omx-integration.ts` | Integration testing with geotrigger focus | `npx tsx test-omx-integration.ts`                         |
-| `auth-test.ts`            | Authentication flow testing               | `npx tsx auth-test.ts`                                    |
-| `demo.html`               | Browser demo with all features            | `pnpm serve` → open `localhost:8000/demo.html`            |
-| `auth-demo.html`          | Browser authentication demo               | `pnpm serve` → open `localhost:8000/auth-demo.html`       |
-| `geotrigger-test.html`    | Geotrigger-specific browser test          | `pnpm serve` → open `localhost:8000/geotrigger-test.html` |
-
-### 📚 Documentation Examples
-
-- [Email sending](./examples/email.md)
-- [Geotrigger setup](./examples/geotrigger.md)
-- [Webhook handling](./examples/webhook.md)
-- [React integration](./examples/react-app.md)
-- [Node.js server](./examples/nodejs-server.md)
-
-**💡 Tip**: Use real credentials from [omx.oxinion.com/token](https://omx.oxinion.com/token) for full functionality testing.
-
-## Development
-
-### Prerequisites
-
-- Node.js 18+
-- pnpm 8+
-
-### Setup
+### Python
 
 ```bash
-# Clone the repository
-git clone https://github.com/oxinion/omx-sdk.git
-cd omx-sdk
+# Install SDK
+pip install omx-sdk
+```
 
-# Install dependencies
+```python
+# Usage
+from omx_sdk import OMXClient
+
+client = OMXClient(
+    api_key="your-api-key", 
+    secret_key="your-secret-key"
+)
+
+await client.authenticate()
+geotrigger = await client.geotriggers.create(
+    name="Coffee Shop",
+    latitude=40.7128,
+    longitude=-74.0060,
+    radius=100
+)
+```
+
+## 📦 Available Packages
+
+### JavaScript (NPM)
+- `omx-sdk` - Meta package (includes all modules)
+- `@omx-sdk/core` - Authentication and base client
+- `@omx-sdk/geotrigger` - Geotrigger management
+- `@omx-sdk/email` - Email sending
+- `@omx-sdk/webhook` - Webhook management
+- `@omx-sdk/shared` - Shared utilities and types
+
+### Python (PyPI)
+- `omx-sdk` - Complete Python SDK
+
+## 🛠️ Development
+
+### JavaScript
+```bash
+cd js
 pnpm install
-
-# Build all packages
 pnpm build
-
-# Run tests
-pnpm test
-
-# Start development mode
-pnpm dev
-```
-
-## Testing the SDK
-
-The SDK includes comprehensive examples and tests in the `examples/` directory. Here are several ways to test the SDK:
-
-### 🚀 Quick Test (Recommended)
-
-```bash
-cd examples
 pnpm test
 ```
 
-This runs the main authentication and functionality test using TypeScript directly.
-
-### 🌐 Browser Testing
-
+### Python  
 ```bash
-cd examples
-pnpm serve
-# Opens http://localhost:8000
+cd py
+pip install -e ".[dev]"
+python -m pytest
 ```
 
-Then navigate to:
-
-- `demo.html` - Full SDK demo with browser APIs
-- `auth-demo.html` - Authentication flow demo
-- `geotrigger-test.html` - Geotrigger-specific testing
-
-### 🧪 Different Test Scenarios
-
+### Both (from root)
 ```bash
-cd examples
-
-# Main authentication flow test
-npx tsx example.ts
-
-# Integration testing focused on geotrigger
-npx tsx test-omx-integration.ts
-
-# Basic auth test
-npx tsx auth-test.ts
-
-# Test current SDK functionality
-npx tsx test-current-sdk.js
+npm run build     # Build both JS and Python
+npm run test      # Test both
+npm run lint      # Lint both
 ```
 
-### 📱 Environment-Specific Features
+## 🔄 Migration
 
-**Node.js Environment:**
+Migrating from v1.x? See [MIGRATION.md](./docs/MIGRATION.md) for detailed instructions.
 
-- ✅ Email, Webhook, Core authentication
-- ⚠️ Geolocation, Beacon, Push notifications (require browser APIs)
+### Key Changes:
+- ✅ **No import changes** required for JavaScript users
+- 🆕 **Python SDK** now available
+- 📁 **Monorepo structure** with shared OpenAPI spec
+- ⚠️ Removed packages: `beacon`, `campaign`, `notification`
 
-**Browser Environment:**
+## 📖 Documentation
 
-- ✅ All features including geolocation and device APIs
-- 🔄 Auto-terminates tests after 30 seconds
+- [Migration Guide](./docs/MIGRATION.md)
+- [Publishing Guide](./docs/PUBLISHING.md)
+- [Setup Summary](./docs/SETUP_SUMMARY.md)
+- [Examples](./js/examples/) (JavaScript) | [Examples](./py/examples/) (Python)
 
-### 🔑 Using Real Credentials
+## 🤝 Contributing
 
-To test with real credentials, update the config in `examples/example.ts`:
+1. Make changes to `spec/openapi.yaml` first
+2. Generate code: `npm run generate`  
+3. Implement in both JS and Python
+4. Test: `npm run test`
+5. Submit PR
 
-```typescript
-const config = {
-  clientId: "your-actual-client-id",
-  secretKey: "your-actual-secret-key",
-};
-```
+## 📄 License
 
-Get your credentials from [omx.oxinion.com/token](https://omx.oxinion.com/token).
+MIT - see [LICENSE](LICENSE) file for details.
 
-### 📋 Test Coverage
+## 🔗 Links
 
-The examples test:
-
-- ✅ SDK initialization and authentication
-- ✅ Error handling for invalid credentials
-- ✅ Email service integration
-- ✅ Geotrigger functionality
-- ✅ Webhook management
-- ✅ Individual package imports
-- ✅ TypeScript type checking
-
-For detailed testing instructions, see [`examples/TEST_GUIDE.md`](./examples/TEST_GUIDE.md).
-
-### Monorepo Structure
-
-This project uses:
-
-- **pnpm workspaces** for dependency management
-- **Turborepo** for build orchestration and caching
-- **TypeScript** with strict configuration
-- **ESLint + Prettier** for code quality
-
-### Adding a New Package
-
-1. Create package directory: `packages/your-package/`
-2. Add `package.json` with proper naming: `@omx-sdk/your-package`
-3. Implement functionality in `src/index.ts`
-4. Add tests in `src/__tests__/`
-5. Update main SDK to include your package
-
-## API Reference
-
-### OmxClient
-
-The main entry point for the unified SDK.
-
-```typescript
-class OmxClient {
-  constructor(config: OmxConfig);
-
-  // Service clients
-  readonly email: EmailClient;
-  readonly geotrigger: GeotriggerClient;
-  readonly webhook: WebhookClient;
-  // ... other services
-}
-```
-
-For detailed API documentation, see the [API Reference](./docs/api.md).
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes
-4. Add tests for your changes
-5. Run `pnpm test` and `pnpm lint`
-6. Create a changeset: `pnpm changeset`
-7. Commit your changes: `git commit -m 'Add amazing feature'`
-8. Push to the branch: `git push origin feature/amazing-feature`
-9. Open a Pull Request
-
-### Publishing
-
-See [PUBLISHING.md](./PUBLISHING.md) for detailed information about publishing packages to npm.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
-
-## Support
-
-- 📖 [Documentation](./docs/)
-- 🐛 [Issue Tracker](https://github.com/oxinion/omx-sdk/issues)
-- 💬 [Discussions](https://github.com/oxinion/omx-sdk/discussions)
-- 📧 [Email Support](mailto:support@oxinion.com)
-
-## Changelog
-
-See [CHANGELOG.md](./CHANGELOG.md) for a list of changes and version history.
-
----
-
-**Reference**: [Naver D2 - SDK Development Guide](https://d2.naver.com/helloworld/2351859)
+- [Repository](https://github.com/oxinion/omx-sdk)
+- [Issues](https://github.com/oxinion/omx-sdk/issues)
+- [Releases](https://github.com/oxinion/omx-sdk/releases)

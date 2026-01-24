@@ -1,0 +1,5 @@
+# js/pnpm-workspace.yaml
+packages:
+  - 'packages/*'
+  - 'packages/meta/*'
+  - 'examples'

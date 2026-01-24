@@ -1,0 +1,60 @@
+{
+  "name": "omx-sdk-js",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JavaScript SDK for Oxinion Marketing Exchange",
+  "type": "module",
+  "packageManager": "pnpm@10.12.4",
+  "workspaces": [
+    "packages/*",
+    "packages/meta/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "clean": "turbo run clean",
+    "dev": "turbo run dev",
+    "publish-packages": "pnpm build && changeset publish",
+    "version-packages": "changeset version",
+    "prepack": "pnpm build",
+    "release": "pnpm build && changeset publish",
+    "generate": "openapi-generator generate -i ../spec/openapi.yaml -g typescript-fetch -o ./packages/shared/generated"
+  },
+  "keywords": [
+    "oxinion",
+    "marketing",
+    "exchange",
+    "omx",
+    "sdk",
+    "geotrigger",
+    "email",
+    "webhook"
+  ],
+  "author": "Oxinion",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oxinion/omx-sdk.git",
+    "directory": "js"
+  },
+  "homepage": "https://github.com/oxinion/omx-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/oxinion/omx-sdk/issues"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.5",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@openapitools/openapi-generator-cli": "^2.13.12",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "prettier": "^3.0.0",
+    "turbo": "^1.10.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

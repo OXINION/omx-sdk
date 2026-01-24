@@ -1,0 +1,40 @@
+{
+  "name": "@omx-sdk/geotrigger",
+  "version": "1.0.0",
+  "description": "Geotrigger functionality for OMX SDK", 
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist .tsbuildinfo", 
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "dev": "vitest"
+  },
+  "dependencies": {
+    "@omx-sdk/core": "workspace:*",
+    "@omx-sdk/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oxinion/omx-sdk.git", 
+    "directory": "js/packages/geotrigger"
+  }
+}

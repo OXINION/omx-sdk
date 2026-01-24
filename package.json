@@ -2,38 +2,39 @@
   "name": "omx-sdk-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "Modular SDK for Oxinion Marketing Exchange",
-  "main": "index.js",
-  "workspaces": [
-    "packages/*"
-  ],
+  "description": "Monorepo for Oxinion Marketing Exchange SDK (JavaScript & Python)",
   "scripts": {
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
-    "clean": "turbo run clean",
-    "dev": "turbo run dev",
-    "publish-packages": "pnpm build && changeset publish",
-    "version-packages": "changeset version",
-    "prepack": "pnpm build",
-    "release": "pnpm build && changeset publish"
+    "build": "npm run build:js && npm run build:py",
+    "build:js": "cd js && pnpm build",
+    "build:py": "cd py && python -m build",
+    "test": "npm run test:js && npm run test:py",
+    "test:js": "cd js && pnpm test",
+    "test:py": "cd py && python -m pytest",
+    "lint": "npm run lint:js && npm run lint:py",
+    "lint:js": "cd js && pnpm lint",
+    "lint:py": "cd py && ruff check .",
+    "format": "npm run format:js && npm run format:py",
+    "format:js": "cd js && pnpm format",
+    "format:py": "cd py && black . && ruff --fix .",
+    "generate": "npm run generate:js && npm run generate:py",
+    "generate:js": "cd js && pnpm generate",
+    "generate:py": "openapi-python-client generate --path spec/openapi.yaml --output-path py/omx_sdk/shared/generated",
+    "clean": "npm run clean:js && npm run clean:py",
+    "clean:js": "cd js && pnpm clean",
+    "clean:py": "cd py && rm -rf dist/ build/ *.egg-info/"
   },
   "keywords": [
     "oxinion",
     "marketing",
-    "exchange",
+    "exchange", 
     "omx",
     "sdk",
-    "geotrigger",
-    "email",
-    "webhook",
-    "beacon",
-    "notification"
+    "monorepo",
+    "javascript",
+    "python"
   ],
   "author": "Oxinion",
   "license": "MIT",
-  "packageManager": "pnpm@10.12.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/oxinion/omx-sdk.git"
@@ -42,18 +43,7 @@
   "bugs": {
     "url": "https://github.com/oxinion/omx-sdk/issues"
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "devDependencies": {
-    "@changesets/cli": "^2.29.5",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "eslint": "^8.0.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-config-standard-with-typescript": "^43.0.1",
-    "prettier": "^3.0.0",
-    "turbo": "^1.10.0",
-    "typescript": "^5.0.0"
+    "@openapitools/openapi-generator-cli": "^2.13.12"
   }
 }
