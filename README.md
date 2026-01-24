@@ -78,9 +78,14 @@ geotrigger = await client.geotriggers.create(
 )
 ```
 
-## 📦 Available Packages
+## 📦 Available SDKs
 
-### JavaScript (NPM)
+| SDK                      | Location                                | Installation                              |
+| ------------------------ | --------------------------------------- | ----------------------------------------- |
+| **JavaScript / TypeScript** | [`js/`](./js/README.md)           | `npm install omx-sdk`                     |
+| **Python**               | [`py/`](./py/README.md)               | `pip install omx-sdk`                     |
+
+### JavaScript Packages (NPM)
 - `omx-sdk` - Meta package (includes all modules)
 - `@omx-sdk/core` - Authentication and base client
 - `@omx-sdk/geotrigger` - Geotrigger management
@@ -88,7 +93,7 @@ geotrigger = await client.geotriggers.create(
 - `@omx-sdk/webhook` - Webhook management
 - `@omx-sdk/shared` - Shared utilities and types
 
-### Python (PyPI)
+### Python Package (PyPI)
 - `omx-sdk` - Complete Python SDK
 
 ## 🛠️ Development
