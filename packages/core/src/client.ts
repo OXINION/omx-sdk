@@ -25,11 +25,16 @@ export class OmxClient {
    */
   async getSupabase(): Promise<ReturnType<typeof createClient>> {
     const jwt = await this.auth.getToken();
-    const supabaseUrl =
-      this.config.supabaseUrl || "https://blhilidnsybhfdmwqsrx.supabase.co";
-    const anonKey =
-      this.config.supabaseAnonKey ||
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c";
+    
+    if (!this.config.supabaseUrl) {
+      throw new Error("supabaseUrl is required in OmxConfig");
+    }
+    if (!this.config.supabaseAnonKey) {
+      throw new Error("supabaseAnonKey is required in OmxConfig");
+    }
+    
+    const supabaseUrl = this.config.supabaseUrl;
+    const anonKey = this.config.supabaseAnonKey;
 
     // Re-create client if JWT changed or not yet created
     // Simplified for now: always create a fresh proxy or check if existing one is valid
@@ -62,9 +67,11 @@ export class OmxClient {
    * Helper to make authenticated requests directly
    */
   async request<T = any>(endpoint: string, options: any = {}): Promise<T> {
-    const baseUrl =
-      this.config.baseUrl ||
-      "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
+    if (!this.config.baseUrl) {
+      throw new Error("baseUrl is required in OmxConfig for making requests");
+    }
+    
+    const baseUrl = this.config.baseUrl;
     const url = endpoint.startsWith("http")
       ? endpoint
       : `${baseUrl}/${endpoint}`;

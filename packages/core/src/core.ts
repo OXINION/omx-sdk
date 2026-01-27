@@ -19,12 +19,11 @@ import {
  * Core authentication manager for OMX SDK
  * Handles JWT token fetching, caching, and automatic refresh with Supabase Edge Function
  */
-export const SUPABASE_FN_BASE_URL =
-  "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
+// Removed hardcoded URL - baseUrl or supabaseUrl must be provided in config
 
 export class CoreAuth {
   private config: AuthConfig;
-  private supabaseFnUrl: string = `${SUPABASE_FN_BASE_URL}/create-jwt-token`;
+  private supabaseFnUrl: string;
   private cachedToken: CachedToken | null = null;
   private refreshPromise: Promise<JWTToken> | null = null;
 
@@ -37,7 +36,7 @@ export class CoreAuth {
       ...config,
     };
 
-    // If baseUrl is provided, use it for the token function
+    // Set the edge function URL based on config
     if (this.config.baseUrl) {
       const base = this.config.baseUrl.replace(/\/$/, "");
       if (base.includes(".supabase.co")) {
@@ -48,6 +47,8 @@ export class CoreAuth {
     } else if (this.config.supabaseUrl) {
       const base = this.config.supabaseUrl.replace(/\/$/, "");
       this.supabaseFnUrl = `${base}/functions/v1/create-jwt-token`;
+    } else {
+      throw new ConfigurationError("Either baseUrl or supabaseUrl must be provided in config");
     }
   }
 

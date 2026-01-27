@@ -1,0 +1,13 @@
+{
+  "security": [
+    "Remove hardcoded Supabase credentials and URLs from client.ts and core.ts for better security",
+    "Add input validation for clientId and secretKey parameters"
+  ],
+  "configuration": [
+    "Add proper TypeScript type definitions for OmxConfig requiring supabaseUrl and supabaseAnonKey fields"
+  ],
+
+  "documentation": [
+    "Update README.md with complete edge function setup instructions"
+  ]
+}

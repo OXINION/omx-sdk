@@ -60,6 +60,38 @@ importers:
         specifier: workspace:*
         version: link:../packages/meta/omx-sdk
 
+  packages/beacon:
+    dependencies:
+      '@omx-sdk/core':
+        specifier: workspace:*
+        version: link:../core
+      '@omx-sdk/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.0.0
+        version: 1.6.1
+
+  packages/campaign:
+    dependencies:
+      '@omx-sdk/core':
+        specifier: workspace:*
+        version: link:../core
+      '@omx-sdk/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.0.0
+        version: 1.6.1
+
   packages/core:
     dependencies:
       '@omx-sdk/shared':
@@ -107,6 +139,12 @@ importers:
 
   packages/meta/omx-sdk:
     dependencies:
+      '@omx-sdk/beacon':
+        specifier: workspace:*
+        version: link:../../beacon
+      '@omx-sdk/campaign':
+        specifier: workspace:*
+        version: link:../../campaign
       '@omx-sdk/core':
         specifier: workspace:*
         version: link:../../core
@@ -116,12 +154,31 @@ importers:
       '@omx-sdk/geotrigger':
         specifier: workspace:*
         version: link:../../geotrigger
+      '@omx-sdk/notification':
+        specifier: workspace:*
+        version: link:../../notification
       '@omx-sdk/shared':
         specifier: workspace:*
         version: link:../../shared
       '@omx-sdk/webhook':
         specifier: workspace:*
         version: link:../../webhook
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+      vitest:
+        specifier: ^1.0.0
+        version: 1.6.1
+
+  packages/notification:
+    dependencies:
+      '@omx-sdk/core':
+        specifier: workspace:*
+        version: link:../core
+      '@omx-sdk/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       typescript:
         specifier: ^5.0.0

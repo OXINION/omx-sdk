@@ -6,9 +6,14 @@
   },
   "include": ["src/**/*"],
   "references": [
+    { "path": "./packages/shared" },
     { "path": "./packages/core" },
     { "path": "./packages/geotrigger" },
     { "path": "./packages/email" },
-    { "path": "./packages/webhook" }
+    { "path": "./packages/webhook" },
+    { "path": "./packages/notification" },
+    { "path": "./packages/beacon" },
+    { "path": "./packages/campaign" },
+    { "path": "./packages/meta/omx-sdk" }
   ]
 }

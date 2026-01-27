@@ -1,57 +1,62 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NotificationManager } from './index';
+import { EmailManager } from './index.js';
 import { OMXClient } from '@omx-sdk/core';
 
-describe('NotificationManager', () => {
+describe('EmailManager', () => {
+  let emailManager: EmailManager;
   let mockClient: OMXClient;
-  let notificationManager: NotificationManager;
 
   beforeEach(() => {
     mockClient = {
-      makeRequest: vi.fn()
+      makeRequest: vi.fn(),
     } as any;
-    notificationManager = new NotificationManager(mockClient);
-  });
-
-  it('should create notification manager', () => {
-    expect(notificationManager).toBeDefined();
-  });
-
-  it('should send push notification', async () => {
-    const data = {
-      userId: 'user-123',
-      title: 'Test Notification',
-      body: 'Test message'
-    };
-
-    const mockResponse = { messageId: 'msg-123', status: 'sent' };
-    vi.mocked(mockClient.makeRequest).mockResolvedValue(mockResponse);
-
-    const result = await notificationManager.sendPushNotification(data);
-
-    expect(mockClient.makeRequest).toHaveBeenCalledWith('/notifications/push', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
-    expect(result).toEqual(mockResponse);
+    emailManager = new EmailManager(mockClient);
   });
 
   it('should send email', async () => {
-    const data = {
+    const emailData = {
       to: 'test@example.com',
-      subject: 'Test Subject',
-      content: 'Test content'
+      subject: 'Test Email',
+      content: 'This is a test email',
+    };
+    
+    const expectedResult = {
+      messageId: 'email123',
+      status: 'sent'
     };
 
-    const mockResponse = { messageId: 'email-123', status: 'sent' };
-    vi.mocked(mockClient.makeRequest).mockResolvedValue(mockResponse);
+    (mockClient.makeRequest as any).mockResolvedValue(expectedResult);
 
-    const result = await notificationManager.sendEmail(data);
+    const result = await emailManager.send(emailData);
 
-    expect(mockClient.makeRequest).toHaveBeenCalledWith('/notifications/email', {
+    expect(mockClient.makeRequest).toHaveBeenCalledWith('/emails/send', {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(emailData),
     });
-    expect(result).toEqual(mockResponse);
+    expect(result).toEqual(expectedResult);
+  });
+
+  it('should create email template', async () => {
+    const template = {
+      name: 'Welcome Email',
+      subject: 'Welcome!',
+      htmlContent: '<h1>Welcome!</h1>',
+      variables: ['firstName', 'lastName']
+    };
+    
+    const expectedResult = {
+      id: 'template123',
+      ...template
+    };
+
+    (mockClient.makeRequest as any).mockResolvedValue(expectedResult);
+
+    const result = await emailManager.createTemplate(template);
+
+    expect(mockClient.makeRequest).toHaveBeenCalledWith('/emails/templates', {
+      method: 'POST',
+      body: JSON.stringify(template),
+    });
+    expect(result).toEqual(expectedResult);
   });
 });
