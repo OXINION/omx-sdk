@@ -142,7 +142,7 @@ export class OMXSDK {
    */
   async makeAuthenticatedRequest<T = any>(
     url: string,
-    options?: import("@omx-sdk/core").ApiRequestOptions
+    options?: import("@omx-sdk/core").ApiRequestOptions,
   ): Promise<import("@omx-sdk/core").ApiResponse<T>> {
     return this.coreAuth.makeAuthenticatedRequest<T>(url, options);
   }
@@ -227,7 +227,7 @@ export class EmailClient {
   }
 
   async send(message: EmailMessage): Promise<EmailResponse> {
-    const url = `${this.config.baseUrl || "https://api.oxinion.com"}/email/send`;
+    const url = `${this.config.baseUrl || process.env.OMX_API_BASE_URL || "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1"}/email/send`;
 
     if (this.authClient) {
       // Use authenticated request if auth client is available
@@ -262,9 +262,6 @@ import OMX from "omx-sdk";
 const config = {
   clientId: "your-client-id",
   secretKey: "your-secret-key",
-  supabaseUrl: "https://your-project.supabase.co",
-  supabaseAnonKey: "your-supabase-anon-key",
-  baseUrl: "https://api.oxinion.com", // Optional, for your API endpoints
 };
 
 async function main() {
@@ -286,7 +283,7 @@ async function main() {
       {
         method: "POST",
         body: { data: "custom data" },
-      }
+      },
     );
 
     // Access auth info
@@ -351,7 +348,7 @@ export class WebhookClient {
   async createSubscription(
     url: string,
     events: string[],
-    secret?: string
+    secret?: string,
   ): Promise<WebhookSubscription> {
     try {
       if (this.authClient) {
@@ -360,14 +357,14 @@ export class WebhookClient {
           {
             method: "POST",
             body: { url, events, secret },
-          }
+          },
         );
 
         if (response.success) {
           return response.data;
         } else {
           throw new Error(
-            response.error?.message || "Failed to create webhook subscription"
+            response.error?.message || "Failed to create webhook subscription",
           );
         }
       }
@@ -376,11 +373,11 @@ export class WebhookClient {
     } catch (error) {
       if (error instanceof InvalidCredentialsError) {
         throw new Error(
-          "Invalid credentials. Please check your clientId and secretKey."
+          "Invalid credentials. Please check your clientId and secretKey.",
         );
       } else if (error instanceof NetworkError) {
         throw new Error(
-          "Network error while creating webhook subscription. Please try again."
+          "Network error while creating webhook subscription. Please try again.",
         );
       } else {
         throw error;

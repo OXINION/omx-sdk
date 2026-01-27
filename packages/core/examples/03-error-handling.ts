@@ -1,7 +1,7 @@
 /**
  * Example const config: AuthConfig = {
   clientId: 'your-business-client-id',
-  secretKey: 'your-business-secret-key', // Contact your administrator for credentials
+  secretKey: 'your-business-secret-key', // Get this from omx.oxinion.com dashboard
 };mprehensive Error Handling
  */
 

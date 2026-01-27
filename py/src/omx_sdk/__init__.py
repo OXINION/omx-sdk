@@ -250,17 +250,17 @@ class EventsManager:
 class OMXClient:
     """Main OMX SDK client."""
     
-    def __init__(self, client_id: Optional[str] = None, secret_key: Optional[str] = None, base_url: str = 'https://api.oxinion.com/v1'):
+    def __init__(self, client_id: Optional[str] = None, secret_key: Optional[str] = None, base_url: Optional[str] = None):
         """Initialize the OMX client.
         
         Args:
             client_id: OMX client ID (can also be set via OMX_CLIENT_ID env var)
             secret_key: OMX secret key (can also be set via OMX_SECRET_KEY env var)
-            base_url: Base URL for the OMX API
+            base_url: Base URL for the OMX API (can also be set via OMX_API_BASE_URL env var)
         """
         self.client_id = client_id or os.getenv('OMX_CLIENT_ID')
         self.secret_key = secret_key or os.getenv('OMX_SECRET_KEY')
-        self.base_url = base_url
+        self.base_url = base_url or os.getenv('OMX_API_BASE_URL', 'https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1')
         
         if not self.client_id or not self.secret_key:
             raise ValueError("client_id and secret_key are required. Set via parameters or OMX_CLIENT_ID/OMX_SECRET_KEY environment variables.")

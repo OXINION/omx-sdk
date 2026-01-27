@@ -14,10 +14,12 @@ info:
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: https://api.oxinion.com/v1
-    description: Production server
-  - url: https://staging-api.oxinion.com/v1
-    description: Staging server
+  - url: '{baseUrl}'
+    description: OMX API server (configured via environment or SDK initialization)
+    variables:
+      baseUrl:
+        default: https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1
+        description: Base URL for the OMX API
 
 paths:
   # Core API endpoints

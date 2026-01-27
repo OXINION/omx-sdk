@@ -13,8 +13,6 @@ import { createOmxClient } from "omx-sdk";
 const sdk = await createOmxClient.initialize({
   clientId: "your-client-id",
   secretKey: "your-secret-key",
-  baseUrl: "https://api.oxinion.com",
-  // Service-specific configurations...
 });
 
 // Use the services

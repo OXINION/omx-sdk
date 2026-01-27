@@ -30,8 +30,6 @@ import { createOmxClient } from "omx-sdk";
 const sdk = createOmxClient({
   clientId: "your-client-id",
   secretKey: "your-secret-key",
-  baseUrl: "https://api.oxinion.com", // optional global base URL
-  timeout: 10000,
 
   // Service-specific overrides
   email: {
@@ -195,14 +193,14 @@ const sdk = createOmxClient({
 
   // Geotrigger settings
   geotrigger: {
-    baseUrl: "https://geo.api.oxinion.com",
+    baseUrl: process.env.OMX_API_BASE_URL || "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1",
     timeout: 15000,
   },
 
   // Email settings
   email: {
     defaultFrom: "notifications@yourcompany.com",
-    baseUrl: "https://email.api.oxinion.com",
+    baseUrl: process.env.OMX_API_BASE_URL || "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1",
   },
 
   // Webhook settings

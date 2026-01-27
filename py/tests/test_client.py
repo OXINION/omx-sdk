@@ -13,7 +13,7 @@ class TestOMXClient:
         client = OMXClient(client_id="test-client", secret_key="test-secret")
         assert client.client_id == "test-client"
         assert client.secret_key == "test-secret"
-        assert client.base_url == "https://api.oxinion.com/v1"
+        assert client.base_url == "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1"
 
     def test_client_initialization_with_env_vars(self):
         """Test client initialization with environment variables."""

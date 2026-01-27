@@ -19,8 +19,9 @@ import { EmailClient, createEmailClient } from '@omx-sdk/email';
 
 // Create an email client
 const emailClient = createEmailClient({
-  apiKey: 'your-api-key',
-  baseUrl: 'https://api.oxinion.com/email', // optional
+  clientId: 'your-client-id',
+  secretKey: 'your-secret-key',
+  // baseUrl defaults to OMX_API_BASE_URL environment variable or Supabase Edge Functions
   defaultFrom: 'noreply@yourcompany.com', // optional
   timeout: 10000, // optional
 });

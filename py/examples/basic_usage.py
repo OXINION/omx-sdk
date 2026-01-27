@@ -15,9 +15,9 @@ async def main():
     
     # Initialize client
     client = OMXClient(
-        api_key=os.getenv("OMX_API_KEY"),
-        secret_key=os.getenv("OMX_SECRET_KEY"),
-        base_url="https://api.oxinion.com/v1"
+        client_id=os.getenv("OMX_CLIENT_ID"),
+        secret_key=os.getenv("OMX_SECRET_KEY")
+        # base_url will default to environment variable OMX_API_BASE_URL or Supabase URL
     )
 
     try:

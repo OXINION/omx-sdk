@@ -7,7 +7,6 @@ console.log("🚀 Testing OMX SDK import pattern...");
 const config = {
   clientId: "test-client-id",
   secretKey: "test-secret-key",
-  baseUrl: "https://api.oxinion.com",
   email: {
     defaultFrom: "test@example.com",
   },
@@ -43,7 +42,7 @@ createOmxClient(config)
 
     console.log("\n🎉 Import pattern test completed successfully!");
     console.log(
-      '💡 You can now use: import { createOmxClient } from "omx-sdk"; in your TypeScript/ES6 code'
+      '💡 You can now use: import { createOmxClient } from "omx-sdk"; in your TypeScript/ES6 code',
     );
   })
   .catch((error) => {

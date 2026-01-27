@@ -15,12 +15,13 @@ pnpm add @omx-sdk/webhook
 ### Basic Webhook Sending
 
 ```typescript
-import { WebhookClient, createWebhookClient } from '@omx-sdk/webhook';
+import { WebhookClient, createWebhookClient } from "@omx-sdk/webhook";
 
 // Create a webhook client
 const webhookClient = createWebhookClient({
-  apiKey: 'your-api-key',
-  baseUrl: 'https://api.oxinion.com/webhooks', // optional
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
+  // baseUrl defaults to OMX_API_BASE_URL environment variable or Supabase Edge Functions
   timeout: 10000, // optional
   retryAttempts: 3, // optional
   retryDelay: 1000, // optional
@@ -28,22 +29,22 @@ const webhookClient = createWebhookClient({
 
 // Send a webhook
 const response = await webhookClient.send({
-  url: 'https://your-app.com/webhook',
-  method: 'POST',
+  url: "https://your-app.com/webhook",
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    Authorization: 'Bearer your-token',
+    "Content-Type": "application/json",
+    Authorization: "Bearer your-token",
   },
   data: {
-    event: 'user.created',
+    event: "user.created",
     user: {
-      id: '123',
-      email: 'user@example.com',
+      id: "123",
+      email: "user@example.com",
     },
   },
 });
 
-console.log('Webhook sent:', response);
+console.log("Webhook sent:", response);
 ```
 
 ### Webhook with Retry Logic
@@ -51,16 +52,16 @@ console.log('Webhook sent:', response);
 ```typescript
 const response = await webhookClient.send(
   {
-    url: 'https://unreliable-endpoint.com/webhook',
-    method: 'POST',
-    data: { message: 'Hello' },
+    url: "https://unreliable-endpoint.com/webhook",
+    method: "POST",
+    data: { message: "Hello" },
   },
   {
     maxAttempts: 5,
     delay: 2000,
-    backoff: 'exponential',
+    backoff: "exponential",
     maxDelay: 30000,
-  }
+  },
 );
 ```
 
@@ -69,16 +70,16 @@ const response = await webhookClient.send(
 ```typescript
 // Create a subscription
 const subscription = await webhookClient.createSubscription(
-  'https://your-app.com/webhooks/handler',
-  ['user.created', 'user.updated', 'order.completed'],
-  'your-webhook-secret' // optional
+  "https://your-app.com/webhooks/handler",
+  ["user.created", "user.updated", "order.completed"],
+  "your-webhook-secret", // optional
 );
 
-console.log('Subscription created:', subscription);
+console.log("Subscription created:", subscription);
 
 // Update subscription
 await webhookClient.updateSubscription(subscription.id, {
-  events: ['user.created', 'user.deleted'],
+  events: ["user.created", "user.deleted"],
   active: true,
 });
 
@@ -94,21 +95,21 @@ await webhookClient.deleteSubscription(subscription.id);
 ```typescript
 // Test a webhook endpoint
 const testResult = await webhookClient.testWebhook(
-  'https://your-app.com/webhook'
+  "https://your-app.com/webhook",
 );
 
-console.log('Test result:', testResult);
+console.log("Test result:", testResult);
 
 // Test with custom event
 const customTestResult = await webhookClient.testWebhook(
-  'https://your-app.com/webhook',
+  "https://your-app.com/webhook",
   {
-    id: 'test-123',
-    type: 'custom.test',
-    data: { message: 'Custom test event' },
+    id: "test-123",
+    type: "custom.test",
+    data: { message: "Custom test event" },
     timestamp: new Date(),
-    source: 'test-suite',
-  }
+    source: "test-suite",
+  },
 );
 ```
 
@@ -117,18 +118,18 @@ const customTestResult = await webhookClient.testWebhook(
 ```typescript
 // Simulate delivering an event to all subscriptions
 const event = {
-  id: 'evt_123',
-  type: 'user.created',
+  id: "evt_123",
+  type: "user.created",
   data: {
-    userId: '456',
-    email: 'newuser@example.com',
+    userId: "456",
+    email: "newuser@example.com",
   },
   timestamp: new Date(),
-  source: 'user-service',
+  source: "user-service",
 };
 
 const deliveries = await webhookClient.deliverEvent(event);
-console.log('Event deliveries:', deliveries);
+console.log("Event deliveries:", deliveries);
 ```
 
 ### Signature Verification
@@ -136,15 +137,15 @@ console.log('Event deliveries:', deliveries);
 ```typescript
 // Verify webhook signature (for incoming webhooks)
 const payload = '{"event":"user.created","data":{"id":"123"}}';
-const signature = 'sha256=abcdef123456...';
-const secret = 'your-webhook-secret';
+const signature = "sha256=abcdef123456...";
+const secret = "your-webhook-secret";
 
 const isValid = webhookClient.verifySignature(payload, signature, secret);
-console.log('Signature valid:', isValid);
+console.log("Signature valid:", isValid);
 
 // Generate signature (for outgoing webhooks)
 const generatedSignature = webhookClient.generateSignature(payload, secret);
-console.log('Generated signature:', generatedSignature);
+console.log("Generated signature:", generatedSignature);
 ```
 
 ## API Reference
@@ -170,7 +171,7 @@ Webhook request payload.
 ```typescript
 interface WebhookPayload {
   url: string; // Target URL
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'; // HTTP method
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH"; // HTTP method
   headers?: Record<string, string>; // HTTP headers
   data?: unknown; // Request body data
   timeout?: number; // Request timeout
@@ -216,7 +217,7 @@ Options for retry behavior.
 interface RetryOptions {
   maxAttempts?: number; // Maximum retry attempts
   delay?: number; // Base delay between retries
-  backoff?: 'linear' | 'exponential'; // Backoff strategy
+  backoff?: "linear" | "exponential"; // Backoff strategy
   maxDelay?: number; // Maximum delay between retries
 }
 ```
@@ -243,9 +244,9 @@ The SDK provides detailed error information for failed operations:
 const response = await webhookClient.send(payload);
 
 if (!response.success) {
-  console.error('Webhook failed:', response.error);
-  console.error('After attempts:', response.attempt);
-  console.error('Duration:', response.duration);
+  console.error("Webhook failed:", response.error);
+  console.error("After attempts:", response.attempt);
+  console.error("Duration:", response.duration);
 }
 ```
 
@@ -256,22 +257,22 @@ if (!response.success) {
 Always verify webhook signatures when receiving webhooks:
 
 ```typescript
-app.post('/webhook', (req, res) => {
-  const signature = req.headers['x-webhook-signature'];
+app.post("/webhook", (req, res) => {
+  const signature = req.headers["x-webhook-signature"];
   const payload = JSON.stringify(req.body);
 
   if (
     !webhookClient.verifySignature(
       payload,
       signature,
-      process.env.WEBHOOK_SECRET
+      process.env.WEBHOOK_SECRET,
     )
   ) {
-    return res.status(401).send('Invalid signature');
+    return res.status(401).send("Invalid signature");
   }
 
   // Process webhook...
-  res.status(200).send('OK');
+  res.status(200).send("OK");
 });
 ```
 

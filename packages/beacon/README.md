@@ -15,14 +15,12 @@ pnpm add @omx-sdk/beacon
 ### Basic Beacon Scanning
 
 ```typescript
-import { BeaconManager, createBeaconManager } from '@omx-sdk/beacon';
+import { BeaconManager, createBeaconManager } from "@omx-sdk/beacon";
 
 // Create a beacon manager
 const beaconManager = createBeaconManager({
-  apiKey: 'your-api-key',
-  baseUrl: 'https://api.oxinion.com/beacon', // optional
-  timeout: 10000, // optional
-  scanInterval: 1000, // optional - scan every 1 second
+  clientId: "your-client-id",
+  secretKey: "your-secret-key",
 });
 
 // Initialize the beacon manager
@@ -30,32 +28,32 @@ await beaconManager.initialize();
 
 // Add beacon regions to monitor
 beaconManager.addRegion({
-  id: 'store-entrance',
-  uuid: 'B0702880-A295-A8AB-F734-031A98A512DE',
+  id: "store-entrance",
+  uuid: "B0702880-A295-A8AB-F734-031A98A512DE",
   major: 1,
   minor: 1,
-  name: 'Store Entrance',
+  name: "Store Entrance",
 });
 
 beaconManager.addRegion({
-  id: 'checkout-area',
-  uuid: 'B0702880-A295-A8AB-F734-031A98A512DE',
+  id: "checkout-area",
+  uuid: "B0702880-A295-A8AB-F734-031A98A512DE",
   major: 1,
   minor: 2,
-  name: 'Checkout Area',
+  name: "Checkout Area",
 });
 
 // Add event listeners
-beaconManager.addEventListener('enter', (event) => {
+beaconManager.addEventListener("enter", (event) => {
   console.log(`Entered region: ${event.region.name}`);
-  console.log('Beacons detected:', event.beacons);
+  console.log("Beacons detected:", event.beacons);
 });
 
-beaconManager.addEventListener('exit', (event) => {
+beaconManager.addEventListener("exit", (event) => {
   console.log(`Exited region: ${event.region.name}`);
 });
 
-beaconManager.addEventListener('range', (event) => {
+beaconManager.addEventListener("range", (event) => {
   console.log(`Ranging in region: ${event.region.name}`);
   event.beacons?.forEach((beacon) => {
     console.log(`Beacon ${beacon.id}: ${beacon.distance?.toFixed(2)}m away`);
@@ -77,8 +75,8 @@ await beaconManager.startScanning({
   filterByRegions: [
     // Only scan for specific regions
     {
-      id: 'target-region',
-      uuid: 'B0702880-A295-A8AB-F734-031A98A512DE',
+      id: "target-region",
+      uuid: "B0702880-A295-A8AB-F734-031A98A512DE",
       major: 1,
     },
   ],
@@ -86,11 +84,11 @@ await beaconManager.startScanning({
 
 // Get all discovered beacons
 const allBeacons = beaconManager.getDiscoveredBeacons();
-console.log('All discovered beacons:', allBeacons);
+console.log("All discovered beacons:", allBeacons);
 
 // Get beacons in a specific region
-const storeBeacons = beaconManager.getBeaconsInRegion('store-entrance');
-console.log('Store entrance beacons:', storeBeacons);
+const storeBeacons = beaconManager.getBeaconsInRegion("store-entrance");
+console.log("Store entrance beacons:", storeBeacons);
 
 // Stop scanning
 beaconManager.stopScanning();
@@ -108,7 +106,7 @@ const proximity = beaconManager.getProximity(distance);
 console.log(`Proximity: ${proximity}`); // 'immediate', 'near', 'far', or 'unknown'
 
 // Access beacon proximity data
-beaconManager.addEventListener('range', (event) => {
+beaconManager.addEventListener("range", (event) => {
   event.beacons?.forEach((beacon) => {
     console.log(`Beacon ${beacon.id}:`);
     console.log(`  RSSI: ${beacon.rssi} dBm`);
@@ -123,7 +121,7 @@ beaconManager.addEventListener('range', (event) => {
 ```typescript
 // Get beacon analytics
 const analytics = beaconManager.getAnalytics();
-console.log('Beacon Analytics:', {
+console.log("Beacon Analytics:", {
   totalBeacons: analytics.totalBeacons,
   regionsMonitored: analytics.regionsMonitored,
   events: analytics.events,
@@ -137,7 +135,7 @@ beaconManager.clearDiscoveredBeacons();
 
 // Check scanning status
 const isScanning = beaconManager.isCurrentlyScanning();
-console.log('Is currently scanning:', isScanning);
+console.log("Is currently scanning:", isScanning);
 ```
 
 ### Region Management
@@ -146,17 +144,17 @@ console.log('Is currently scanning:', isScanning);
 // Add multiple regions
 const regions = [
   {
-    id: 'entrance',
-    uuid: 'B0702880-A295-A8AB-F734-031A98A512DE',
+    id: "entrance",
+    uuid: "B0702880-A295-A8AB-F734-031A98A512DE",
     major: 1,
     minor: 1,
-    name: 'Entrance',
+    name: "Entrance",
   },
   {
-    id: 'electronics',
-    uuid: 'B0702880-A295-A8AB-F734-031A98A512DE',
+    id: "electronics",
+    uuid: "B0702880-A295-A8AB-F734-031A98A512DE",
     major: 2,
-    name: 'Electronics Section',
+    name: "Electronics Section",
   },
 ];
 
@@ -164,11 +162,11 @@ regions.forEach((region) => beaconManager.addRegion(region));
 
 // Get all regions
 const allRegions = beaconManager.getRegions();
-console.log('Monitored regions:', allRegions);
+console.log("Monitored regions:", allRegions);
 
 // Remove a region
-const removed = beaconManager.removeRegion('entrance');
-console.log('Region removed:', removed);
+const removed = beaconManager.removeRegion("entrance");
+console.log("Region removed:", removed);
 ```
 
 ## API Reference
@@ -198,7 +196,7 @@ interface BeaconDevice {
   minor: number; // Minor value
   rssi: number; // Signal strength in dBm
   distance?: number; // Estimated distance in meters
-  proximity: 'immediate' | 'near' | 'far' | 'unknown'; // Proximity category
+  proximity: "immediate" | "near" | "far" | "unknown"; // Proximity category
   lastSeen: Date; // Last detection timestamp
   name?: string; // Optional beacon name
   manufacturer?: string; // Optional manufacturer info
@@ -225,7 +223,7 @@ Event object for beacon-related events.
 
 ```typescript
 interface BeaconEvent {
-  type: 'enter' | 'exit' | 'range'; // Event type
+  type: "enter" | "exit" | "range"; // Event type
   region: BeaconRegion; // Associated region
   beacons?: BeaconDevice[]; // Detected beacons (for range events)
   timestamp: Date; // Event timestamp
@@ -312,12 +310,12 @@ The beacon manager requires Bluetooth permissions from the user. Make sure to:
 try {
   await beaconManager.initialize();
 } catch (error) {
-  if (error.message.includes('not supported')) {
+  if (error.message.includes("not supported")) {
     // Show fallback UI for unsupported browsers
-    console.log('Beacon functionality not available');
+    console.log("Beacon functionality not available");
   } else {
     // Handle permission denied or other errors
-    console.error('Failed to initialize beacon manager:', error);
+    console.error("Failed to initialize beacon manager:", error);
   }
 }
 ```
