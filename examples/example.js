@@ -38,7 +38,7 @@ async function testOMXInitialization() {
         // Handle specific error cases
         if (error.message.includes('invalid credentials')) {
             console.error('🔑 Authentication failed: Invalid clientId or secretKey');
-            console.error('💡 Please verify your credentials from omx.oxinion.com/token');
+            console.error('💡 Please verify your credentials and API configuration');
         }
         else if (error.message.includes('network') ||
             error.message.includes('fetch')) {

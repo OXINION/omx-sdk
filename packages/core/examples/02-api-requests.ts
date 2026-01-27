@@ -1,7 +1,7 @@
 /**
  *const config: AuthConfig = {
   clientId: 'your-business-client-id',
-  secretKey: 'your-business-secret-key', // Get this from omx.oxinion.com dashboard
+  secretKey: 'your-business-secret-key', // Contact your administrator for credentials
 };ple 2: Making Authenticated API Requests with Automatic Token Refresh
  */
 
