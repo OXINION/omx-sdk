@@ -48,4 +48,3 @@ omx-sdk/
 
 - **`create-jwt-token`** - Validates client credentials and returns JWT
 - **`webhook-handler`** - Processes incoming webhook events
-- **`analytics-processor`** - Aggregates usage metrics
