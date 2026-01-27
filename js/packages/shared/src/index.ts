@@ -1,7 +1,7 @@
 // Shared utilities and types for OMX SDK
-export * from './types.js'
-export * from './client.js'
-export * from './constants.js'
+export * from "./client.js";
+export * from "./constants.js";
+export * from "./types.js";
 
 // Re-export generated types
-export * from '../generated/index.js'
+export * from "./generated/index.js";

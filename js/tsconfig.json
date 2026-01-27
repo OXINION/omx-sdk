@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/geotrigger" },
+    { "path": "./packages/email" },
+    { "path": "./packages/webhook" }
+  ]
+}

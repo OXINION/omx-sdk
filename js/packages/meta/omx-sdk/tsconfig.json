@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../../shared" },
+    { "path": "../../core" },
+    { "path": "../../geotrigger" },
+    { "path": "../../email" },
+    { "path": "../../webhook" },
+    { "path": "../../notification" },
+    { "path": "../../beacon" },
+    { "path": "../../campaign" }
+  ]
+}

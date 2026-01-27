@@ -4,14 +4,14 @@ A unified SDK for the Oxinion Marketing Exchange, providing both JavaScript and 
 
 ## 🏗️ Structure
 
-```
+```text
 omx-sdk/
 ├─ spec/                     # Single OpenAPI specification
 │   └─ openapi.yaml         # Source of truth for all SDKs
 ├─ js/                      # JavaScript SDK
 │   ├─ packages/
 │   │   ├─ core/           # @omx-sdk/core
-│   │   ├─ geotrigger/     # @omx-sdk/geotrigger  
+│   │   ├─ geotrigger/     # @omx-sdk/geotrigger
 │   │   ├─ email/          # @omx-sdk/email
 │   │   ├─ webhook/        # @omx-sdk/webhook
 │   │   ├─ shared/         # @omx-sdk/shared
@@ -21,7 +21,7 @@ omx-sdk/
 │   ├─ omx_sdk/
 │   │   ├─ core/           # Core authentication
 │   │   ├─ geo_trigger/    # Geotrigger functionality
-│   │   ├─ email/          # Email functionality  
+│   │   ├─ email/          # Email functionality
 │   │   ├─ webhook/        # Webhook functionality
 │   │   └─ shared/         # Shared utilities
 │   └─ examples/
@@ -32,25 +32,33 @@ omx-sdk/
 
 ### JavaScript
 
-```javascript
-// Install meta package (recommended)
+```bash
+# Install SDK
 npm install omx-sdk
+```
 
+```javascript
 // Usage
-import { OMXClient } from 'omx-sdk'
+import { createOmxClient } from "omx-sdk";
 
-const client = new OMXClient({
-  apiKey: 'your-api-key',
-  secretKey: 'your-secret-key'
-})
+const omx = createOmxClient({
+  clientId: process.env.OMX_CLIENT_ID,
+  secretKey: process.env.OMX_SECRET_KEY,
+});
 
-await client.authenticate()
-const geotrigger = await client.geotriggers.create({
-  name: 'Coffee Shop',
-  latitude: 40.7128,
-  longitude: -74.0060,
-  radius: 100
-})
+const geoTrigger = await omx.geoTrigger.create({
+  name: "Coffee Shop Promo",
+  location: { lat: 43.6532, lng: -79.3832 },
+  radius: 100,
+  onEnter: {
+    notification: {
+      title: "Welcome!",
+      body: "Get 30% off your order!",
+    },
+  },
+});
+
+console.log("GeoTrigger created:", geoTrigger.id);
 ```
 
 ### Python
@@ -64,28 +72,36 @@ pip install omx-sdk
 # Usage
 from omx_sdk import OMXClient
 
-client = OMXClient(
-    api_key="your-api-key", 
+omx = OMXClient(
+    client_id="your-client-id",
     secret_key="your-secret-key"
 )
 
-await client.authenticate()
-geotrigger = await client.geotriggers.create(
-    name="Coffee Shop",
-    latitude=40.7128,
-    longitude=-74.0060,
-    radius=100
-)
+geo_trigger = await omx.geo_trigger.create({
+    "name": "Coffee Shop Promo",
+    "location": {"lat": 43.6532, "lng": -79.3832},
+    "radius": 100,
+    "on_enter": {
+        "notification": {
+            "title": "Welcome!",
+            "body": "Get 30% off your order!"
+        }
+    }
+})
+
+print("GeoTrigger created:", geo_trigger.id)
+
 ```
 
 ## 📦 Available SDKs
 
-| SDK                      | Location                                | Installation                              |
-| ------------------------ | --------------------------------------- | ----------------------------------------- |
-| **JavaScript / TypeScript** | [`js/`](./js/README.md)           | `npm install omx-sdk`                     |
-| **Python**               | [`py/`](./py/README.md)               | `pip install omx-sdk`                     |
+| SDK                      | Location                | Installation          |
+| ------------------------ | ----------------------- | --------------------- |
+| **Node.js / TypeScript** | [`js/`](./js/README.md) | `npm install omx-sdk` |
+| **Python**               | [`py/`](./py/README.md) | `pip install omx-sdk` |
 
 ### JavaScript Packages (NPM)
+
 - `omx-sdk` - Meta package (includes all modules)
 - `@omx-sdk/core` - Authentication and base client
 - `@omx-sdk/geotrigger` - Geotrigger management
@@ -94,11 +110,13 @@ geotrigger = await client.geotriggers.create(
 - `@omx-sdk/shared` - Shared utilities and types
 
 ### Python Package (PyPI)
+
 - `omx-sdk` - Complete Python SDK
 
 ## 🛠️ Development
 
-### JavaScript
+### JavaScript Development
+
 ```bash
 cd js
 pnpm install
@@ -106,7 +124,8 @@ pnpm build
 pnpm test
 ```
 
-### Python  
+### Python Development
+
 ```bash
 cd py
 pip install -e ".[dev]"
@@ -114,6 +133,7 @@ python -m pytest
 ```
 
 ### Both (from root)
+
 ```bash
 npm run build     # Build both JS and Python
 npm run test      # Test both
@@ -124,7 +144,8 @@ npm run lint      # Lint both
 
 Migrating from v1.x? See [MIGRATION.md](./docs/MIGRATION.md) for detailed instructions.
 
-### Key Changes:
+### Key Changes
+
 - ✅ **No import changes** required for JavaScript users
 - 🆕 **Python SDK** now available
 - 📁 **Monorepo structure** with shared OpenAPI spec
@@ -140,7 +161,7 @@ Migrating from v1.x? See [MIGRATION.md](./docs/MIGRATION.md) for detailed instru
 ## 🤝 Contributing
 
 1. Make changes to `spec/openapi.yaml` first
-2. Generate code: `npm run generate`  
+2. Generate code: `npm run generate`
 3. Implement in both JS and Python
 4. Test: `npm run test`
 5. Submit PR

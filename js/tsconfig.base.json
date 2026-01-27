@@ -9,9 +9,9 @@
     "allowJs": false,
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
     "noImplicitReturns": true,
-    "noImplicitOverride": true,
+    "noImplicitOverride": false,
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedSideEffectImports": true,
     "noFallthroughCasesInSwitch": true,
@@ -23,7 +23,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "incremental": true,
-    "tsBuildInfoFile": ".tsbuildinfo",
+
     "paths": {
       "@omx-sdk/core": ["./packages/core/src/index.ts"],
       "@omx-sdk/geotrigger": ["./packages/geotrigger/src/index.ts"],

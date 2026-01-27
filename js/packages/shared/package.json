@@ -1,6 +1,6 @@
 {
   "name": "@omx-sdk/shared",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Shared utilities and types for OMX SDK",
   "type": "module",
   "main": "./dist/index.js",

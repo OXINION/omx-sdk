@@ -1,6 +1,6 @@
 {
   "name": "omx-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Complete SDK for Oxinion Marketing Exchange",
   "type": "module",
   "main": "./dist/index.js",
@@ -25,6 +25,22 @@
     "./webhook": {
       "import": "./dist/webhook.js",
       "types": "./dist/webhook.d.ts"
+    },
+    "./notification": {
+      "import": "./dist/notification.js",
+      "types": "./dist/notification.d.ts"
+    },
+    "./beacon": {
+      "import": "./dist/beacon.js",
+      "types": "./dist/beacon.d.ts"
+    },
+    "./campaign": {
+      "import": "./dist/campaign.js",
+      "types": "./dist/campaign.d.ts"
+    },
+    "./shared": {
+      "import": "./dist/shared.js",
+      "types": "./dist/shared.d.ts"
     }
   },
   "files": [
@@ -42,6 +58,9 @@
     "@omx-sdk/geotrigger": "workspace:*", 
     "@omx-sdk/email": "workspace:*",
     "@omx-sdk/webhook": "workspace:*",
+    "@omx-sdk/notification": "workspace:*",
+    "@omx-sdk/beacon": "workspace:*",
+    "@omx-sdk/campaign": "workspace:*",
     "@omx-sdk/shared": "workspace:*"
   },
   "devDependencies": {

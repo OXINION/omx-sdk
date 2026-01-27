@@ -1,6 +1,6 @@
 {
   "name": "@omx-sdk/core",
-  "version": "1.0.0", 
+  "version": "1.0.1", 
   "description": "Core authentication and client for OMX SDK",
   "type": "module",
   "main": "./dist/index.js",

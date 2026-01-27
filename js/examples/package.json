@@ -6,7 +6,12 @@
   "description": "Example usage of OMX SDK JavaScript packages",
   "scripts": {
     "basic": "node basic-usage.js",
-    "advanced": "node advanced-usage.js"
+    "advanced": "node advanced-usage.js",
+    "build": "echo 'No build needed for examples'",
+    "typecheck": "echo 'No typecheck needed for examples'",
+    "test": "echo 'No tests in examples'",
+    "lint": "echo 'No lint needed for examples'",
+    "clean": "echo 'No clean needed for examples'"
   },
   "dependencies": {
     "omx-sdk": "workspace:*",
