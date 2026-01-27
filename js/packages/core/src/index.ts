@@ -2,17 +2,16 @@
 export interface OMXClientConfig {
   clientId?: string;
   secretKey?: string;
-  baseUrl?: string;
 }
 
 export class OMXClient {
   private config: Required<OMXClientConfig>;
+  private readonly baseUrl = 'https://omx.oxinion.com/v1';
   
   constructor(config: OMXClientConfig = {}) {
     this.config = {
       clientId: config.clientId || process.env['OMX_CLIENT_ID'] || '',
-      secretKey: config.secretKey || process.env['OMX_SECRET_KEY'] || '',
-      baseUrl: config.baseUrl || process.env['OMX_BASE_URL'] || 'https://api.oxinion.com/v1'
+      secretKey: config.secretKey || process.env['OMX_SECRET_KEY'] || ''
     };
 
     if (!this.config.clientId) {
@@ -25,7 +24,7 @@ export class OMXClient {
   }
 
   public async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${this.config.baseUrl}${endpoint}`;
+    const url = `${this.baseUrl}${endpoint}`;
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${this.config.secretKey}`,
@@ -53,8 +52,8 @@ export class OMXClient {
     return this.config.secretKey;
   }
 
-  public get baseUrl(): string {
-    return this.config.baseUrl || 'https://api.oxinion.com/v1';
+  public get apiUrl(): string {
+    return this.baseUrl;
   }
 }
 

@@ -12,8 +12,7 @@ async function main() {
   // Initialize SDK
   const sdk = createOmxSdk({
     clientId: process.env.OMX_CLIENT_ID,
-    secretKey: process.env.OMX_SECRET_KEY,
-    baseUrl: 'https://api.oxinion.com/v1'
+    secretKey: process.env.OMX_SECRET_KEY
   })
 
   try {

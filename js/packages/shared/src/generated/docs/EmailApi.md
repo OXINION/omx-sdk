@@ -1,12 +1,10 @@
 # EmailApi
 
-All URIs are relative to *https://api.oxinion.com/v1*
+All URIs are relative to the configured base URL (default: *https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1*)
 
-| Method | HTTP request | Description |
-|------------- | ------------- | -------------|
-| [**sendEmail**](EmailApi.md#sendemailoperation) | **POST** /email/send | Send email |
-
-
+| Method                                          | HTTP request         | Description |
+| ----------------------------------------------- | -------------------- | ----------- |
+| [**sendEmail**](EmailApi.md#sendemailoperation) | **POST** /email/send | Send email  |
 
 ## sendEmail
 
@@ -25,7 +23,7 @@ import type { SendEmailOperationRequest } from '';
 
 async function example() {
   console.log("🚀 Testing  SDK...");
-  const config = new Configuration({ 
+  const config = new Configuration({
     // Configure HTTP bearer authorization: BearerAuth
     accessToken: "YOUR BEARER TOKEN",
   });
@@ -50,10 +48,9 @@ example().catch(console.error);
 
 ### Parameters
 
-
-| Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **sendEmailRequest** | [SendEmailRequest](SendEmailRequest.md) |  | |
+| Name                 | Type                                    | Description | Notes |
+| -------------------- | --------------------------------------- | ----------- | ----- |
+| **sendEmailRequest** | [SendEmailRequest](SendEmailRequest.md) |             |       |
 
 ### Return type
 
@@ -68,11 +65,10 @@ example().catch(console.error);
 - **Content-Type**: `application/json`
 - **Accept**: `application/json`
 
-
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-| **200** | Email sent successfully |  -  |
+
+| Status code | Description             | Response headers |
+| ----------- | ----------------------- | ---------------- |
+| **200**     | Email sent successfully | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#api-endpoints) [[Back to Model list]](../README.md#models) [[Back to README]](../README.md)
-

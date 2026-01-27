@@ -13,22 +13,12 @@ describe('OMXClient', () => {
     expect(client.secretKey).toBe('test-secret');
   });
 
-  it('should use default base URL', () => {
+  it('should use OMX API URL', () => {
     const client = new OMXClient({
       clientId: 'test-client',
       secretKey: 'test-secret'
     });
 
-    expect(client.baseUrl).toBe('https://api.oxinion.com/v1');
-  });
-
-  it('should allow custom base URL', () => {
-    const client = new OMXClient({
-      clientId: 'test-client',
-      secretKey: 'test-secret',
-      baseUrl: 'https://custom-api.example.com'
-    });
-
-    expect(client.baseUrl).toBe('https://custom-api.example.com');
+    expect(client.apiUrl).toBe('https://omx.oxinion.com/v1');
   });
 });

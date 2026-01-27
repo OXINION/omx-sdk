@@ -1,8 +1,10 @@
+import { DEFAULT_BASE_URL } from '@omx-sdk/shared';
+
 export class OMXClient {
     config;
     constructor(config) {
         this.config = {
-            baseUrl: 'https://api.oxinion.com/v1',
+            baseUrl: DEFAULT_BASE_URL,
             ...config
         };
     }
@@ -30,7 +32,7 @@ export class OMXClient {
         return this.config.secretKey;
     }
     get baseUrl() {
-        return this.config.baseUrl || 'https://api.oxinion.com/v1';
+        return this.config.baseUrl || DEFAULT_BASE_URL;
     }
 }
 export function createOMXClient(config) {

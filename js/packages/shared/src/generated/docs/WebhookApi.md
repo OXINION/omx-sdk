@@ -1,6 +1,6 @@
 # WebhookApi
 
-All URIs are relative to *https://api.oxinion.com/v1*
+All URIs are relative to the configured base URL (default: *https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1*)
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|

@@ -2,7 +2,7 @@
 
 export const OMX_API_VERSION = 'v1';
 
-export const DEFAULT_BASE_URL = 'https://api.oxinion.com/v1';
+export const DEFAULT_BASE_URL = (typeof globalThis !== 'undefined' && (globalThis as any).process?.env?.OMX_API_BASE_URL) || 'https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1';
 
 export const EVENT_TYPES = {
   GEOTRIGGER_ENTER: 'geotrigger.enter',

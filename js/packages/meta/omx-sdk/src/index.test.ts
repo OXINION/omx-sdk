@@ -7,8 +7,7 @@ describe('OMXSdk', () => {
   beforeEach(() => {
     sdk = new OMXSdk({
       clientId: 'test-client',
-      secretKey: 'test-secret',
-      baseUrl: 'https://api.test.com'
+      secretKey: 'test-secret'
     });
   });
 
