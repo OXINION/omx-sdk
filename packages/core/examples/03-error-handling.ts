@@ -177,24 +177,19 @@ async function handleConfigurationErrors() {
       name: 'Missing clientId',
       config: {
         secretKey: 'valid-secret',
-        supabaseUrl: 'https://valid.supabase.co',
-        supabaseAnonKey: 'valid-anon-key',
       } as any,
     },
     {
-      name: 'Invalid supabaseFnUrl',
+      name: 'Empty clientId',
       config: {
-        clientId: 'valid-client',
+        clientId: '',
         secretKey: 'valid-secret',
-        supabaseFnUrl: 'not-a-valid-url',
       },
     },
     {
       name: 'Missing secretKey',
       config: {
         clientId: 'valid-client',
-        supabaseFnUrl:
-          'https://valid.supabase.co/functions/v1/create-jwt-token',
       } as any,
     },
   ];

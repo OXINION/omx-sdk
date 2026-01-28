@@ -79,25 +79,31 @@ export class WebhookClient {
     let lastError: Error | null = null;
 
     const maxAttempts =
-      retryOptions?.maxAttempts || this.omx.config.webhook?.retryAttempts || 3;
+      retryOptions?.maxAttempts || this.omx.config['webhook']?.retryAttempts || 3;
     const baseDelay =
-      retryOptions?.delay || this.omx.config.webhook?.retryDelay || 1000;
+      retryOptions?.delay || this.omx.config['webhook']?.retryDelay || 1000;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         // Use OmxClient for authenticated requests if needed,
         // or direct fetch if it's an external webhook
-        const response = await fetch(payload.url, {
+        const fetchOptions: RequestInit = {
           method: payload.method || "POST",
           headers: {
             "Content-Type": "application/json",
             ...payload.headers,
           },
-          body: payload.data ? JSON.stringify(payload.data) : undefined,
-          signal: payload.timeout
-            ? AbortSignal.timeout(payload.timeout)
-            : undefined,
-        });
+        };
+
+        if (payload.data) {
+          fetchOptions.body = JSON.stringify(payload.data);
+        }
+
+        if (payload.timeout) {
+          fetchOptions.signal = AbortSignal.timeout(payload.timeout);
+        }
+
+        const response = await fetch(payload.url, fetchOptions);
 
         const data = await response.json().catch(() => ({}));
         const duration = Date.now() - startTime;
@@ -147,11 +153,14 @@ export class WebhookClient {
       id: result.id,
       url,
       events,
-      secret,
       active: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+
+    if (secret !== undefined) {
+      subscription.secret = secret;
+    }
 
     this.subscriptions.set(subscription.id, subscription);
     return subscription;

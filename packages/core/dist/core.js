@@ -6,7 +6,6 @@ import { AuthenticationError, ConfigurationError, InvalidCredentialsError, Netwo
 export const SUPABASE_FN_BASE_URL = "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
 export class CoreAuth {
     constructor(config) {
-        this.supabaseFnUrl = `${SUPABASE_FN_BASE_URL}/create-jwt-token`;
         this.cachedToken = null;
         this.refreshPromise = null;
         this.validateConfig(config);
@@ -16,20 +15,6 @@ export class CoreAuth {
             retryDelay: 1000,
             ...config,
         };
-        // If baseUrl is provided, use it for the token function
-        if (this.config.baseUrl) {
-            const base = this.config.baseUrl.replace(/\/$/, "");
-            if (base.includes(".supabase.co")) {
-                this.supabaseFnUrl = `${base}/functions/v1/create-jwt-token`;
-            }
-            else {
-                this.supabaseFnUrl = `${base}/create-jwt-token`;
-            }
-        }
-        else if (this.config.supabaseUrl) {
-            const base = this.config.supabaseUrl.replace(/\/$/, "");
-            this.supabaseFnUrl = `${base}/functions/v1/create-jwt-token`;
-        }
     }
     /**
      * Validate the authentication configuration
@@ -83,7 +68,7 @@ export class CoreAuth {
      */
     async fetchNewToken() {
         try {
-            const response = await fetch(this.supabaseFnUrl, {
+            const response = await fetch(`${SUPABASE_FN_BASE_URL}/create-jwt-token`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

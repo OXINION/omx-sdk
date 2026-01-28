@@ -5,9 +5,6 @@
 export interface AuthConfig {
   clientId: string;
   secretKey: string;
-  baseUrl?: string;
-  supabaseUrl?: string;
-  supabaseAnonKey?: string;
   tokenCacheTtl?: number; // Time to live in milliseconds (default: 55 minutes)
   maxRetries?: number; // Maximum retry attempts (default: 3)
   retryDelay?: number; // Delay between retries in milliseconds (default: 1000)

@@ -13,6 +13,12 @@ import { webhook } from "@omx-sdk/webhook";
  * Enhanced OMX Client for the unified SDK with all modules pre-attached
  */
 export class OMXClient extends BaseClient {
+    _beacon;
+    _campaign;
+    _email;
+    _geotrigger;
+    _notification;
+    _webhook;
     /**
      * Geotrigger module
      */

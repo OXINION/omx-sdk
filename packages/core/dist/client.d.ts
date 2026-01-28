@@ -2,21 +2,19 @@
  * @omx-sdk/core
  * Core client module for OMX SDK
  */
-import { createClient } from "@supabase/supabase-js";
 import { CoreAuth } from "./core.js";
 import { OmxConfig } from "./types.js";
 /**
  * Main OMX Client class that manages authentication and shared state
  */
 export declare class OmxClient {
-    auth: CoreAuth;
-    private _supabase;
+    core: CoreAuth;
     config: OmxConfig;
     constructor(config: OmxConfig);
     /**
-     * Get an authenticated Supabase client
+     * @deprecated Use .core instead. Will be removed in v2.0.0
      */
-    getSupabase(): Promise<ReturnType<typeof createClient>>;
+    get auth(): CoreAuth;
     /**
      * Helper to make authenticated requests directly
      */

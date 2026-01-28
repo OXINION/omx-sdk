@@ -3,6 +3,7 @@
  * Email sending functionality for omx-sdk
  */
 export class EmailClient {
+    omx;
     constructor(omx) {
         this.omx = omx;
     }
@@ -60,7 +61,7 @@ export class EmailClient {
             const processedContent = this.processTemplate(template, mergedVariables);
             const message = {
                 to: recipients,
-                from: this.omx.config.email?.defaultFrom,
+                from: this.omx.config['email']?.defaultFrom,
                 subject: processedContent.subject,
                 body: processedContent.body,
                 html: processedContent.html,
@@ -108,7 +109,7 @@ export class EmailClient {
     preparePayload(message) {
         return {
             to: message.to,
-            from: message.from || this.omx.config.email?.defaultFrom,
+            from: message.from || this.omx.config['email']?.defaultFrom,
             subject: message.subject,
             body: message.body,
             html: message.html,

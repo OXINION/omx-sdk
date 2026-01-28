@@ -26,11 +26,11 @@ const omx = createOmxClient({
 
 ```js
 // Check authentication status (optional)
-const tokenInfo = omx.auth.getTokenInfo();
+const tokenInfo = omx.core.getTokenInfo();
 console.log("Authenticated:", tokenInfo.isValid);
 
 // Clear token when logging out
-omx.auth.clearToken();
+omx.core.clearToken();
 ```
 
 ## What This Module Does

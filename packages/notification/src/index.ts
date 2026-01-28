@@ -15,10 +15,11 @@ class NotificationClientImpl implements NotificationClient {
     this.omx = omx;
     const base = options?.baseUrl || omx.config.notification?.baseUrl;
     if (!base) {
+      if (!omx.config.baseUrl) {
+        throw new Error("baseUrl is required in OmxConfig or NotificationOptions");
+      }
       this.baseUrl =
-        (
-          omx.config.supabaseUrl || "https://blhilidnsybhfdmwqsrx.supabase.co"
-        ).replace(/\/$/, "") + "/functions/v1/notification-service";
+        omx.config.baseUrl.replace(/\/$/, "") + "/functions/v1/notification-service";
     } else {
       this.baseUrl = base.replace(/\/$/, "");
     }
@@ -32,7 +33,7 @@ class NotificationClientImpl implements NotificationClient {
     const url = `${this.baseUrl}${path}`;
 
     try {
-      await this.omx.auth.makeAuthenticatedRequest(url, {
+      await this.omx.core.makeAuthenticatedRequest(url, {
         method,
         body,
       });

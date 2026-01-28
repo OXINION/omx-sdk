@@ -11,19 +11,23 @@ function generateUUID() {
     });
 }
 export class GeotriggerClient {
+    omx;
+    teamId = null;
+    regions = new Map();
+    isWatching = false;
+    watchId = null;
     constructor(omx) {
-        this.teamId = null;
-        this.regions = new Map();
-        this.isWatching = false;
-        this.watchId = null;
         this.omx = omx;
     }
     async getTeamId() {
         if (this.teamId)
             return this.teamId;
-        const token = await this.omx.auth.getToken();
+        const token = await this.omx.core.getToken();
         try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
+            const parts = token.split(".");
+            if (parts.length < 2 || !parts[1])
+                throw new Error("Invalid token format");
+            const payload = JSON.parse(atob(parts[1]));
             if (payload.team_id) {
                 this.teamId = payload.team_id;
                 return this.teamId;
@@ -183,14 +187,21 @@ export class GeotriggerClient {
         const duplicateData = {
             team_id: teamId,
             name: newName || `${original.name} (Copy)`,
-            description: original.description,
-            location: original.config?.location,
-            coordinates: original.config?.coordinates,
-            radius: original.config?.radius,
-            event_type: original.config?.event_type,
-            event_payload: original.config?.event_payload,
             status: "inactive",
         };
+        // Only add properties that are defined
+        if (original.description !== undefined)
+            duplicateData.description = original.description;
+        if (original.config?.location)
+            duplicateData.location = original.config.location;
+        if (original.config?.coordinates)
+            duplicateData.coordinates = original.config.coordinates;
+        if (original.config?.radius)
+            duplicateData.radius = original.config.radius;
+        if (original.config?.event_type)
+            duplicateData.event_type = original.config.event_type;
+        if (original.config?.event_payload)
+            duplicateData.event_payload = original.config.event_payload;
         return this.createGeotrigger(duplicateData);
     }
     async getGeotriggerStats() {

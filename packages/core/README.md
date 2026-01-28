@@ -91,8 +91,6 @@ import { CoreAuth, AuthConfig } from "@omx-sdk/core";
 const config: AuthConfig = {
   clientId: "your-business-client-id",
   secretKey: "your-business-secret-key",
-  supabaseFnUrl:
-    "https://your-project.supabase.co/functions/v1/create-jwt-token", // Optional: uses default if not provided
   tokenCacheTtl: 50 * 60 * 1000, // Cache for 50 minutes (optional)
 };
 
@@ -197,7 +195,6 @@ auth.dispose();
 interface AuthConfig {
   clientId: string; // Business client ID
   secretKey: string; // Business secret key
-  supabaseFnUrl?: string; // Supabase Edge Function URL (optional - uses default production URL)
   tokenCacheTtl?: number; // Token cache TTL in ms (default: 55 minutes)
   maxRetries?: number; // Max retry attempts (default: 3)
   retryDelay?: number; // Retry delay in ms (default: 1000)
@@ -254,8 +251,6 @@ import { CoreAuth } from "@omx-sdk/core";
 const auth = new CoreAuth({
   clientId: "business-123",
   secretKey: "secret-456",
-  supabaseFnUrl:
-    "https://your-project.supabase.co/functions/v1/create-jwt-token", // Optional
 });
 
 // Get token
@@ -356,7 +351,6 @@ businesses.forEach((business) => {
     new CoreAuth({
       clientId: business.clientId,
       secretKey: business.secretKey,
-      supabaseUrl: "https://project.supabase.co",
     })
   );
 });

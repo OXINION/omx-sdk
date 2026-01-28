@@ -3,8 +3,9 @@
  * Webhook management functionality for omx-sdk
  */
 export class WebhookClient {
+    omx;
+    subscriptions = new Map();
     constructor(omx) {
-        this.subscriptions = new Map();
         this.omx = omx;
     }
     /**
@@ -13,23 +14,26 @@ export class WebhookClient {
     async send(payload, retryOptions) {
         const startTime = Date.now();
         let lastError = null;
-        const maxAttempts = retryOptions?.maxAttempts || this.omx.config.webhook?.retryAttempts || 3;
-        const baseDelay = retryOptions?.delay || this.omx.config.webhook?.retryDelay || 1000;
+        const maxAttempts = retryOptions?.maxAttempts || this.omx.config['webhook']?.retryAttempts || 3;
+        const baseDelay = retryOptions?.delay || this.omx.config['webhook']?.retryDelay || 1000;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 // Use OmxClient for authenticated requests if needed,
                 // or direct fetch if it's an external webhook
-                const response = await fetch(payload.url, {
+                const fetchOptions = {
                     method: payload.method || "POST",
                     headers: {
                         "Content-Type": "application/json",
                         ...payload.headers,
                     },
-                    body: payload.data ? JSON.stringify(payload.data) : undefined,
-                    signal: payload.timeout
-                        ? AbortSignal.timeout(payload.timeout)
-                        : undefined,
-                });
+                };
+                if (payload.data) {
+                    fetchOptions.body = JSON.stringify(payload.data);
+                }
+                if (payload.timeout) {
+                    fetchOptions.signal = AbortSignal.timeout(payload.timeout);
+                }
+                const response = await fetch(payload.url, fetchOptions);
                 const data = await response.json().catch(() => ({}));
                 const duration = Date.now() - startTime;
                 if (!response.ok)
@@ -67,11 +71,13 @@ export class WebhookClient {
             id: result.id,
             url,
             events,
-            secret,
             active: true,
             createdAt: new Date(),
             updatedAt: new Date(),
         };
+        if (secret !== undefined) {
+            subscription.secret = secret;
+        }
         this.subscriptions.set(subscription.id, subscription);
         return subscription;
     }

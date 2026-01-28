@@ -119,7 +119,7 @@ export class EmailClient {
 
       const message: EmailMessage = {
         to: recipients,
-        from: this.omx.config.email?.defaultFrom,
+        from: this.omx.config['email']?.defaultFrom,
         subject: processedContent.subject,
         body: processedContent.body,
         html: processedContent.html,
@@ -174,7 +174,7 @@ export class EmailClient {
   private preparePayload(message: EmailMessage): Record<string, unknown> {
     return {
       to: message.to,
-      from: message.from || this.omx.config.email?.defaultFrom,
+      from: message.from || this.omx.config['email']?.defaultFrom,
       subject: message.subject,
       body: message.body,
       html: message.html,

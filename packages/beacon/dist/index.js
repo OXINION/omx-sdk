@@ -3,21 +3,22 @@
  * Beacon management functionality for omx-sdk
  */
 export class BeaconManager {
+    omx;
+    regions = new Map();
+    discoveredBeacons = new Map();
+    isScanning = false;
+    scanInterval = null;
+    eventListeners = new Map();
+    analytics = {
+        totalBeacons: 0,
+        regionsMonitored: 0,
+        events: { enters: 0, exits: 0, ranges: 0 },
+        averageRssi: 0,
+        strongestSignal: -100,
+        uptime: 0,
+    };
+    startTime = null;
     constructor(omx) {
-        this.regions = new Map();
-        this.discoveredBeacons = new Map();
-        this.isScanning = false;
-        this.scanInterval = null;
-        this.eventListeners = new Map();
-        this.analytics = {
-            totalBeacons: 0,
-            regionsMonitored: 0,
-            events: { enters: 0, exits: 0, ranges: 0 },
-            averageRssi: 0,
-            strongestSignal: -100,
-            uptime: 0,
-        };
-        this.startTime = null;
         this.omx = omx;
     }
     async initialize() {
@@ -46,7 +47,7 @@ export class BeaconManager {
             return;
         if (!this.startTime)
             await this.initialize();
-        const interval = options?.interval || this.omx.config.beacon?.scanInterval || 1000;
+        const interval = options?.interval || this.omx.config['beacon']?.scanInterval || 1000;
         this.isScanning = true;
         this.scanInterval = window.setInterval(async () => {
             await this.performScan(options);
@@ -120,7 +121,9 @@ export class BeaconManager {
             }
             else {
                 existingBeacon.rssi = beacon.rssi;
-                existingBeacon.distance = beacon.distance;
+                if (beacon.distance !== undefined) {
+                    existingBeacon.distance = beacon.distance;
+                }
                 existingBeacon.proximity = beacon.proximity;
                 existingBeacon.lastSeen = new Date();
             }

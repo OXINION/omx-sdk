@@ -1,0 +1,9 @@
+packages:
+  - 'core'
+  - 'geotrigger'
+  - 'email'
+  - 'webhook'
+  - 'beacon'
+  - 'notification'
+  - 'campaign'
+  - 'omx-sdk'

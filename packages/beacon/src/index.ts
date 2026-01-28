@@ -105,7 +105,7 @@ export class BeaconManager {
     if (!this.startTime) await this.initialize();
 
     const interval =
-      options?.interval || this.omx.config.beacon?.scanInterval || 1000;
+      options?.interval || this.omx.config['beacon']?.scanInterval || 1000;
     this.isScanning = true;
 
     this.scanInterval = window.setInterval(async () => {
@@ -201,7 +201,9 @@ export class BeaconManager {
         }
       } else {
         existingBeacon.rssi = beacon.rssi;
-        existingBeacon.distance = beacon.distance;
+        if (beacon.distance !== undefined) {
+          existingBeacon.distance = beacon.distance;
+        }
         existingBeacon.proximity = beacon.proximity;
         existingBeacon.lastSeen = new Date();
       }

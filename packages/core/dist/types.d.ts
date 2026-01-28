@@ -4,9 +4,6 @@
 export interface AuthConfig {
     clientId: string;
     secretKey: string;
-    baseUrl?: string;
-    supabaseUrl?: string;
-    supabaseAnonKey?: string;
     tokenCacheTtl?: number;
     maxRetries?: number;
     retryDelay?: number;
