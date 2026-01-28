@@ -40,14 +40,12 @@ class TestOMXClient:
     def test_managers_initialized(self):
         """Test that all managers are properly initialized."""
         client = OMXClient(client_id="test-client", secret_key="test-secret")
-        assert hasattr(client, 'geo_trigger')
         assert hasattr(client, 'notification')
-        assert hasattr(client, 'workflow')
-        assert hasattr(client, 'analytics')
+        assert hasattr(client, 'email')
+        assert hasattr(client, 'geo_trigger')
+        assert hasattr(client, 'beacon')
         assert hasattr(client, 'webhook')
-        assert hasattr(client, 'segment')
         assert hasattr(client, 'campaign')
-        assert hasattr(client, 'events')
 
     @pytest.mark.asyncio
     async def test_context_manager(self):
