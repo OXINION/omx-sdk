@@ -15,3 +15,35 @@
       secret_key="..."
   )
 ```
+
+## Python Coding Style
+
+### ✅ Always Use Keyword Arguments (Pythonic Standard)
+
+All SDK methods should use **keyword arguments** instead of dictionary-based arguments.
+
+**✅ Recommended (Pythonic):**
+```python
+fence = await omx.geo_trigger.create(
+    name="Downtown Store",
+    location={"lat": 40.7128, "lng": -74.006},
+    radius=100,
+    events=["enter", "exit"]
+)
+```
+
+**❌ Avoid (JavaScript-style):**
+```python
+fence = await omx.geo_trigger.create({
+    "name": "Downtown Store",
+    "location": {"lat": 40.7128, "lng": -74.006},
+    "radius": 100,
+    "events": ["enter", "exit"]
+})
+```
+
+**Benefits:**
+- ✔ IDE autocomplete support
+- ✔ Type hinting and validation
+- ✔ Better for both JavaScript and Python developers
+- ✔ Follows PEP 8 and Python best practices

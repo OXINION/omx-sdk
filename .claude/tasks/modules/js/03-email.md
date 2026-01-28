@@ -43,13 +43,17 @@ const result = await omx.email.send({
   variables: { firstName: "John", discountCode: "WELCOME10" },
 });
 
-// Send bulk campaign
-await omx.email.sendCampaign({
-  subject: "Monthly Newsletter",
+// Create and send email campaign (email-only bulk sending)
+const campaign = await omx.email.createCampaign({
+  name: "Monthly Newsletter",
+  subject: "Special Offers Inside!",
   template: "newsletter_template",
   recipients: ["segment:loyal_customers"],
   scheduledAt: "2024-01-15T10:00:00Z",
 });
+
+// Send the email campaign
+await omx.email.sendCampaign(campaign.id);
 
 // Create email template
 await omx.email.createTemplate({
@@ -62,12 +66,28 @@ await omx.email.createTemplate({
 
 ## What This Module Does
 
-- ✅ **Transactional Emails** - Send individual emails
-- ✅ **Email Campaigns** - Bulk email marketing
+- ✅ **Transactional Emails** - Send individual one-off emails
+- ✅ **Email-Only Campaigns** - Bulk email marketing (email channel only)
 - ✅ **Template Management** - Create reusable email templates
+- ✅ **Email Campaign Stats** - Track opens, clicks, bounces
 
 ## What This Module Does NOT Do
 
+- ❌ **Multi-Channel Campaigns** - Use `@omx-sdk/campaign` for email+push+webhook campaigns
+- ❌ **Location-Based Triggers** - Use `@omx-sdk/campaign` with `@omx-sdk/geotrigger`
 - ❌ **Push Notifications** - Use `@omx-sdk/notification` instead
 - ❌ **SMS Marketing** - Use dedicated SMS modules
-- ❌ **Email List Management** - Use CRM integrations
+
+## When to Use Email vs Campaign
+
+**Use `@omx-sdk/email`:**
+- Simple email newsletters
+- Transactional emails (receipts, confirmations)
+- Email-only marketing blasts
+- Template-based email sending
+
+**Use `@omx-sdk/campaign`:**
+- Multi-channel marketing (email + push + webhook)
+- Location-triggered campaigns (store visit → push + email)
+- Complex automation workflows
+- A/B testing across channels

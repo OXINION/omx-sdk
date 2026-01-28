@@ -70,13 +70,41 @@ const campaigns = await omx.campaign.list({
 
 ## What This Module Does
 
-- ✅ **Campaign Creation** - Create multi-channel marketing campaigns
-- ✅ **Audience Targeting** - Target specific customer segments
-- ✅ **Performance Tracking** - Monitor campaign metrics and ROI
-- ✅ **Automation** - Schedule and manage campaign lifecycle
+- ✅ **Multi-Channel Campaigns** - Orchestrate email + push + webhook + coupons
+- ✅ **Location-Based Triggers** - Integrate with geotriggers and beacons
+- ✅ **Audience Targeting** - Target specific customer segments and locations
+- ✅ **Campaign Automation** - Schedule, pause, resume campaign lifecycle
+- ✅ **Performance Tracking** - Monitor campaign metrics and ROI across channels
 
 ## What This Module Does NOT Do
 
-- ❌ **Content Creation** - Create email/notification content separately
+- ❌ **Email-Only Bulk Sending** - Use `@omx-sdk/email` for simple email blasts
+- ❌ **Content Creation** - Create email/notification templates in respective modules
 - ❌ **Customer Segmentation** - Use CRM tools for audience building
 - ❌ **Payment Processing** - Handle transactions in your e-commerce system
+
+## Campaign vs Email Campaign
+
+**Campaign Module** (this module):
+```js
+// Multi-channel marketing automation
+const campaign = await omx.campaign.create({
+  channels: ["email", "push_notification", "webhook"],  // Multiple channels
+  targeting: { geofences: ["store_123"] },  // Location-based
+  actions: [
+    { type: "email", config: { template: "welcome" } },
+    { type: "notification", config: { title: "Welcome!" } },
+    { type: "webhook", config: { url: "https://..." } }
+  ]
+});
+```
+
+**Email Module** (simpler):
+```js
+// Email-only bulk sending
+const campaign = await omx.email.createCampaign({
+  subject: "Newsletter",  // Email-specific fields only
+  template: "newsletter_template",
+  recipients: ["segment:all_users"]
+});
+```
