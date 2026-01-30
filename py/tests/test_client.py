@@ -46,6 +46,10 @@ class TestOMXClient:
         assert hasattr(client, 'beacon')
         assert hasattr(client, 'webhook')
         assert hasattr(client, 'campaign')
+        assert hasattr(client, 'workflow')
+        assert hasattr(client, 'analytics')
+        assert hasattr(client, 'segment')
+        assert hasattr(client, 'events')
 
     @pytest.mark.asyncio
     async def test_context_manager(self):

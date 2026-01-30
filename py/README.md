@@ -1,6 +1,6 @@
 # OMX SDK for Python
 
-Python SDK for Oxinion Marketing Exchange (OMX) - A comprehensive toolkit for multi-channel marketing automation, geotrigger management, push notifications, email campaigns, and webhook integration.
+Python SDK for Oxinion Marketing Exchange (OMX) - A comprehensive toolkit for multi-channel marketing automation, geotrigger management, push notifications, email campaigns, webhook integration, workflow automation, analytics insights, audience segmentation, and event tracking.
 
 ## Installation
 
@@ -68,6 +68,10 @@ if __name__ == "__main__":
 - 📡 **Beacon Management** - Bluetooth beacon proximity marketing
 - 🔗 **Webhook Integration** - Real-time event notifications and webhooks
 - 🎯 **Campaign Automation** - Multi-channel marketing campaigns
+- 🔄 **Workflow Automation** - Visual workflow automation with complex logic
+- 📊 **Analytics & Insights** - Performance analytics and reporting
+- 👥 **Audience Segmentation** - Advanced user segmentation and targeting
+- 📝 **Event Tracking** - Comprehensive user behavior tracking
 - 🔐 **Secure Authentication** - Automatic token management
 - ⚡ **Async Support** - Built with httpx for high-performance async/await
 
@@ -179,6 +183,74 @@ campaign = await omx.campaign.create(
 await omx.campaign.execute(
     campaign.id,
     trigger_data={"user_id": "user_123"}
+)
+```
+
+### Workflow Module
+```python
+# Create visual workflow
+workflow = await omx.workflow.create_workflow(
+    name="Customer Onboarding",
+    description="Automated welcome sequence",
+    config={
+        "triggers": ["user_signup"],
+        "actions": [
+            {"type": "send_email", "template": "welcome"},
+            {"type": "wait", "duration": 3600},
+            {"type": "send_notification", "title": "Complete Profile"}
+        ]
+    }
+)
+
+# Execute workflow
+result = await omx.workflow.run_workflow(workflow.id)
+```
+
+### Analytics Module
+```python
+# Get geotrigger analytics
+analytics = await omx.analytics.get_geotrigger_stats(
+    geotrigger_id="store_001",
+    time_range="30d"
+)
+
+print(f"Total entries: {analytics.metrics['total_entries']}")
+print(f"Conversion rate: {analytics.metrics['conversion_rate']}%")
+```
+
+### Segment Module
+```python
+# Create audience segment
+segment = await omx.segment.create_segment(
+    name="High Value Customers",
+    description="Customers with high lifetime value",
+    criteria={
+        "total_spent": {"$gte": 1000},
+        "last_purchase": {"$gte": "2024-01-01"}
+    }
+)
+
+# Get users in segment
+users = await omx.segment.get_segment_users(segment.id)
+```
+
+### Events Module
+```python
+# Track user event
+await omx.events.track_event(
+    user_id="user_123",
+    event_type="purchase",
+    data={
+        "product_id": "prod_456",
+        "amount": 99.99,
+        "currency": "USD"
+    }
+)
+
+# Get user event timeline
+timeline = await omx.events.get_event_timeline(
+    user_id="user_123",
+    limit=50
 )
 ```
 

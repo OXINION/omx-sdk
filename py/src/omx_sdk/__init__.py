@@ -120,6 +120,45 @@ class WebhookDelivery:
         self.timestamp = timestamp
 
 
+# ==================== Data Models ====================
+
+class Workflow:
+    """Workflow model."""
+    def __init__(self, id: str, name: str, description: str, status: str, created_at: str):
+        self.id = id
+        self.name = name
+        self.description = description
+        self.status = status
+        self.created_at = created_at
+
+
+class Segment:
+    """Segment model."""
+    def __init__(self, id: str, name: str, description: str, criteria: Dict[str, Any], user_count: int):
+        self.id = id
+        self.name = name
+        self.description = description
+        self.criteria = criteria
+        self.user_count = user_count
+
+
+class Event:
+    """Event model."""
+    def __init__(self, id: str, user_id: str, event_type: str, data: Dict[str, Any], timestamp: str):
+        self.id = id
+        self.user_id = user_id
+        self.event_type = event_type
+        self.data = data
+        self.timestamp = timestamp
+
+
+class AnalyticsData:
+    """Analytics data model."""
+    def __init__(self, metrics: Dict[str, Any], time_range: Dict[str, str]):
+        self.metrics = metrics
+        self.time_range = time_range
+
+
 # ==================== Module Managers ====================
 
 class NotificationManager:
@@ -996,6 +1035,244 @@ class CampaignManager:
         ]
 
 
+class WorkflowManager:
+    """Workflow module for visual workflow automation."""
+
+    def __init__(self, client: 'OMXClient'):
+        self.client = client
+
+    async def create_workflow(
+        self,
+        name: str,
+        description: str,
+        config: Dict[str, Any]
+    ) -> Workflow:
+        """Create visual workflow using keyword arguments.
+
+        Args:
+            name: Workflow name
+            description: Workflow description  
+            config: Workflow configuration (triggers, actions, conditions)
+
+        Returns:
+            Workflow object
+        """
+        payload = {
+            "name": name,
+            "description": description,
+            "config": config
+        }
+
+        response = await self.client._make_request('POST', '/workflows', payload)
+        return Workflow(
+            id=response['id'],
+            name=response['name'],
+            description=response['description'],
+            status=response['status'],
+            created_at=response['createdAt']
+        )
+
+    async def run_workflow(self, workflow_id: str) -> Dict[str, Any]:
+        """Execute workflow.
+
+        Args:
+            workflow_id: Workflow ID to execute
+
+        Returns:
+            Execution result
+        """
+        return await self.client._make_request('POST', f'/workflows/{workflow_id}/execute')
+
+    async def list(self, status: Optional[str] = None) -> List[Workflow]:
+        """Get all workflows.
+
+        Args:
+            status: Filter by status (active, paused, draft)
+
+        Returns:
+            List of Workflow objects
+        """
+        params = {}
+        if status:
+            params["status"] = status
+
+        response = await self.client._make_request('GET', '/workflows', params=params)
+        return [
+            Workflow(
+                id=item['id'],
+                name=item['name'],
+                description=item['description'],
+                status=item['status'],
+                created_at=item['createdAt']
+            )
+            for item in response
+        ]
+
+
+class AnalyticsManager:
+    """Analytics module for data insights and reporting."""
+
+    def __init__(self, client: 'OMXClient'):
+        self.client = client
+
+    async def get_geotrigger_stats(
+        self,
+        geotrigger_id: str,
+        time_range: Optional[str] = None
+    ) -> AnalyticsData:
+        """Get geotrigger analytics.
+
+        Args:
+            geotrigger_id: Geotrigger ID
+            time_range: Time range filter (7d, 30d, 90d)
+
+        Returns:
+            AnalyticsData with metrics
+        """
+        params = {"geoTriggerId": geotrigger_id}
+        if time_range:
+            params["timeRange"] = time_range
+
+        response = await self.client._make_request('GET', '/analytics/geotriggers', params=params)
+        return AnalyticsData(
+            metrics=response.get('metrics', {}),
+            time_range=response.get('timeRange', {})
+        )
+
+
+class SegmentManager:
+    """Segment module for audience segmentation."""
+
+    def __init__(self, client: 'OMXClient'):
+        self.client = client
+
+    async def create_segment(
+        self,
+        name: str,
+        description: str,
+        criteria: Dict[str, Any]
+    ) -> Segment:
+        """Create audience segment.
+
+        Args:
+            name: Segment name
+            description: Segment description
+            criteria: Segmentation criteria (location, behavior, attributes)
+
+        Returns:
+            Segment object
+        """
+        payload = {
+            "name": name,
+            "description": description,
+            "criteria": criteria
+        }
+
+        response = await self.client._make_request('POST', '/segments', payload)
+        return Segment(
+            id=response['id'],
+            name=response['name'],
+            description=response['description'],
+            criteria=response['criteria'],
+            user_count=response.get('userCount', 0)
+        )
+
+    async def get_segment_users(self, segment_id: str) -> List[Dict[str, Any]]:
+        """Get users in segment.
+
+        Args:
+            segment_id: Segment ID
+
+        Returns:
+            List of user objects
+        """
+        return await self.client._make_request('GET', f'/segments/{segment_id}/users')
+
+    async def list(self, active: Optional[bool] = None) -> List[Segment]:
+        """Get all segments.
+
+        Args:
+            active: Filter by active status
+
+        Returns:
+            List of Segment objects
+        """
+        params = {}
+        if active is not None:
+            params["active"] = str(active).lower()
+
+        response = await self.client._make_request('GET', '/segments', params=params)
+        return [
+            Segment(
+                id=item['id'],
+                name=item['name'],
+                description=item['description'],
+                criteria=item['criteria'],
+                user_count=item.get('userCount', 0)
+            )
+            for item in response
+        ]
+
+
+class EventsManager:
+    """Events module for tracking user interactions and behaviors."""
+
+    def __init__(self, client: 'OMXClient'):
+        self.client = client
+
+    async def track_event(
+        self,
+        user_id: str,
+        event_type: str,
+        data: Optional[Dict[str, Any]] = None
+    ) -> None:
+        """Track user event.
+
+        Args:
+            user_id: User identifier
+            event_type: Type of event (page_view, purchase, etc.)
+            data: Optional event data payload
+        """
+        payload = {
+            "userId": user_id,
+            "eventType": event_type
+        }
+        if data:
+            payload["data"] = data
+
+        await self.client._make_request('POST', '/events', payload)
+
+    async def get_event_timeline(
+        self,
+        user_id: str,
+        limit: Optional[int] = 50
+    ) -> List[Event]:
+        """Get user event timeline.
+
+        Args:
+            user_id: User identifier
+            limit: Maximum number of events
+
+        Returns:
+            List of Event objects
+        """
+        params = {"userId": user_id}
+        if limit:
+            params["limit"] = str(limit)
+
+        response = await self.client._make_request('GET', '/events/timeline', params=params)
+        return [
+            Event(
+                id=item['id'],
+                user_id=item['userId'],
+                event_type=item['eventType'],
+                data=item.get('data', {}),
+                timestamp=item['timestamp']
+            )
+            for item in response
+        ]
+
+
 # ==================== Main Client ====================
 
 class OMXClient:
@@ -1060,6 +1337,10 @@ class OMXClient:
         self.beacon = BeaconManager(self)
         self.webhook = WebhookManager(self)
         self.campaign = CampaignManager(self)
+        self.workflow = WorkflowManager(self)
+        self.analytics = AnalyticsManager(self)
+        self.segment = SegmentManager(self)
+        self.events = EventsManager(self)
 
     async def _make_request(
         self,
@@ -1151,4 +1432,8 @@ __all__ = [
     'WebhookDelivery',
     'Campaign',
     'GeoEvent',
+    'Workflow',
+    'Segment',
+    'Event',
+    'AnalyticsData',
 ]
