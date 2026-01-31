@@ -2,6 +2,7 @@
   "name": "@omx-sdk/shared",
   "version": "1.0.3",
   "description": "Shared utilities and types for OMX SDK",
+  "private": true,
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
