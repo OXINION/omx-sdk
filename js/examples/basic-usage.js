@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Example 1: Using the unified SDK (recommended)
-import { OMXSdk, createOmxSdk } from 'omx-sdk'
+import { OMXClient, createOmxClient } from 'omx-sdk'
 
 // Example 2: Using individual packages
 // import { OMXClient } from '@omx-sdk/core'
@@ -10,7 +10,7 @@ import { OMXSdk, createOmxSdk } from 'omx-sdk'
 
 async function main() {
   // Initialize SDK
-  const sdk = createOmxSdk({
+  const sdk = createOmxClient({
     clientId: process.env.OMX_CLIENT_ID,
     secretKey: process.env.OMX_SECRET_KEY
   })

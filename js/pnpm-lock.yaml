@@ -138,31 +138,6 @@ importers:
         version: 1.6.1
 
   packages/meta/omx-sdk:
-    dependencies:
-      '@omx-sdk/beacon':
-        specifier: workspace:*
-        version: link:../../beacon
-      '@omx-sdk/campaign':
-        specifier: workspace:*
-        version: link:../../campaign
-      '@omx-sdk/core':
-        specifier: workspace:*
-        version: link:../../core
-      '@omx-sdk/email':
-        specifier: workspace:*
-        version: link:../../email
-      '@omx-sdk/geotrigger':
-        specifier: workspace:*
-        version: link:../../geotrigger
-      '@omx-sdk/notification':
-        specifier: workspace:*
-        version: link:../../notification
-      '@omx-sdk/shared':
-        specifier: workspace:*
-        version: link:../../shared
-      '@omx-sdk/webhook':
-        specifier: workspace:*
-        version: link:../../webhook
     devDependencies:
       typescript:
         specifier: ^5.0.0

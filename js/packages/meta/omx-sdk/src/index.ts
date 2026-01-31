@@ -52,8 +52,8 @@ export {
   CampaignAction
 } from '@omx-sdk/campaign'
 
-// Main SDK class that provides access to all managers
-import { OMXClient, OMXClientConfig } from '@omx-sdk/core';
+// Main client class that provides access to all managers
+import { OMXClient as CoreClient, OMXClientConfig } from '@omx-sdk/core';
 import { GeoTriggerManager } from '@omx-sdk/geotrigger';
 import { EmailManager } from '@omx-sdk/email';
 import { WebhookManager } from '@omx-sdk/webhook';
@@ -61,8 +61,8 @@ import { NotificationManager } from '@omx-sdk/notification';
 import { BeaconManager } from '@omx-sdk/beacon';
 import { CampaignManager } from '@omx-sdk/campaign';
 
-export class OMXSdk {
-  public readonly client: OMXClient;
+export class OMXClient {
+  public readonly core: CoreClient;
   public readonly geotrigger: GeoTriggerManager;
   public readonly email: EmailManager;
   public readonly webhook: WebhookManager;
@@ -71,22 +71,19 @@ export class OMXSdk {
   public readonly campaign: CampaignManager;
 
   constructor(config?: OMXClientConfig) {
-    this.client = new OMXClient(config);
-    this.geotrigger = new GeoTriggerManager(this.client);
-    this.email = new EmailManager(this.client);
-    this.webhook = new WebhookManager(this.client);
-    this.notification = new NotificationManager(this.client);
-    this.beacon = new BeaconManager(this.client);
-    this.campaign = new CampaignManager(this.client);
+    this.core = new CoreClient(config);
+    this.geotrigger = new GeoTriggerManager(this.core);
+    this.email = new EmailManager(this.core);
+    this.webhook = new WebhookManager(this.core);
+    this.notification = new NotificationManager(this.core);
+    this.beacon = new BeaconManager(this.core);
+    this.campaign = new CampaignManager(this.core);
   }
 }
 
-// Factory function for creating SDK instance
-export function createOmxSdk(config?: OMXClientConfig): OMXSdk {
-  return new OMXSdk(config);
+// Factory function for creating client instance
+export function createOmxClient(config?: OMXClientConfig): OMXClient {
+  return new OMXClient(config);
 }
-
-// Legacy export for backwards compatibility
-export const createOMXSdk = createOmxSdk;
 
 // OMXClient is already exported above from '@omx-sdk/core'

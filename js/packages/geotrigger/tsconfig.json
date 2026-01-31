@@ -6,7 +6,11 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "composite": true,
-    "paths": {}
+    "baseUrl": "../../",
+    "paths": {
+      "@omx-sdk/core": ["./packages/core/dist/index.d.ts"],
+      "@omx-sdk/shared": ["./packages/shared/dist/index.d.ts"]
+    }
   },
   "references": [{ "path": "../core" }, { "path": "../shared" }]
 }

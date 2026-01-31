@@ -1,18 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { OMXSdk, createOmxSdk } from './index.js';
+import { OMXClient, createOmxClient } from './index.js';
 
-describe('OMXSdk', () => {
-  let sdk: OMXSdk;
+describe('OMXClient', () => {
+  let sdk: OMXClient;
 
   beforeEach(() => {
-    sdk = new OMXSdk({
+    sdk = new OMXClient({
       clientId: 'test-client',
       secretKey: 'test-secret'
     });
   });
 
   it('should initialize with all managers', () => {
-    expect(sdk.client).toBeDefined();
+    expect(sdk.core).toBeDefined();
     expect(sdk.geotrigger).toBeDefined();
     expect(sdk.email).toBeDefined();
     expect(sdk.webhook).toBeDefined();
@@ -22,22 +22,22 @@ describe('OMXSdk', () => {
   });
 
   it('should create SDK via factory function', () => {
-    const sdkFromFactory = createOmxSdk({
+    const sdkFromFactory = createOmxClient({
       clientId: 'test-client',
       secretKey: 'test-secret'
     });
     
-    expect(sdkFromFactory).toBeInstanceOf(OMXSdk);
-    expect(sdkFromFactory.client).toBeDefined();
+    expect(sdkFromFactory).toBeInstanceOf(OMXClient);
+    expect(sdkFromFactory.core).toBeDefined();
   });
 
   it('should use environment variables when no config provided', () => {
     process.env.OMX_CLIENT_ID = 'env-client';
     process.env.OMX_SECRET_KEY = 'env-secret';
     
-    const envSdk = new OMXSdk();
-    expect(envSdk.client.clientId).toBe('env-client');
-    expect(envSdk.client.secretKey).toBe('env-secret');
+    const envSdk = new OMXClient();
+    expect(envSdk.core.clientId).toBe('env-client');
+    expect(envSdk.core.secretKey).toBe('env-secret');
     
     // Clean up
     delete process.env.OMX_CLIENT_ID;

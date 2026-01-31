@@ -24,7 +24,6 @@
     "dev": "pnpm -r --parallel dev",
     "publish-packages": "pnpm build && changeset publish",
     "version-packages": "changeset version",
-    "prepack": "pnpm build",
     "release": "pnpm build && changeset publish",
     "generate": "openapi-generator-cli generate -i ../spec/openapi.yaml -g typescript-fetch -o ./packages/shared/src/generated"
   },

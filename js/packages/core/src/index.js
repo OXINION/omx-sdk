@@ -1,15 +1,20 @@
-import { DEFAULT_BASE_URL } from '@omx-sdk/shared';
-
 export class OMXClient {
     config;
-    constructor(config) {
+    baseUrl = 'https://omx.oxinion.com/v1';
+    constructor(config = {}) {
         this.config = {
-            baseUrl: DEFAULT_BASE_URL,
-            ...config
+            clientId: config.clientId || process.env['OMX_CLIENT_ID'] || '',
+            secretKey: config.secretKey || process.env['OMX_SECRET_KEY'] || ''
         };
+        if (!this.config.clientId) {
+            throw new Error('OMX Client ID is required. Provide via config or OMX_CLIENT_ID environment variable.');
+        }
+        if (!this.config.secretKey) {
+            throw new Error('OMX Secret Key is required. Provide via config or OMX_SECRET_KEY environment variable.');
+        }
     }
     async makeRequest(endpoint, options = {}) {
-        const url = `${this.config.baseUrl}${endpoint}`;
+        const url = `${this.baseUrl}${endpoint}`;
         const headers = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.config.secretKey}`,
@@ -31,11 +36,13 @@ export class OMXClient {
     get secretKey() {
         return this.config.secretKey;
     }
-    get baseUrl() {
-        return this.config.baseUrl || DEFAULT_BASE_URL;
+    get apiUrl() {
+        return this.baseUrl;
     }
 }
-export function createOMXClient(config) {
+export function createOmxClient(config = {}) {
     return new OMXClient(config);
 }
+// Legacy export for backwards compatibility
+export const createOMXClient = createOmxClient;
 //# sourceMappingURL=index.js.map

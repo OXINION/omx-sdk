@@ -54,7 +54,7 @@ This guide covers how to publish the OMX SDK to both npm and PyPI.
 
    ```bash
    cd packages/meta/omx-sdk
-   npm publish
+   npm publish --tag latest
    ```
 
 ### Publishing to PyPI

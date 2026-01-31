@@ -1,15 +1,16 @@
 export interface OMXClientConfig {
-    clientId: string;
-    secretKey: string;
-    baseUrl?: string;
+    clientId?: string;
+    secretKey?: string;
 }
 export declare class OMXClient {
     private config;
-    constructor(config: OMXClientConfig);
+    private readonly baseUrl;
+    constructor(config?: OMXClientConfig);
     makeRequest<T>(endpoint: string, options?: RequestInit): Promise<T>;
     get clientId(): string;
     get secretKey(): string;
-    get baseUrl(): string;
+    get apiUrl(): string;
 }
-export declare function createOMXClient(config: OMXClientConfig): OMXClient;
+export declare function createOmxClient(config?: OMXClientConfig): OMXClient;
+export declare const createOMXClient: typeof createOmxClient;
 //# sourceMappingURL=index.d.ts.map

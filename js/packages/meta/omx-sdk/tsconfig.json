@@ -3,17 +3,18 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "composite": true
+    "baseUrl": "../../../",
+    "skipLibCheck": true,
+    "paths": {
+      "@omx-sdk/core": ["./packages/core/src/index.ts"],
+      "@omx-sdk/geotrigger": ["./packages/geotrigger/src/index.ts"],
+      "@omx-sdk/email": ["./packages/email/src/index.ts"],
+      "@omx-sdk/webhook": ["./packages/webhook/src/index.ts"],
+      "@omx-sdk/notification": ["./packages/notification/src/index.ts"],
+      "@omx-sdk/beacon": ["./packages/beacon/src/index.ts"],
+      "@omx-sdk/campaign": ["./packages/campaign/src/index.ts"],
+      "@omx-sdk/shared": ["./packages/shared/src/index.ts"]
+    }
   },
-  "include": ["src/**/*"],
-  "references": [
-    { "path": "../../shared" },
-    { "path": "../../core" },
-    { "path": "../../geotrigger" },
-    { "path": "../../email" },
-    { "path": "../../webhook" },
-    { "path": "../../notification" },
-    { "path": "../../beacon" },
-    { "path": "../../campaign" }
-  ]
+  "include": ["src/**/*", "../../*/src/**/*"]
 }

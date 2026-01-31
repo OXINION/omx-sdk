@@ -1,6 +1,6 @@
 {
   "name": "omx-sdk",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "Complete SDK for Oxinion Marketing Exchange",
   "type": "module",
   "main": "./dist/index.js",
@@ -44,7 +44,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsc",
