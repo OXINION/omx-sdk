@@ -1,6 +1,7 @@
 {
   "name": "omx-sdk",
-  "version": "1.0.1",
+  "version": "1.0.5",
+  "private": false,
   "description": "Complete SDK for Oxinion Marketing Exchange",
   "type": "module",
   "main": "./dist/index.js",
@@ -62,6 +63,29 @@
     "@omx-sdk/beacon": "workspace:*",
     "@omx-sdk/campaign": "workspace:*",
     "@omx-sdk/shared": "workspace:*"
+  },
+  "keywords": [
+    "oxinion",
+    "marketing",
+    "exchange",
+    "omx",
+    "sdk",
+    "geotrigger",
+    "email",
+    "webhook",
+    "push-notification",
+    "geofencing",
+    "beacon",
+    "campaign",
+    "automation",
+    "location-based",
+    "proximity-marketing"
+  ],
+  "author": "Oxinion",
+  "license": "MIT",
+  "homepage": "https://github.com/oxinion/omx-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/oxinion/omx-sdk/issues"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
