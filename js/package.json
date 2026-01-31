@@ -25,6 +25,8 @@
     "publish-packages": "pnpm build && changeset publish",
     "version-packages": "changeset version",
     "release": "pnpm build && changeset publish",
+    "publish-all": "pnpm -r publish --tag latest",
+    "publish-all-dry": "pnpm -r publish --tag latest --dry-run",
     "generate": "openapi-generator-cli generate -i ../spec/openapi.yaml -g typescript-fetch -o ./packages/shared/src/generated"
   },
   "keywords": [

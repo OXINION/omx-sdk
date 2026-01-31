@@ -1,6 +1,6 @@
 {
   "name": "@omx-sdk/webhook",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Webhook functionality for OMX SDK",
   "type": "module",
   "main": "./dist/index.js", 
