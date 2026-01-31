@@ -1,6 +1,8 @@
 """OMX SDK for Python - Official SDK for Oxinion Marketing Exchange."""
 
 import os
+import base64
+import json
 from typing import Optional, Dict, Any, List, Union
 import httpx
 
@@ -78,12 +80,23 @@ class Webhook:
 
 class Campaign:
     """Campaign model."""
-    def __init__(self, id: str, name: str, description: str, channels: List[str], status: str):
+    def __init__(
+        self, 
+        id: str, 
+        name: str, 
+        description: str, 
+        status: str,
+        type: str = "campaign",
+        industry: Optional[str] = None,
+        target: Optional[str] = None
+    ):
         self.id = id
         self.name = name
         self.description = description
-        self.channels = channels
         self.status = status
+        self.type = type
+        self.industry = industry
+        self.target = target
 
 
 class NotificationHistory:
@@ -897,43 +910,76 @@ class CampaignManager:
     def __init__(self, client: 'OMXClient'):
         self.client = client
 
+    async def _get_team_id(self) -> str:
+        """Get the team ID, from cache, token, or API."""
+        return await self.client._get_team_id()
+
     async def create(
         self,
         name: str,
         description: str,
-        channels: List[str],
+        industry: str = "ecommerce",
+        target: str = "all-customers",
+        type: str = "campaign",
         schedule: Optional[Dict[str, str]] = None,
-        targeting: Optional[Dict[str, Any]] = None
+        targeting: Optional[Dict[str, Any]] = None,
+        **kwargs
     ) -> Campaign:
-        """Create marketing campaign using keyword arguments (Pythonic style).
-
-        Args:
-            name: Campaign name
-            description: Campaign description
-            channels: List of channels (email, push_notification, webhook)
-            schedule: Optional schedule with start_date and end_date
-            targeting: Optional targeting configuration (segments, geofences)
-
-        Returns:
-            Campaign object
-        """
+        """Create marketing campaign using keyword arguments."""
+        team_id = await self._get_team_id()
+        
+        # Note: 'channels' is not a table column, we accept it for compatibility but don't insert it.
+        
         payload = {
-            "name": name,
-            "description": description,
-            "channels": channels
+            "action": "create",
+            "data": {
+                "name": name,
+                "description": description,
+                "industry": industry,
+                "target": target,
+                "type": type,
+                "team_id": team_id,
+                "status": "draft"
+            }
         }
         if schedule:
-            payload["schedule"] = schedule
+            if "start_date" in schedule:
+                payload["data"]["start_date"] = schedule["start_date"]
+            if "end_date" in schedule:
+                payload["data"]["end_date"] = schedule["end_date"]
+        
+        import datetime
+        payload["data"]["created_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        
         if targeting:
-            payload["targeting"] = targeting
+            payload["data"]["target_audience"] = targeting
 
-        response = await self.client._make_request('POST', '/campaigns', payload)
+        response = await self.client._make_request('POST', '/database-access?table=campaigns&schema=business', payload)
+        
+        if not response:
+            raise Exception("No data returned from campaign creation")
+            
+        # Handle the {success: True, data: {...}} format
+        if isinstance(response, dict) and response.get('success') is True:
+            item = response.get('data')
+        else:
+            item = response[0] if isinstance(response, list) and len(response) > 0 else response
+        
+        # If it's still a list (as data might be a list)
+        if isinstance(item, list) and len(item) > 0:
+            item = item[0]
+
+        if not isinstance(item, dict) or 'id' not in item:
+            raise Exception(f"Failed to create campaign: {response}")
+
         return Campaign(
-            id=response['id'],
-            name=response['name'],
-            description=response['description'],
-            channels=response['channels'],
-            status=response['status']
+            id=item['id'],
+            name=item['name'],
+            description=item.get('description', ''),
+            status=item['status'],
+            type=item.get('type', 'campaign'),
+            industry=item.get('industry'),
+            target=item.get('target')
         )
 
     async def update(
@@ -942,29 +988,44 @@ class CampaignManager:
         status: Optional[str] = None,
         budget: Optional[Dict[str, Any]] = None
     ) -> Campaign:
-        """Update campaign settings.
-
-        Args:
-            campaign_id: Campaign ID to update
-            status: Optional new status
-            budget: Optional budget configuration
-
-        Returns:
-            Updated Campaign object
-        """
-        payload = {}
+        """Update campaign settings."""
+        team_id = await self._get_team_id()
+        data = {}
         if status:
-            payload["status"] = status
+            data["status"] = status
         if budget:
-            payload["budget"] = budget
+            data["budget"] = budget
+        
+        import datetime
+        data["updated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-        response = await self.client._make_request('PUT', f'/campaigns/{campaign_id}', payload)
+        payload = {
+            "action": "update",
+            "filters": {"id": campaign_id, "team_id": team_id},
+            "data": data
+        }
+
+        response = await self.client._make_request('POST', '/database-access?table=campaigns&schema=business', payload)
+        
+        if isinstance(response, dict) and response.get('success') is True:
+            item = response.get('data')
+        else:
+            item = response[0] if isinstance(response, list) and len(response) > 0 else response
+            
+        if isinstance(item, list) and len(item) > 0:
+            item = item[0]
+        
+        if not isinstance(item, dict) or 'id' not in item:
+            raise Exception(f"Failed to update campaign: {response}")
+
         return Campaign(
-            id=response['id'],
-            name=response['name'],
-            description=response['description'],
-            channels=response['channels'],
-            status=response['status']
+            id=item['id'],
+            name=item['name'],
+            description=item.get('description', ''),
+            status=item['status'],
+            type=item.get('type', 'campaign'),
+            industry=item.get('industry'),
+            target=item.get('target')
         )
 
     async def pause(self, campaign_id: str) -> None:
@@ -1006,32 +1067,42 @@ class CampaignManager:
         sort_by: Optional[str] = None,
         limit: int = 20
     ) -> List[Campaign]:
-        """Get all campaigns.
-
-        Args:
-            status: Filter by status
-            sort_by: Sort field (created_date, name, etc.)
-            limit: Maximum number of records
-
-        Returns:
-            List of Campaign objects
-        """
-        params = {"limit": str(limit)}
+        """Get all campaigns."""
+        team_id = await self._get_team_id()
+        filters = {"team_id": team_id}
         if status:
-            params["status"] = status
+            filters["status"] = status
+        
+        payload = {
+            "filters": filters,
+            "limit": limit
+        }
         if sort_by:
-            params["sortBy"] = sort_by
+            payload["sort_by"] = sort_by
 
-        response = await self.client._make_request('GET', '/campaigns', params=params)
+        response = await self.client._make_request('POST', '/database-access?table=campaigns&schema=business', payload)
+        
+        if isinstance(response, dict) and response.get('success') is True:
+            data = response.get('data', [])
+        else:
+            data = response
+
+        if not isinstance(data, list):
+            if isinstance(data, dict) and 'error' in data:
+                raise Exception(f"API Error listing campaigns: {data['error']}")
+            return []
+
         return [
             Campaign(
                 id=item['id'],
                 name=item['name'],
                 description=item.get('description', ''),
-                channels=item['channels'],
-                status=item['status']
+                status=item['status'],
+                type=item.get('type', 'campaign'),
+                industry=item.get('industry'),
+                target=item.get('target')
             )
-            for item in response
+            for item in data
         ]
 
 
@@ -1329,6 +1400,7 @@ class OMXClient:
 
         self._client = httpx.AsyncClient()
         self._token: Optional[str] = None
+        self._team_id: Optional[str] = None
 
         # Initialize all module managers
         self.notification = NotificationManager(self)
@@ -1342,6 +1414,88 @@ class OMXClient:
         self.segment = SegmentManager(self)
         self.events = EventsManager(self)
 
+    async def _get_team_id(self) -> str:
+        """Extract team_id from token or fetch it if needed."""
+        if self._team_id:
+            return self._team_id
+
+        token = await self._get_token()
+        try:
+            # Simple JWT decoding without library
+            _, payload_b64, _ = token.split('.')
+            missing_padding = len(payload_b64) % 4
+            if missing_padding:
+                payload_b64 += '=' * (4 - missing_padding)
+            payload_json = base64.urlsafe_b64decode(payload_b64).decode('utf-8')
+            payload = json.loads(payload_json)
+            self._team_id = payload.get('team_id')
+            if self._team_id:
+                return self._team_id
+        except:
+            pass
+
+        # Fallback: Load from API keys
+        try:
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {token}',
+                'X-Client-ID': self.client_id,
+            }
+            # Use database-access to find the team_id
+            payload = {
+                "filters": {"client_id": self.client_id}
+            }
+            url = f"{self.base_url}/database-access?table=api_keys&schema=business"
+            response = await self._client.post(url, headers=headers, json=payload)
+            if response.status_code == 200:
+                data = response.json()
+                items = data if isinstance(data, list) else [data]
+                if items and len(items) > 0:
+                    self._team_id = items[0].get('team_id')
+                    return self._team_id
+        except:
+            pass
+
+        return "default-team" # Last resort fallback
+
+    async def _get_token(self) -> str:
+        """Fetch a fresh JWT token from the authentication server."""
+        if self._token:
+            # TODO: Add expiration check
+            return self._token
+
+        url = f"{self.base_url}/create-jwt-token"
+        payload = {
+            "clientId": self.client_id,
+            "secretKey": self.secret_key
+        }
+        
+        try:
+            response = await self._client.post(url, json=payload, timeout=20.0)
+            if response.status_code != 200:
+                try:
+                    err_json = response.json()
+                    detail = err_json.get('error') or err_json.get('message') or response.text
+                except:
+                    detail = response.text
+                raise Exception(f"HTTP {response.status_code}: {detail}")
+            
+            data = response.json()
+            # Handle different response formats
+            self._token = data.get('token') or data.get('access_token')
+            if not self._token:
+                # If message is "Valid credentials" but no token, something is wrong with the function deployment
+                message = data.get('message', 'No token in response')
+                raise Exception(f"Auth was successful but {message}")
+            
+            return self._token
+        except httpx.RequestError as e:
+            raise Exception(f"Network error: {str(e)}")
+        except Exception as e:
+            # Ensure we always have a string message
+            error_msg = str(e) or "Unknown authentication error"
+            raise Exception(f"Authentication failed: {error_msg}")
+
     async def _make_request(
         self,
         method: str,
@@ -1349,39 +1503,40 @@ class OMXClient:
         data: Optional[Dict[str, Any]] = None,
         params: Optional[Dict[str, str]] = None
     ) -> Any:
-        """Make an HTTP request to the OMX API.
-
-        Args:
-            method: HTTP method (GET, POST, PUT, DELETE)
-            endpoint: API endpoint path
-            data: Optional request body data
-            params: Optional query parameters
-
-        Returns:
-            Response data (JSON parsed) or empty dict
-
-        Raises:
-            Exception: If request fails
-        """
+        """Make an authenticated HTTP request to the OMX API."""
+        # Get fresh token
+        token = await self._get_token()
+        
         url = f"{self.base_url}{endpoint}"
         headers = {
             'Content-Type': 'application/json',
-            'Authorization': f'Bearer {self.secret_key}',
+            'Authorization': f'Bearer {token}',
             'X-Client-ID': self.client_id,
         }
 
         try:
             if method.upper() == 'GET':
-                response = await self._client.get(url, headers=headers, params=params)
+                response = await self._client.get(url, headers=headers, params=params, timeout=30.0)
             elif method.upper() == 'POST':
-                response = await self._client.post(url, headers=headers, json=data)
+                response = await self._client.post(url, headers=headers, json=data, timeout=30.0)
             elif method.upper() == 'PUT':
-                response = await self._client.put(url, headers=headers, json=data)
+                response = await self._client.put(url, headers=headers, json=data, timeout=30.0)
             elif method.upper() == 'DELETE':
-                response = await self._client.delete(url, headers=headers)
+                response = await self._client.delete(url, headers=headers, timeout=30.0)
             else:
                 raise ValueError(f"Unsupported HTTP method: {method}")
 
+            if response.status_code == 401:
+                self._token = None # Clear token for retry
+                # Simple one-time retry
+                token = await self._get_token()
+                headers['Authorization'] = f'Bearer {token}'
+                # Repeat the request once
+                if method.upper() == 'GET':
+                    response = await self._client.get(url, headers=headers, params=params)
+                elif method.upper() == 'POST':
+                    response = await self._client.post(url, headers=headers, json=data)
+                
             response.raise_for_status()
 
             if response.content:
@@ -1389,7 +1544,7 @@ class OMXClient:
             return {}
 
         except httpx.HTTPStatusError as e:
-            raise Exception(f"API Error: {e.response.status_code} {e.response.text}")
+            raise Exception(f"API Error {e.response.status_code}: {e.response.text}")
         except Exception as e:
             raise Exception(f"Request failed: {str(e)}")
 

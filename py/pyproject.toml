@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "omx-sdk"
-version = "0.2.0"
+version = "0.2.1"
 description = "Official Python SDK for Oxinion Marketing Exchange - Multi-channel marketing automation with push notifications, email, geotriggers, beacons, and webhooks"
 readme = "README.md"
 license = {file = "LICENSE"}
