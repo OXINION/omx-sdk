@@ -1,7 +1,6 @@
 {
   "name": "omx-sdk",
   "version": "1.0.5",
-  "private": false,
   "description": "Complete SDK for Oxinion Marketing Exchange",
   "type": "module",
   "main": "./dist/index.js",
@@ -54,16 +53,7 @@
     "test": "vitest run",
     "dev": "vitest"
   },
-  "dependencies": {
-    "@omx-sdk/core": "workspace:*",
-    "@omx-sdk/geotrigger": "workspace:*", 
-    "@omx-sdk/email": "workspace:*",
-    "@omx-sdk/webhook": "workspace:*",
-    "@omx-sdk/notification": "workspace:*",
-    "@omx-sdk/beacon": "workspace:*",
-    "@omx-sdk/campaign": "workspace:*",
-    "@omx-sdk/shared": "workspace:*"
-  },
+  "dependencies": {},
   "keywords": [
     "oxinion",
     "marketing",
