@@ -48,15 +48,15 @@
     "@types/jest": "^30.0.0",
     "jest": "^30.3.0",
     "ts-jest": "^29.4.6",
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@omx-sdk/core": "workspace:*",
-    "@omx-sdk/geotrigger": "workspace:*",
-    "@omx-sdk/email": "workspace:*",
-    "@omx-sdk/webhook": "workspace:*",
     "@omx-sdk/beacon": "workspace:*",
+    "@omx-sdk/campaign": "workspace:*",
+    "@omx-sdk/core": "workspace:*",
+    "@omx-sdk/email": "workspace:*",
+    "@omx-sdk/geotrigger": "workspace:*",
     "@omx-sdk/notification": "workspace:*",
-    "@omx-sdk/campaign": "workspace:*"
+    "@omx-sdk/webhook": "workspace:*"
   }
 }
