@@ -7,15 +7,25 @@
     "composite": true,
     "skipLibCheck": true,
     "paths": {
-      "@omx-sdk/core": ["./packages/core/src/index.ts"],
-      "@omx-sdk/geotrigger": ["./packages/geotrigger/src/index.ts"],
-      "@omx-sdk/email": ["./packages/email/src/index.ts"],
-      "@omx-sdk/webhook": ["./packages/webhook/src/index.ts"],
-      "@omx-sdk/notification": ["./packages/notification/src/index.ts"],
-      "@omx-sdk/beacon": ["./packages/beacon/src/index.ts"],
-      "@omx-sdk/campaign": ["./packages/campaign/src/index.ts"],
-      "@omx-sdk/shared": ["./packages/shared/src/index.ts"]
+      "@omx-sdk/core": ["./packages/core/dist/index.d.ts"],
+      "@omx-sdk/geotrigger": ["./packages/geotrigger/dist/index.d.ts"],
+      "@omx-sdk/email": ["./packages/email/dist/index.d.ts"],
+      "@omx-sdk/webhook": ["./packages/webhook/dist/index.d.ts"],
+      "@omx-sdk/notification": ["./packages/notification/dist/index.d.ts"],
+      "@omx-sdk/beacon": ["./packages/beacon/dist/index.d.ts"],
+      "@omx-sdk/campaign": ["./packages/campaign/dist/index.d.ts"],
+      "@omx-sdk/shared": ["./packages/shared/dist/index.d.ts"]
     }
   },
-  "include": ["src/**/*", "../../*/src/**/*"]
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../../core" },
+    { "path": "../../shared" },
+    { "path": "../../geotrigger" },
+    { "path": "../../email" },
+    { "path": "../../webhook" },
+    { "path": "../../notification" },
+    { "path": "../../beacon" },
+    { "path": "../../campaign" }
+  ]
 }

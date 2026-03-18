@@ -1,4 +1,8 @@
 // Core authentication and HTTP client for OMX SDK
+declare var process: {
+  env: { [key: string]: string | undefined };
+};
+
 export interface OMXClientConfig {
   clientId?: string;
   secretKey?: string;
