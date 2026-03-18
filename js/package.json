@@ -10,7 +10,8 @@
     "packages/meta/*"
   ],
   "resolutions": {
-    "file-type": "21.3.3"
+    "file-type": "21.3.3",
+    "esbuild": "0.27.4"
   },
   "scripts": {
     "build": "pnpm run build:shared && pnpm run build:core && pnpm run build:features && pnpm run build:meta",
