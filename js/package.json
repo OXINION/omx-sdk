@@ -9,6 +9,9 @@
     "packages/*",
     "packages/meta/*"
   ],
+  "resolutions": {
+    "file-type": "21.3.3"
+  },
   "scripts": {
     "build": "pnpm run build:shared && pnpm run build:core && pnpm run build:features && pnpm run build:meta",
     "build:turbo": "turbo run build",
