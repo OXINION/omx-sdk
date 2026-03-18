@@ -51,16 +51,16 @@
     "url": "https://github.com/oxinion/omx-sdk/issues"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.5",
+    "@changesets/cli": "^2.30.0",
     "@openapitools/openapi-generator-cli": "^2.30.2",
-    "@typescript-eslint/eslint-plugin": "^8.21.0",
-    "@typescript-eslint/parser": "^8.21.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
     "eslint": "^8.57.1",
-    "eslint-config-love": "^62.0.0",
-    "eslint-config-prettier": "^9.0.0",
+    "eslint-config-love": "^62.0.1",
+    "eslint-config-prettier": "^9.1.2",
     "file-type": "^21.3.3",
-    "prettier": "^3.0.0",
-    "turbo": "^1.10.0",
+    "prettier": "^3.8.1",
+    "turbo": "^1.13.4",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"
   }
