@@ -1,6 +1,9 @@
 // Simple JavaScript test for OMX SDK Authentication
 // This simulates the expected behavior since the actual SDK may not be built yet
 
+// Load configuration
+const OMX_CONFIG = require('./config.js');
+
 // Test configuration with clientId and secretKey
 const config = {
   clientId: "f7b294c9-12d1-477b-b454-552dedd28de3",
@@ -27,7 +30,7 @@ async function simulateOMXInitialize(config) {
     // Step 2: Make POST request to Supabase Edge Function
     console.log("\n🔐 Making POST request to authentication endpoint...");
     console.log(
-      "📡 URL: https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1/create-jwt-token"
+      "📡 URL: ${OMX_CONFIG.SUPABASE_URL}/functions/v1/create-jwt-token"
     );
     console.log(
       "📦 Body:",
@@ -43,15 +46,15 @@ async function simulateOMXInitialize(config) {
 
     // Simulate the fetch request (this is what happens internally)
     const response = await fetch(
-      "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1/create-jwt-token",
+      "${OMX_CONFIG.SUPABASE_URL}/functions/v1/create-jwt-token",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c",
+            "Bearer ${OMX_CONFIG.SUPABASE_ANON_KEY}",
           apikey:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c",
+            "${OMX_CONFIG.SUPABASE_ANON_KEY}",
         },
         body: JSON.stringify({
           clientId: config.clientId,

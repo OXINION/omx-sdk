@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Campaign Module Test</title>
+    <!-- Load configuration -->
+    <script src="config.js"></script>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -357,7 +359,7 @@ Campaign created via OMX SDK test interface</textarea
           this.teamId = teamId || null; // Set to null for now
           this.authToken = null;
           this.baseUrl =
-            "https://blhilidnsybhfdmwqsrx.supabase.co/functions/v1";
+            "' + OMX_CONFIG.SUPABASE_URL + '/functions/v1";
         }
 
         // UUID generation function
@@ -409,9 +411,9 @@ Campaign created via OMX SDK test interface</textarea
               headers: {
                 "Content-Type": "application/json",
                 Authorization:
-                  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c",
+                  "Bearer ' + OMX_CONFIG.SUPABASE_ANON_KEY + '",
                 apikey:
-                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c",
+                  "' + OMX_CONFIG.SUPABASE_ANON_KEY + '",
               },
               body: JSON.stringify({
                 clientId: this.clientId,
@@ -497,9 +499,9 @@ Campaign created via OMX SDK test interface</textarea
             const headers = {
               "Content-Type": "application/json",
               Authorization:
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c",
+                "Bearer ' + OMX_CONFIG.SUPABASE_ANON_KEY + '",
               apikey:
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c",
+                "' + OMX_CONFIG.SUPABASE_ANON_KEY + '",
             };
 
             log("🔑 Using apikey as Authorization header", "info");
@@ -579,9 +581,9 @@ Campaign created via OMX SDK test interface</textarea
                 "Content-Type": "application/json",
                 // Supabase anon key for basic authentication
                 Authorization:
-                  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c",
+                  "Bearer ' + OMX_CONFIG.SUPABASE_ANON_KEY + '",
                 apikey:
-                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaGlsaWRuc3liaGZkbXdxc3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MjM4OTgsImV4cCI6MjA2MDA5OTg5OH0.KZGJMcm2V7aW1tH7U0skvipE7h53212MRaaSm2kS84c",
+                  "' + OMX_CONFIG.SUPABASE_ANON_KEY + '",
               },
               body: JSON.stringify(requestBody),
             });
