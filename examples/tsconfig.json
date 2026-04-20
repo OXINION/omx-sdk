@@ -2,7 +2,6 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "baseUrl": ".",
     "paths": {
       "omx-sdk": ["../js/src/index.ts"]
     }
